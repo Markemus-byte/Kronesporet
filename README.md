@@ -14,6 +14,22 @@ pip install -r requirements.txt
 python scripts/run_phase1.py --year 2025 --statsregnskap data/statsregnskap_2025.csv
 ```
 
+### Uten statsregnskap-fil: årsrapportene i Kudos
+
+Når statsregnskapet.dfo.no ikke svarer, kan kjøp av varer og tjenester hentes fra
+årsrapportene i Kudos (kudos.dfo.no, ingen nøkkel). Hver statlig virksomhet har en
+standard «Oppstilling av artskontorapportering»; vi bruker «Andre utbetalinger til
+drift» + «Utbetaling til investeringer» (uten lønn, tilskudd og finans).
+
+```bash
+python scripts/run_phase1.py --year 2025 --skip-collect --kudos
+```
+
+- Krever `pdftotext` (poppler-utils) for å lese PDF-ene.
+- Kommuner, fylker, selskaper og helseforetak har ikke årsrapport i Kudos og hoppes over.
+- Forvaltningsbedrifter (Statsbygg) og nettobudsjetterte virksomheter (universiteter)
+  har et annet oppsett og blir foreløpig ikke lest.
+
 ### Med DFØs månedsrapport (xlsx)
 
 Statsregnskapet publiserer også «Utgifter til staten <måned> <år>» som xlsx

@@ -3,6 +3,9 @@
 Eksempel (fra repo-roten):
   python scripts/run_phase1.py --year 2025 --statsregnskap data/statsregnskap_2025.csv
 
+  # Uten statsregnskap-fil: kjøp av varer og tjenester fra årsrapportene i Kudos
+  python scripts/run_phase1.py --year 2025 --skip-collect --kudos
+
   # DFØs månedsrapport (xlsx, hittil i år): Doffin hentes for samme måneder
   python scripts/run_phase1.py --year 2026 --to-month 8 \
       --statsregnskap data/utgifter_til_staten_august_2026.xlsx
@@ -31,6 +34,7 @@ from src.analysis.join_and_flag import (  # noqa: E402
     summary,
 )
 from src.collectors.doffin import collect, init_db, save_contracts  # noqa: E402
+from src.collectors.kudos_arsrapport import load_kudos_purchases  # noqa: E402
 from src.collectors.statsregnskap import load_utgifter_xlsx  # noqa: E402
 
 
@@ -43,6 +47,10 @@ def parse_args() -> argparse.Namespace:
     ap.add_argument("--no-details", action="store_true",
                     help="Raskt: bruk anslått verdi fra søket i stedet for tildelt verdi (ett kall per kunngjøring)")
     ap.add_argument("--max-notices", type=int, help="Stopp etter N kunngjøringer (for testing)")
+    ap.add_argument("--kudos", action="store_true",
+                    help="Bruk kjøp av varer og tjenester fra årsrapportene i Kudos i stedet for en statsregnskap-fil")
+    ap.add_argument("--kudos-top", type=int, default=0,
+                    help="Bare de N Doffin-kjøperne med størst kontraktsverdi (0 = alle)")
     ap.add_argument("--to-month", type=int, default=12,
                     help="Hent Doffin bare januar til og med denne måneden (match hittil-i-år-regnskap)")
     ap.add_argument("--posts", default="1-49",
@@ -74,8 +82,13 @@ def main() -> int:
             print("[1-2/3] Hopper over innsamling, bruker eksisterende Doffin-data")
 
         # 3. Join + flagging
-        if a.statsregnskap is None:
-            print("[3/3] Ingen --statsregnskap gitt, hopper over flagging.")
+        if a.kudos:
+            print(f"[3/3] Henter årsrapporter {a.year} fra Kudos (topp {a.kudos_top or 'alle'} kjøpere) ...")
+            tried, found = load_kudos_purchases(conn, a.year, a.kudos_top or None)
+            print(f"      Kjøpstall funnet for {found} av {tried}, flagger avvik over {a.threshold:.0%} ...")
+            flag_deviations(conn, a.threshold)
+        elif a.statsregnskap is None:
+            print("[3/3] Ingen --statsregnskap eller --kudos gitt, hopper over flagging.")
         else:
             columns = {f: getattr(a, f"col_{f}") for f in ("year", "orgnr", "name", "amount", "artskonto")
                        if getattr(a, f"col_{f}")}
@@ -99,7 +112,7 @@ def main() -> int:
             "SELECT description FROM flags f JOIN contract_spend_comparison c "
             "ON f.source_id = c.orgnr || ':' || c.year WHERE f.flag_type = 'doffin_avvik' "
             "ORDER BY ABS(c.contract_sum - c.spend_sum) DESC LIMIT ?", (a.top,)
-        ).fetchall() if a.statsregnskap else []
+        ).fetchall() if a.statsregnskap or a.kudos else []
     finally:
         conn.close()
 

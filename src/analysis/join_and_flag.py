@@ -29,6 +29,7 @@ import io
 import re
 import sqlite3
 import unicodedata
+import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -40,7 +41,7 @@ COLUMN_ALIASES: dict[str, list[str]] = {
     "orgnr": ["orgnr", "organisasjonsnummer", "org_nr", "virksomhetsnummer", "orgnummer", "virksomhet_orgnr"],
     "name": ["virksomhet", "virksomhetsnavn", "navn", "virksomhet_navn", "etat"],
     "amount": ["belop", "regnskap", "sum", "belop_i_kroner", "regnskapsbelop", "belop_nok", "amount"],
-    "artskonto": ["artskonto", "art", "konto", "artskontonummer"],
+    "artskonto": ["artskonto", "artskonto_id", "art", "konto", "artskontonummer"],
 }
 
 SCHEMA = """
@@ -174,7 +175,13 @@ def load_statsregnskap_csv(
         )
     conn.executescript(SCHEMA)
 
-    raw = path.read_bytes()
+    if path.suffix.lower() == ".zip":
+        # DFØs årsfiler lastes ned som zip med én CSV inni
+        with zipfile.ZipFile(path) as z:
+            name = next(n for n in z.namelist() if n.lower().endswith(".csv"))
+            raw = z.read(name)
+    else:
+        raw = path.read_bytes()
     text = raw.decode("utf-8-sig") if _is_utf8(raw) else raw.decode("cp1252")
     sample = text[:20000]
     try:
