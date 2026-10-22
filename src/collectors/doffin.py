@@ -128,8 +128,8 @@ class DoffinClient:
 # Søk med paginering og automatisk oppdeling av datoperioder
 # ---------------------------------------------------------------------------
 
-def month_ranges(year: int) -> Iterator[tuple[date, date]]:
-    for m in range(1, 13):
+def month_ranges(year: int, to_month: int = 12) -> Iterator[tuple[date, date]]:
+    for m in range(1, to_month + 1):
         start = date(year, m, 1)
         end = date(year + (m == 12), m % 12 + 1, 1) - timedelta(days=1)
         yield start, end
@@ -264,8 +264,11 @@ def collect(
     fetch_details: bool = True,
     max_notices: int | None = None,
     client: DoffinClient | None = None,
+    to_month: int = 12,
 ) -> list[DoffinContract]:
-    """Hent alle kontraktstildelinger publisert i `year`.
+    """Hent alle kontraktstildelinger publisert i `year` (januar til og med `to_month`).
+
+    to_month lar oss matche statsregnskapets hittil-i-år-tall, f.eks. 8 for januar-august.
 
     fetch_details=True gir faktisk tildelt verdi, men koster ett ekstra kall per
     kunngjøring (~3 200 kall for 2025, ca. en time med 1,2 s mellom kall).
@@ -273,7 +276,7 @@ def collect(
     """
     client = client or DoffinClient()
     hits: dict[str, dict[str, Any]] = {}
-    for start, end in month_ranges(year):
+    for start, end in month_ranges(year, to_month):
         for hit in iter_search_hits(client, start, end):
             hits.setdefault(hit["id"], hit)
             if max_notices and len(hits) >= max_notices:
@@ -344,10 +347,11 @@ def main() -> None:
     ap.add_argument("--db", default="data/offentlig_forbruk.db")
     ap.add_argument("--no-details", action="store_true", help="Raskt: bruk anslått verdi fra søket")
     ap.add_argument("--max-notices", type=int, help="Stopp etter N kunngjøringer (for testing)")
+    ap.add_argument("--to-month", type=int, default=12, help="Hent bare januar til og med denne måneden")
     a = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
-    contracts = collect(a.year, fetch_details=not a.no_details, max_notices=a.max_notices)
+    contracts = collect(a.year, fetch_details=not a.no_details, max_notices=a.max_notices, to_month=a.to_month)
     conn = init_db(a.db)
     try:
         n = save_contracts(conn, contracts)

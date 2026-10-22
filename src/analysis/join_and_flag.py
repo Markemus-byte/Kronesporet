@@ -16,6 +16,9 @@ bokstaver og æøå spiller ingen rolle; overstyr med `columns=` ved behov):
   artskonto   : "Artskonto", "Art", "Konto"                           (valgfri, for filtrering)
 Skilletegn (; , tab) og norsk tallformat ("1 234 567,89") håndteres.
 
+DFØs månedsrapport «Utgifter til staten» (xlsx, kapittel/post uten orgnr)
+lastes med src/collectors/statsregnskap.py, som fyller samme tabell.
+
 Flaggingen bygger videre på `flags`-tabellen fra database_loader.py
 (flag_type, severity, description, source_id) med flag_type = 'doffin_avvik'.
 """
