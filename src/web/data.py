@@ -65,6 +65,7 @@ class Agency:
     match_method: str | None
     spend_parts: dict[str, float] = field(default_factory=dict)  # artskonto -> beløp
     report_url: str | None = None
+    spend_source: str | None = None    # filnavn når kjøpene kommer fra statsregnskapet, ikke Kudos
     awarded_in_year_sum: float = 0.0   # hele verdien av kontrakter tildelt i året
     awarded_in_year_count: int = 0
     coverage: Coverage | None = None   # fylles når doffin_coverage finnes
@@ -111,6 +112,15 @@ def _report_url(source_file: str | None) -> str | None:
     return None
 
 
+def available_years(db_path: str | Path) -> list[int]:
+    conn = sqlite3.connect(db_path)
+    try:
+        return [r[0] for r in conn.execute(
+            "SELECT DISTINCT year FROM contract_spend_comparison WHERE year IS NOT NULL ORDER BY year")]
+    finally:
+        conn.close()
+
+
 def load_dataset(db_path: str | Path, year: int | None = None, threshold: float = 0.05) -> Dataset:
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
@@ -151,6 +161,8 @@ def load_dataset(db_path: str | Path, year: int | None = None, threshold: float 
                 "FROM statsregnskap WHERE orgnr = ? AND year = ? GROUP BY artskonto", (a.orgnr, year)):
                 a.spend_parts[s["artskonto"] or "sum"] = s["amount"] or 0.0
                 a.report_url = a.report_url or _report_url(s["source_file"])
+                if s["source_file"] and not _report_url(s["source_file"]):
+                    a.spend_source = a.spend_source or s["source_file"]
 
             awarded = conn.execute(
                 "SELECT COUNT(*), COALESCE(SUM(value), 0) FROM doffin_contracts WHERE buyer_orgnr = ? AND year = ?",

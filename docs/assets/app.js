@@ -39,21 +39,29 @@
     });
   });
 
-  // Søkefelt med data-filter="<tabell-id>": skjul rader som ikke inneholder teksten.
-  // Rader med data-name søkes i det feltet, ellers i hele radteksten.
-  document.querySelectorAll("input[data-filter]").forEach(function (input) {
-    var table = document.getElementById(input.getAttribute("data-filter"));
-    var counter = document.querySelector('[data-count-for="' + input.getAttribute("data-filter") + '"]');
+  // Søkefelt med data-filter="<tabell-id>" og nedtrekk med data-flag-filter="<tabell-id>".
+  // Søket matcher data-name (ellers hele radteksten), nedtrekket et ord i data-flags.
+  function applyFilters(tableId) {
+    var table = document.getElementById(tableId);
     if (!table) return;
-    input.addEventListener("input", function () {
-      var q = input.value.trim().toLowerCase();
-      var shown = 0;
-      Array.prototype.forEach.call(table.tBodies[0].rows, function (row) {
-        var text = (row.getAttribute("data-name") || row.textContent).toLowerCase();
-        row.hidden = q !== "" && text.indexOf(q) === -1;
-        if (!row.hidden) shown++;
-      });
-      if (counter) counter.textContent = q ? shown + " treff" : "";
+    var input = document.querySelector('input[data-filter="' + tableId + '"]');
+    var select = document.querySelector('select[data-flag-filter="' + tableId + '"]');
+    var counter = document.querySelector('[data-count-for="' + tableId + '"]');
+    var q = input ? input.value.trim().toLowerCase() : "";
+    var flag = select ? select.value : "";
+    var shown = 0;
+    Array.prototype.forEach.call(table.tBodies[0].rows, function (row) {
+      var text = (row.getAttribute("data-name") || row.textContent).toLowerCase();
+      var flags = " " + (row.getAttribute("data-flags") || "") + " ";
+      row.hidden = (q !== "" && text.indexOf(q) === -1) || (flag !== "" && flags.indexOf(" " + flag + " ") === -1);
+      if (!row.hidden) shown++;
     });
+    if (counter) counter.textContent = q || flag ? shown + " treff" : "";
+  }
+  document.querySelectorAll("input[data-filter]").forEach(function (el) {
+    el.addEventListener("input", function () { applyFilters(el.getAttribute("data-filter")); });
+  });
+  document.querySelectorAll("select[data-flag-filter]").forEach(function (el) {
+    el.addEventListener("change", function () { applyFilters(el.getAttribute("data-flag-filter")); });
   });
 })();

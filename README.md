@@ -61,6 +61,10 @@ python scripts/fetch_winners.py --year 2025
 python scripts/build_site.py --db data/offentlig_forbruk.db --out docs
 ```
 
+`build_site.py` tar med alle årene i databasen. Siste år blir forsiden, de andre årene får
+egne sider (`docs/ar/<år>.html`), og hver virksomhet får en tabell over utviklingen. Velg år med
+`--year 2024 2025`.
+
 Alle steg skriver til `data/offentlig_forbruk.db` (SQLite). Rå Doffin-kunngjøringer caches i
 `data/doffin_cache/`, så nye kjøringer går raskt. Doffin kalles med minst 1,2 sekunder mellom
 hvert kall.
