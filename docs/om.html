@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Om dataene – Kronesporet</title>
+<meta name="description" content="Kronesporet sammenligner statlige virksomheters kunngjorte kontrakter i Doffin med kjøpene i regnskapet.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="mark" aria-hidden="true">kr</span>Kronesporet</a>
+    <nav><a href="index.html">Virksomheter</a><a href="om.html" aria-current="page">Om dataene</a></nav>
+  </div>
+</header>
+<main class="wrap">
+
+<section class="hero"><h1>Om dataene og metoden</h1>
+<p class="lede">Kronesporet er et åpenhetsverktøy for offentlig pengebruk. Første versjon sammenligner
+kunngjorte kontrakter i Doffin med det statlige virksomheter selv rapporterer at de kjøpte for.</p></section>
+<div class="prose">
+<h2>Kilder</h2>
+<dl class="sources">
+<dt><a href="https://doffin.no">Doffin</a></dt>
+<dd>Den nasjonale kunngjøringsdatabasen for offentlige anskaffelser, drevet av Digdir. Vi henter
+kunngjøringer om tildelte kontrakter, med kjøperens organisasjonsnummer, tittel og tildelt verdi.
+Mangler tildelt verdi, brukes anslått verdi (merket «anslått verdi»).</dd>
+<dt><a href="https://kudos.dfo.no">Kudos</a> (DFØ)</dt>
+<dd>Kunnskapsdatabasen for offentlige utredninger, der statlige virksomheter publiserer årsrapportene sine.
+Fra den standardiserte «Oppstilling av artskontorapportering» bruker vi
+<em>Andre utbetalinger til drift</em> + <em>Utbetaling til investeringer</em> som «kjøp av varer og tjenester».
+Lønn, tilskudd og finansposter er holdt utenfor.</dd>
+</dl>
+<p>Begge kildene er lisensiert under <a href="https://data.norge.no/nlod/no/2.0">Norsk lisens for offentlige data
+(NLOD 2.0)</a>, som tillater gjenbruk, også kommersielt, med kildehenvisning. Inneholder data under NLOD
+tilgjengeliggjort av Digitaliseringsdirektoratet (Doffin) og Direktoratet for forvaltning og økonomistyring (Kudos).</p>
+
+<h2>Slik kobles tallene</h2>
+<p>Regnskapet har ikke leverandører, så koblingen går på <em>kjøper</em>: organisasjonsnummeret til kjøperen i
+Doffin mot virksomheten som har levert årsrapporten. Avviket er (Doffin − kjøp) / kjøp, og virksomheter
+der avviket er større enn 5 % i den ene eller andre retningen, blir flagget.</p>
+
+<h3>Årsfordelt kontraktverdi</h3>
+<p>Verdien i Doffin gjelder hele kontraktsperioden, ofte en rammeavtale over flere år, mens regnskapet viser
+ett år. Hver kontrakt fordeles derfor jevnt over perioden den løper, og regnskapsåret sammenlignes med
+summen av årsandelene til alle kontrakter som løper det året, også de som ble tildelt tidligere.
+Perioden leses fra kunngjøringen (start- og sluttdato, oppgitt varighet eller fritekst som «2+1+1 år»).
+Står det ingenting, antas 48 måneder for rammeavtaler og 24 måneder for andre kontrakter; slike
+kontrakter er merket «antatt varighet».</p>
+
+
+<h3>Doffin-dekning mot lignende virksomheter</h3>
+<p>Fordi Doffin bare viser en del av innkjøpene, er det mer nyttig å spørre om en virksomhet kunngjør
+<em>uvanlig mye eller lite</em> sammenlignet med lignende virksomheter. Dekningen er Doffin-summen delt på kjøpene.
+Virksomhetene deles i tre størrelsesgrupper etter kjøp (små, mellomstore, store), og hver virksomhet
+sammenlignes med medianen i sin gruppe på logaritmisk skala (robust z-verdi). Avviker den med mer enn
+to standardavvik, får den flagget «uvanlig høy» eller «uvanlig lav dekning».</p>
+<ul>
+<li><strong>Høy dekning</strong> kan bety at kontraktverdiene er tak i rammeavtaler som ikke blir brukt fullt ut,
+at virksomheten kjøper inn for andre (som Statens innkjøpssenter), eller at kjøpene føres et annet sted
+enn drift og investering.</li>
+<li><strong>Lav dekning</strong> kan bety at virksomheten kjøper mye under terskelverdiene, via andres avtaler,
+eller at kunngjøringer mangler.</li>
+</ul>
+
+<h2 id="forbehold">Forbehold</h2>
+<ul>
+<li><strong>Doffin dekker bare en del av kjøpene.</strong> Kjøp under terskelverdiene, avrop på eksisterende
+rammeavtaler (også Statens innkjøpssenters fellesavtaler), husleie og kjøp via andre virksomheter kunngjøres
+ikke. Doffin-summen blir derfor som regel mye lavere enn kjøpene, og 5 %-terskelen
+flagger nesten alle. Den er beholdt fordi den er den opprinnelige målestokken, ikke fordi et slikt avvik i seg
+selv tyder på feil.</li>
+<li><strong>Kontraktverdier er anslag.</strong> For rammeavtaler er verdien ofte et tak, ikke det som faktisk
+blir kjøpt.</li>
+<li><strong>Ikke alle virksomheter er med.</strong> Kommuner, fylker, helseforetak og selskaper har ikke
+årsrapport i Kudos. Forvaltningsbedrifter som Statsbygg og universitetene bruker et annet oppsett som foreløpig
+ikke leses.</li>
+<li><strong>Feil i kildene følger med.</strong> Navn og tall vises slik de står i Doffin og årsrapportene.</li>
+</ul>
+
+<h2>Åpen kildekode</h2>
+<p>Innsamling, kobling og denne nettsiden er laget med åpen kode. Tallene bak forsiden kan lastes ned som
+<a href="data/virksomheter.csv">CSV</a> eller <a href="data/virksomheter.json">JSON</a>.</p>
+</div>
+
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <p>Data: <a href="https://doffin.no">Doffin</a> (Digdir) og årsrapporter i
+    <a href="https://kudos.dfo.no">Kudos</a> (DFØ), lisensiert under
+    <a href="https://data.norge.no/nlod/no/2.0">Norsk lisens for offentlige data (NLOD 2.0)</a>.
+    Kronesporet er ikke tilknyttet DFØ eller Digdir.</p>
+    <p>Sist bygget 23.10.2026. <a href="om.html">Om dataene og metoden</a>.</p>
+  </div>
+</footer>
+<script src="assets/app.js"></script>
+</body>
+</html>

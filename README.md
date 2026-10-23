@@ -92,4 +92,19 @@ python scripts/run_phase1.py --year 2025 --skip-collect --kudos --no-annualize  
 
 `--framework-months` og `--contract-months` endrer standardvarighetene.
 
+## Nettsiden (Kronesporet.no)
+
+`docs/` er en ferdig bygget statisk nettside (ren HTML/CSS/JS, ingen byggesteg): en forside
+med alle virksomhetene (Doffin-sum, kjøp, avvik og flagg), én side per virksomhet med
+Doffin-kontraktene og lenke til årsrapporten i Kudos, og en side om dataene og metoden.
+Finnes tabellen `doffin_coverage` i databasen, vises også Doffin-dekningen og dekningsflagget.
+
+```bash
+python scripts/run_phase1.py --year 2025 --skip-collect --kudos
+python scripts/build_site.py --db data/offentlig_forbruk.db --out docs
+```
+
+Koden ligger i `src/web/` (`data.py` leser SQLite, `build.py` lager sidene, `assets/` er CSS og JS).
+Publiser med GitHub Pages: Settings → Pages → Source «Deploy from a branch» → `main` og `/docs`.
+
 Data: Doffin og statsregnskapet (DFØ), lisensiert under NLOD.
