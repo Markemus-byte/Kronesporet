@@ -27,8 +27,11 @@ python scripts/run_phase1.py --year 2025 --skip-collect --kudos
 
 - Krever `pdftotext` (poppler-utils) for å lese PDF-ene.
 - Kommuner, fylker, selskaper og helseforetak har ikke årsrapport i Kudos og hoppes over.
-- Forvaltningsbedrifter (Statsbygg) og nettobudsjetterte virksomheter (universiteter)
-  har et annet oppsett og blir foreløpig ikke lest.
+- Nettobudsjetterte virksomheter (universiteter) har ikke artskontorapportering.
+  For dem brukes SRS-regnskapets «utbetalinger for kjøp av varer og tjenester»
+  (KS.12, ellers «Andre driftskostnader», RE.10) og investeringer (KS.17).
+- Underenheter som ikke har egen årsrapport i Kudos (f.eks. Politiets fellestjenester,
+  Forsvarets logistikkorganisasjon) blir stående utenfor.
 
 ### Med DFØs månedsrapport (xlsx)
 
