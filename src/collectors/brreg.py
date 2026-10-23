@@ -17,8 +17,10 @@ import logging
 import sqlite3
 import time
 from collections.abc import Iterable
+from typing import TYPE_CHECKING
 
-import requests
+if TYPE_CHECKING:  # requests lastes først ved oppslag, så nettsidebyggingen (parent_map) klarer seg uten
+    import requests
 
 log = logging.getLogger(__name__)
 
@@ -56,6 +58,8 @@ def _children(session: requests.Session, orgnr: str) -> list[tuple[str, str, str
 
 def load_subunits(conn: sqlite3.Connection, orgnrs: Iterable[str], session: requests.Session | None = None) -> int:
     """Fyll `orgnr_parent` for regnskapsvirksomhetene i orgnrs. Returnerer antall barn."""
+    import requests
+
     roots = set(orgnrs)
     session = session or requests.Session()
     conn.executescript(SCHEMA)
