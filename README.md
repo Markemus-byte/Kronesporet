@@ -14,6 +14,41 @@ pip install -r requirements.txt
 python scripts/run_phase1.py --year 2025 --statsregnskap data/statsregnskap_2025.csv
 ```
 
+### Uten statsregnskap-fil: årsrapportene i Kudos
+
+Når statsregnskapet.dfo.no ikke svarer, kan kjøp av varer og tjenester hentes fra
+årsrapportene i Kudos (kudos.dfo.no, ingen nøkkel). Hver statlig virksomhet har en
+standard «Oppstilling av artskontorapportering»; vi bruker «Andre utbetalinger til
+drift» + «Utbetaling til investeringer» (uten lønn, tilskudd og finans).
+
+```bash
+python scripts/run_phase1.py --year 2025 --skip-collect --kudos
+```
+
+- Krever `pdftotext` (poppler-utils) for å lese PDF-ene.
+- Kommuner, fylker, selskaper og helseforetak har ikke årsrapport i Kudos og hoppes over.
+- Forvaltningsbedrifter (Statsbygg) og nettobudsjetterte virksomheter (universiteter)
+  har et annet oppsett og blir foreløpig ikke lest.
+
+### Med DFØs månedsrapport (xlsx)
+
+Statsregnskapet publiserer også «Utgifter til staten <måned> <år>» som xlsx
+(hittil i år, per kapittel og post, uten orgnr). Den kan brukes direkte:
+
+```bash
+python scripts/run_phase1.py --year 2026 --to-month 8 \
+    --statsregnskap data/utgifter_til_staten_august_2026.xlsx
+```
+
+- `--to-month 8` henter bare Doffin-kunngjøringer januar-august, så periodene matcher.
+- `--posts 1-49` (standard) tar med drifts- og investeringsposter; 50-99 er overføringer.
+- Kapittelnavn (f.eks. «Statens vegvesen») kobles til orgnr via Doffin-kjøpere og
+  Enhetsregisteret. Treffene ligger i tabellen `kapittel_orgnr` og kan rettes for hånd
+  med `kilde = 'manuell'`. Kapitler som er formål og ikke virksomheter («Flytransport»)
+  får ikke orgnr og blir stående utenfor.
+
+### Valg
+
 - `--no-details` henter bare søketreff (under ett minutt) og bruker anslått verdi.
   Uten flagget hentes tildelt verdi fra hver kunngjøring, som tar omtrent en time
   for et helt år med 1,2 sekunder mellom kall.
@@ -23,10 +58,38 @@ python scripts/run_phase1.py --year 2025 --statsregnskap data/statsregnskap_2025
   ikke gjenkjennes automatisk (se `src/analysis/join_and_flag.py`).
 
 Resultatet havner i `data/offentlig_forbruk.db`: tabellene `doffin_contracts`,
-`statsregnskap`, `contract_spend_comparison` og `flags` (`flag_type = 'doffin_avvik'`).
+`statsregnskap`, `contract_spend_comparison` og `flags` (`flag_type = 'doffin_avvik'`), og for xlsx også `kapittel_orgnr`.
 
-Merk: Doffin-verdier gjelder ofte hele kontraktsperioden (rammeavtaler over flere
-år), mens statsregnskapet er årlige utgifter. Terskelen på 5 % bør justeres når
-vi ser de reelle fordelingene.
+### Årsfordelt kontraktverdi
+
+Doffin-verdier gjelder hele kontraktsperioden (ofte rammeavtaler over flere år),
+mens regnskapet er utgifter for ett år. Derfor fordeles hver kontrakt lineært over
+perioden den løper, og et regnskapsår sammenlignes med summen av årsandelene til
+alle kontrakter som løper det året, også de som ble tildelt tidligere år
+(`src/analysis/annualize.py`, tabellen `doffin_contract_years`).
+
+Kontraktsperioden leses fra kunngjøringen, i denne rekkefølgen:
+
+1. start- og sluttdato (`datoer`)
+2. «Varighet» / «Varighet, År» (`varighet`), regnet fra startdato eller publisering
+3. fritekst som «2+1+1 år» eller «total varighet inntil 4 år» (`tekst`)
+4. standard når ingenting er oppgitt: rammeavtaler 48 måneder (lovens maksimum,
+   og medianen blant rammeavtaler med oppgitt periode), andre kontrakter 24 måneder
+   (medianen blant dem med oppgitt periode)
+
+Fornyelser («Maksimal fornyelse: 2») regnes som 12 måneder hver, men ikke ut over
+48 måneder totalt. Verdien er tildelt total for prosedyren, ellers rammeavtalenes
+maksimale verdi, ellers summen av vinnernes verdier.
+
+Siden kontrakter tildelt tidligere år også teller, henter `run_phase1.py`
+tildelinger 8 år bakover (`--history`) for virksomhetene som har regnskapstall.
+Rå kunngjøringer lagres i `data/doffin_cache/`, så neste kjøring går raskt.
+
+```bash
+python scripts/run_phase1.py --year 2025 --skip-collect --kudos            # årsfordelt (standard)
+python scripts/run_phase1.py --year 2025 --skip-collect --kudos --no-annualize   # gammel sammenligning
+```
+
+`--framework-months` og `--contract-months` endrer standardvarighetene.
 
 Data: Doffin og statsregnskapet (DFØ), lisensiert under NLOD.
