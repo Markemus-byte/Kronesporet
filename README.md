@@ -65,6 +65,10 @@ python scripts/build_site.py --db data/offentlig_forbruk.db --out docs
 egne sider (`docs/ar/<år>.html`), og hver virksomhet får en tabell over utviklingen. Velg år med
 `--year 2024 2025`.
 
+Med leverandører i databasen får nettsiden også en leverandøroversikt (`leverandorer.html`) og én
+side per leverandør med organisasjonsnummer (`docs/leverandor/<orgnr>.html`) med kontraktene på
+tvers av statlige kjøpere.
+
 Alle steg skriver til `data/offentlig_forbruk.db` (SQLite). Rå Doffin-kunngjøringer caches i
 `data/doffin_cache/`, så nye kjøringer går raskt. Doffin kalles med minst 1,2 sekunder mellom
 hvert kall.
