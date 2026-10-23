@@ -1,0 +1,58 @@
+# Bygger nettsiden i docs/ fra site-data/kronesporet.sql.
+# - Pull requests: bygger og sjekker lenkene, så feil oppdages før fletting.
+# - main: bygger og committer docs/ hvis noe er endret. GitHub Pages publiserer
+#   deretter docs/ som før (Settings -> Pages -> main, /docs).
+name: Nettside
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site-data/**"
+      - "src/web/**"
+      - "scripts/build_site.py"
+      - "scripts/check_site.py"
+      - ".github/workflows/nettside.yml"
+  pull_request:
+    paths:
+      - "site-data/**"
+      - "src/**"
+      - "scripts/**"
+      - ".github/workflows/nettside.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nettside-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bygg:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Bygg nettsiden
+        run: python scripts/build_site.py --db site-data/kronesporet.sql --out docs
+
+      - name: Sjekk lenkene
+        run: python scripts/check_site.py docs
+
+      - name: Commit oppdatert docs/
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        run: |
+          if [ -z "$(git status --porcelain docs)" ]; then
+            echo "docs/ er uendret"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs
+          git commit -m "Bygg nettsiden på nytt"
+          git push
