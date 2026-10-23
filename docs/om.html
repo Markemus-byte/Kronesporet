@@ -37,7 +37,7 @@
   "https://kudos.dfo.no"
  ],
  "license": "https://data.norge.no/nlod/no/2.0",
- "temporalCoverage": "2025",
+ "temporalCoverage": "2023/2026",
  "spatialCoverage": "Norge",
  "distribution": [
   {
@@ -85,16 +85,25 @@ Mangler tildelt verdi, brukes anslått verdi (merket «anslått verdi»). Levera
 Fra den standardiserte «Oppstilling av artskontorapportering» bruker vi
 <em>Andre utbetalinger til drift</em> + <em>Utbetaling til investeringer</em> som «kjøp av varer og tjenester».
 Lønn, tilskudd og finansposter er holdt utenfor.</dd>
+<dt><a href="https://statsregnskapet.dfo.no">Statsregnskapet</a> (DFØ)</dt>
+<dd>Bevilgningsregnskapet for alle statlige virksomheter, som DFØ publiserer som rådata per måned.
+Desembertallene gir hele året. Kjøp av varer og tjenester er summen av artskontogruppene 40, 41, 43, 45, 47, 48, 49, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 72, 73, 74, 75, 76, 77
+(varer, fremmedytelser, investeringer og driftskostnader), uten lønn, avskrivninger, reiser og tilskudd.
+Når en virksomhet har tall både her og i årsrapporten, brukes statsregnskapet, og årsrapporten lenkes til
+når den finnes.</dd>
 </dl>
-<p>Begge kildene er lisensiert under <a href="https://data.norge.no/nlod/no/2.0">Norsk lisens for offentlige data
+<p>Kildene er lisensiert under <a href="https://data.norge.no/nlod/no/2.0">Norsk lisens for offentlige data
 (NLOD 2.0)</a>, som tillater gjenbruk, også kommersielt, med kildehenvisning. Inneholder data under NLOD
 tilgjengeliggjort av Digitaliseringsdirektoratet (Doffin) og Direktoratet for forvaltning og økonomistyring
-(Kudos).</p>
+(statsregnskapet og Kudos).</p>
 
 <h2>Slik kobles tallene</h2>
 <p>Regnskapet har ikke leverandører, så koblingen går på <em>kjøper</em>: organisasjonsnummeret til kjøperen i
 Doffin mot virksomheten som har levert årsrapporten. Avviket er (Doffin − kjøp) / kjøp, og virksomheter
 der avviket er større enn 5 % i den ene eller andre retningen, blir flagget.</p>
+<p>Noen virksomheter kunngjør gjennom underenheter med eget organisasjonsnummer, for eksempel
+politidistriktene og Politiets fellestjenester for Politiet, eller avdelinger i Forsvaret. Slike kontrakter
+regnes til virksomheten som fører regnskapet, og underenheten vises ved kontrakten.</p>
 
 <h3>Årsfordelt kontraktverdi</h3>
 <p>Verdien i Doffin gjelder hele kontraktsperioden, ofte en rammeavtale over flere år, mens regnskapet viser
@@ -110,7 +119,8 @@ kontrakter er merket «antatt varighet».</p>
 <em>uvanlig mye eller lite</em> sammenlignet med lignende virksomheter. Dekningen er Doffin-summen delt på kjøpene.
 Virksomhetene deles i tre størrelsesgrupper etter kjøp (små, mellomstore, store), og hver virksomhet
 sammenlignes med medianen i sin gruppe på logaritmisk skala (robust z-verdi). Avviker den med mer enn
-to standardavvik, får den flagget «uvanlig høy» eller «uvanlig lav dekning».</p>
+to standardavvik, er det et avvik.</p>
+<p>Avviker den samme vei i minst to av de tre siste årene, får den flagget «uvanlig høy» eller «uvanlig lav dekning». Ett år alene kan skyldes én stor rammeavtale og vises bare som «avvik i dekning i år». Dekning over 100 % betyr at Doffin-andelen er større enn egne kjøp. Det har som regel en kjent forklaring og blir merket, ikke flagget: «tilskudd» når tilskuddene ut av staten er minst like store (Samferdselsdepartementet kunngjør fly- og togruter, men betaler dem som tilskudd), ellers «avtaler for andre» (som DFØ og DSS, som inngår avtaler andre bruker).</p>
 <ul>
 <li><strong>Høy dekning</strong> kan bety at kontraktverdiene er tak i rammeavtaler som ikke blir brukt fullt ut,
 at virksomheten kjøper inn for andre (som Statens innkjøpssenter), eller at kjøpene føres et annet sted
@@ -128,7 +138,7 @@ flagger nesten alle. Den er beholdt fordi den er den opprinnelige målestokken, 
 selv tyder på feil.</li>
 <li><strong>Kontraktverdier er anslag.</strong> For rammeavtaler er verdien ofte et tak, ikke det som faktisk
 blir kjøpt.</li>
-<li><strong>Ikke alle virksomheter er med.</strong> Kommuner, fylker, helseforetak og selskaper har ikke årsrapport i Kudos. Forvaltningsbedrifter som Statsbygg og universitetene bruker et annet oppsett som foreløpig ikke leses.</li>
+<li><strong>Ikke alle virksomheter er med.</strong> Kommuner, fylker, helseforetak og statlige selskaper er ikke en del av statsregnskapet og er ikke med.</li>
 <li><strong>Feil i kildene følger med.</strong> Navn og tall vises slik de står i Doffin og årsrapportene.</li>
 </ul>
 
@@ -142,7 +152,7 @@ underlagt NLOD 2.0; oppgi kildene ved gjenbruk.</p>
 </main>
 <footer class="site-footer">
   <div class="wrap">
-    <p>Data: <a href="https://doffin.no">Doffin</a> (Digdir) og årsrapporter i
+    <p>Data: <a href="https://doffin.no">Doffin</a> (Digdir), <a href="https://statsregnskapet.dfo.no">statsregnskapet</a> og årsrapporter i
     <a href="https://kudos.dfo.no">Kudos</a> (DFØ), lisensiert under
     <a href="https://data.norge.no/nlod/no/2.0">Norsk lisens for offentlige data (NLOD 2.0)</a>.
     Kronesporet er ikke tilknyttet DFØ eller Digdir.</p>

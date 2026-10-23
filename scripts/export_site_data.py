@@ -3,7 +3,7 @@
 Nettsiden bygges automatisk av GitHub Actions (.github/workflows/nettside.yml)
 fra site-data/kronesporet.sql. Tekstformatet gir små, lesbare differ i git,
 i motsetning til en binær .db-fil. Bare tabellene og radene siden bruker tas med:
-virksomhetene i contract_spend_comparison og kontraktene der de er kjøper.
+virksomhetene i contract_spend_comparison og kontraktene der de (eller underenhetene) er kjøper.
 
 Eksempel (fra repo-roten), etter run_phase1.py og fetch_winners.py:
   python scripts/export_site_data.py --db data/offentlig_forbruk.db
@@ -17,15 +17,27 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 # (tabell, WHERE-filter). Filteret begrenser til virksomhetene som er med på nettsiden.
+# Kontraktene hentes via doffin_contract_years når den finnes, fordi kjøperen der er
+# regnskapsvirksomheten også når en underenhet (orgnr_parent) står som kjøper i Doffin.
 BUYERS = "SELECT orgnr FROM contract_spend_comparison"
+UNITS = f"{BUYERS} UNION SELECT child FROM orgnr_parent WHERE parent IN ({BUYERS})"
 TABLES: list[tuple[str, str]] = [
     ("contract_spend_comparison", ""),
     ("statsregnskap", f"orgnr IN ({BUYERS})"),
     ("doffin_coverage", ""),
-    ("doffin_contracts", f"buyer_orgnr IN ({BUYERS})"),
+    ("orgnr_parent", f"parent IN ({BUYERS})"),
+    ("doffin_contracts", "{contracts}"),
     ("doffin_contract_years", f"buyer_orgnr IN ({BUYERS})"),
-    ("doffin_winners", f"contract_id IN (SELECT id FROM doffin_contracts WHERE buyer_orgnr IN ({BUYERS}))"),
+    ("doffin_winners", "contract_id IN (SELECT id FROM doffin_contracts WHERE {contracts})"),
 ]
+
+
+def _contracts_filter(present: set[str]) -> str:
+    buyers = UNITS if "orgnr_parent" in present else BUYERS
+    where = f"buyer_orgnr IN ({buyers})"
+    if "doffin_contract_years" in present:
+        where += f" OR id IN (SELECT contract_id FROM doffin_contract_years WHERE buyer_orgnr IN ({BUYERS}))"
+    return where
 
 
 def export(src: Path, dest: Path) -> dict[str, int]:
@@ -34,9 +46,11 @@ def export(src: Path, dest: Path) -> dict[str, int]:
     counts: dict[str, int] = {}
     try:
         present = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
+        contracts = _contracts_filter(present)
         for table, where in TABLES:
             if table not in present:
                 continue
+            where = where.replace("{contracts}", contracts)
             schema = conn.execute("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?",
                                   (table,)).fetchone()[0]
             out.execute(schema)

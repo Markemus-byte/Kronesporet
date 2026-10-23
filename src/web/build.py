@@ -48,8 +48,8 @@ ARTSKONTO_GROUPS = {
     "41": "Frakt, toll og spedisjon",
     "43": "Forbruk av innkjøpte varer og tjenester",
     "45": "Fremmedytelse og underentreprise",
-    "47": "Programvarelisenser",
-    "48": "Bygninger og anlegg",
+    "47": "Immaterielle eiendeler og programvarelisenser",
+    "48": "Bygninger, anlegg og infrastruktur",
     "49": "Maskiner, transportmidler, inventar og IKT-utstyr",
     "61": "Frakt og transport",
     "62": "Energi og brensel",
@@ -181,12 +181,32 @@ def page(title: str, body: str, root: str = "", active: str = "", description: s
 """
 
 
+# Merker for Doffin-dekningen som ikke er flagg (doffin_coverage.category): (tekst, forklaring)
+COVERAGE_NOTES = {
+    "observasjon": ("Avvik i dekning i år", "Dekningen avviker fra lignende virksomheter dette året, men ikke "
+                                             "flere år på rad"),
+    "tilskudd": ("Over 100 %: tilskudd", "Doffin-andelen er større enn kjøpene, men dekkes av tilskudd ut av "
+                                         "staten (f.eks. kjøp av fly- og togruter)"),
+    "avtaler_for_andre": ("Over 100 %: avtaler for andre", "Doffin-andelen er større enn kjøpene, typisk fordi "
+                                                           "virksomheten inngår avtaler som andre bruker"),
+}
+
+
+def _z(z: float) -> str:
+    """Robust z-verdi med norsk desimalkomma og minustegn: −2,3."""
+    return f"{z:+.1f}".replace(".", ",").replace("-", "\u2212")
+
+
 def _flag_badges(a: Agency) -> str:
     out = []
     if a.coverage and a.coverage.flagged:
         word = "høy" if a.coverage.z > 0 else "lav"
-        out.append(f'<span class="badge badge-strong" title="Dekningen avviker tydelig fra lignende virksomheter">'
-                   f'Uvanlig {word} dekning</span>')
+        tip = ("Dekningen avviker fra lignende virksomheter flere år på rad" if a.coverage.category
+               else "Dekningen avviker tydelig fra lignende virksomheter")
+        out.append(f'<span class="badge badge-strong" title="{tip}">Uvanlig {word} dekning</span>')
+    elif a.coverage and a.coverage.category in COVERAGE_NOTES:
+        label, tip = COVERAGE_NOTES[a.coverage.category]
+        out.append(f'<span class="badge badge-note" title="{escape(tip)}">{escape(label)}</span>')
     if a.flagged:
         out.append(f'<span class="badge badge-soft" title="Doffin-summen avviker mer enn 5 % fra kjøpene">'
                    f'Avvik over 5&nbsp;%</span>')
@@ -198,7 +218,8 @@ def _caveat(ds: Dataset, root: str = "") -> str:
         '<aside class="caveat"><strong>Les dette først.</strong> Doffin viser bare kontrakter som er kunngjort. '
         "Kjøp under terskelverdiene, avrop på eksisterende avtaler, husleie og mye annet kommer ikke med, "
         f"så Doffin-summen er nesten alltid langt lavere enn kjøpene i regnskapet. Med en fast terskel på "
-        f"{pct(ds.threshold, decimals=0)} blir derfor alle virksomhetene flagget. Et flagg betyr «verdt å se nærmere på», "
+        f"{pct(ds.threshold, decimals=0)} blir derfor "
+        f"{'alle' if all(a.flagged for a in ds.agencies) else 'nesten alle'} virksomhetene flagget. Et flagg betyr «verdt å se nærmere på», "
         f'ikke at noe er galt. <a href="{root}om.html#forbehold">Mer om forbeholdene</a>.</aside>'
     )
 
@@ -214,6 +235,8 @@ def _row_flags(a: Agency) -> str:
         tags.append(f"gruppe-{a.coverage.peer_group}")
         if a.coverage.flagged:
             tags += ["dekning", "dekning-hoy" if a.coverage.z > 0 else "dekning-lav"]
+        elif a.coverage.category in COVERAGE_NOTES:
+            tags.append(a.coverage.category.replace("_", "-"))
     return " ".join(tags)
 
 
@@ -241,7 +264,9 @@ def index_page(ds: Dataset, root: str = "", years: list[int] | None = None) -> s
     if ds.has_coverage:
         covered = [a for a in ds.agencies if a.coverage]
         n_cov = sum(a.coverage.flagged for a in covered)
-        stats.append((f"{n_cov} av {len(covered)}", "har uvanlig høy eller lav dekning"))
+        persistent = any(a.coverage.category for a in covered)
+        stats.append((f"{n_cov} av {len(covered)}", "har uvanlig dekning flere år på rad" if persistent
+                       else "har uvanlig høy eller lav dekning"))
     stat_html = "".join(f'<div class="stat"><div class="stat-value">{v}</div><div class="stat-label">{l}</div></div>'
                         for v, l in stats)
 
@@ -270,7 +295,8 @@ def index_page(ds: Dataset, root: str = "", years: list[int] | None = None) -> s
         if ds.has_coverage:
             cov = (f'<td class="num" data-sort="{_num(a.coverage.ratio)}">{pct(a.coverage.ratio)}</td>'
                    if a.coverage else '<td class="num" data-sort="">–</td>')
-        flag_sort = (2 if a.coverage and a.coverage.flagged else 0) + (1 if a.flagged else 0)
+        flag_sort = ((4 if a.coverage and a.coverage.flagged else
+                      2 if a.coverage and a.coverage.category in COVERAGE_NOTES else 0) + (1 if a.flagged else 0))
         rows.append(
             f'<tr data-name="{escape(a.name.lower())} {a.orgnr}" data-flags="{escape(_row_flags(a))}">'
             f'<td><a href="{root}virksomhet/{a.slug}.html">{escape(a.name)}</a></td>'
@@ -288,6 +314,8 @@ def index_page(ds: Dataset, root: str = "", years: list[int] | None = None) -> s
     if ds.has_coverage:
         options[1:1] = [("dekning", "Uvanlig dekning (alle)"), ("dekning-hoy", "Uvanlig høy dekning"),
                         ("dekning-lav", "Uvanlig lav dekning")]
+        present = {a.coverage.category for a in ds.agencies if a.coverage and not a.coverage.flagged}
+        options[4:4] = [(k.replace("_", "-"), label) for k, (label, _) in COVERAGE_NOTES.items() if k in present]
         groups = sorted({a.coverage.peer_group for a in ds.agencies if a.coverage},
                         key=lambda g: ["små", "mellomstore", "store"].index(g) if g in ("små", "mellomstore", "store") else 9)
         options += [(f"gruppe-{g}", f"{g.capitalize()} virksomheter") for g in groups]
@@ -409,8 +437,9 @@ def _partial_caveat(ds: Dataset) -> str:
     if not ds.partial:
         return ""
     return (f'<aside class="caveat"><strong>Delår.</strong> Regnskapstallene for {ds.year} gjelder bare '
-            f"januar–{MONTHS[ds.through_month - 1]}, mens Doffin-tallene er for hele året. Avvik og dekning er derfor ikke "
-            f"sammenlignbare med hele år, og flaggene bør leses med ekstra forsiktighet.</aside>")
+            f"januar–{MONTHS[ds.through_month - 1]}, og kontraktverdiene er fordelt på de samme månedene. Tallene kan "
+            f"likevel ikke sammenlignes direkte med hele år, siden innkjøp og fakturering ofte samles mot "
+            f"slutten av året.</aside>")
 
 
 def _history_table(history: list[tuple[int, Agency]], current: int) -> str:
@@ -473,7 +502,26 @@ def agency_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]] | None
         notes.append(
             f"<li><strong>Uvanlig {'høy' if c.z > 0 else 'lav'} Doffin-dekning.</strong> Doffin dekker {pct(c.ratio)} "
             f"av kjøpene, tydelig {side} enn de {c.peer_count} {escape(c.peer_group)} virksomhetene i samme "
-            f"størrelsesgruppe (median {pct(c.peer_median)}, z = {c.z:+.1f}).</li>")
+            f"størrelsesgruppe (median {pct(c.peer_median)}, z\u00a0=\u00a0{_z(c.z)})"
+            + (f", og dekningen har avveket {c.years_outlier} av de siste tre årene" if c.years_outlier > 1 else "")
+            + ".</li>")
+    elif a.coverage and a.coverage.category == "observasjon":
+        c = a.coverage
+        side = "høyere" if c.z > 0 else "lavere"
+        notes.append(
+            f"<li><strong>Avvik i dekning i år.</strong> Doffin dekker {pct(c.ratio)} av kjøpene, {side} enn de "
+            f"{c.peer_count} {escape(c.peer_group)} virksomhetene i samme størrelsesgruppe (median "
+            f"{pct(c.peer_median)}, z\u00a0=\u00a0{_z(c.z)}). Avviket gjelder bare dette året, så det er ikke "
+            f"flagget; én stor rammeavtale kan være nok.</li>")
+    elif a.coverage and a.coverage.category in ("tilskudd", "avtaler_for_andre"):
+        c = a.coverage
+        why = ("Tilskuddene ut av staten er minst like store som Doffin-andelen, så kontraktene betales trolig "
+               "som tilskudd, for eksempel kjøp av fly- og togruter." if c.category == "tilskudd" else
+               "Typisk inngår virksomheten avtaler som andre statlige virksomheter bruker, eller kjøpene føres "
+               "utenfor kjøp av varer og tjenester.")
+        notes.append(
+            f"<li><strong>Dekning over 100 %.</strong> Doffin-andelen ({pct(c.ratio)} av kjøpene) er større enn "
+            f"virksomhetens egne kjøp. {why} Det gir ikke flagg.</li>")
     if a.flagged:
         word = "høyere" if a.deviation > 0 else "lavere"
         notes.append(
@@ -506,6 +554,8 @@ def agency_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]] | None
         if c.period_source == "standard":
             tags.append("antatt varighet")
         tag_html = "".join(f'<span class="tag">{t}</span>' for t in tags)
+        if c.buyer_unit:
+            tag_html += f'<span class="tag" title="Underenheten som står som kjøper i Doffin">{escape(c.buyer_unit)}</span>'
         cells = [f"<td>{link}{tag_html}</td>"]
         if ds.has_suppliers:
             cells.append(_suppliers_cell(c, linked))
@@ -715,13 +765,23 @@ def supplier_page(ds: Dataset, s: SupplierSummary) -> str:
 def about_page(ds: Dataset) -> str:
     coverage = ""
     if ds.has_coverage:
-        coverage = """
+        persist = ("<p>Avviker den samme vei i minst to av de tre siste årene, får den flagget «uvanlig høy» eller "
+                   "«uvanlig lav dekning». Ett år alene kan skyldes én stor rammeavtale og vises bare som "
+                   "«avvik i dekning i år». Dekning over 100 % betyr at Doffin-andelen er større enn egne kjøp. Det "
+                   "har som regel en kjent forklaring og blir merket, ikke flagget: «tilskudd» når tilskuddene ut "
+                   "av staten er minst like store (Samferdselsdepartementet kunngjør fly- og togruter, men betaler "
+                   "dem som tilskudd), ellers «avtaler for andre» (som DFØ og DSS, som inngår avtaler andre "
+                   "bruker).</p>"
+                   if any(a.coverage and a.coverage.category for a in ds.agencies) else
+                   "<p>Da får den flagget «uvanlig høy» eller «uvanlig lav dekning».</p>")
+        coverage = f"""
 <h3>Doffin-dekning mot lignende virksomheter</h3>
 <p>Fordi Doffin bare viser en del av innkjøpene, er det mer nyttig å spørre om en virksomhet kunngjør
 <em>uvanlig mye eller lite</em> sammenlignet med lignende virksomheter. Dekningen er Doffin-summen delt på kjøpene.
 Virksomhetene deles i tre størrelsesgrupper etter kjøp (små, mellomstore, store), og hver virksomhet
 sammenlignes med medianen i sin gruppe på logaritmisk skala (robust z-verdi). Avviker den med mer enn
-to standardavvik, får den flagget «uvanlig høy» eller «uvanlig lav dekning».</p>
+to standardavvik, er det et avvik.</p>
+{persist}
 <ul>
 <li><strong>Høy dekning</strong> kan bety at kontraktverdiene er tak i rammeavtaler som ikke blir brukt fullt ut,
 at virksomheten kjøper inn for andre (som Statens innkjøpssenter), eller at kjøpene føres et annet sted
@@ -751,6 +811,12 @@ Desembertallene gir hele året. Kjøp av varer og tjenester er summen av artskon
 (varer, fremmedytelser, investeringer og driftskostnader), uten lønn, avskrivninger, reiser og tilskudd.
 Når en virksomhet har tall både her og i årsrapporten, brukes statsregnskapet, og årsrapporten lenkes til
 når den finnes.</dd>"""
+    units = ""
+    if any(c.buyer_unit for a in ds.agencies for c in a.contracts):
+        units = """
+<p>Noen virksomheter kunngjør gjennom underenheter med eget organisasjonsnummer, for eksempel
+politidistriktene og Politiets fellestjenester for Politiet, eller avdelinger i Forsvaret. Slike kontrakter
+regnes til virksomheten som fører regnskapet, og underenheten vises ved kontrakten.</p>"""
     coverage_caveat = (
         "Kommuner, fylker, helseforetak og statlige selskaper er ikke en del av statsregnskapet og er ikke med."
         if _SITE["statsregnskap"] else
@@ -781,7 +847,7 @@ tilgjengeliggjort av Digitaliseringsdirektoratet (Doffin) og Direktoratet for fo
 <h2>Slik kobles tallene</h2>
 <p>Regnskapet har ikke leverandører, så koblingen går på <em>kjøper</em>: organisasjonsnummeret til kjøperen i
 Doffin mot virksomheten som har levert årsrapporten. Avviket er (Doffin − kjøp) / kjøp, og virksomheter
-der avviket er større enn {pct(ds.threshold, decimals=0)} i den ene eller andre retningen, blir flagget.</p>
+der avviket er større enn {pct(ds.threshold, decimals=0)} i den ene eller andre retningen, blir flagget.</p>{units}
 {annual}
 {coverage}
 <h2 id="forbehold">Forbehold</h2>
@@ -878,6 +944,8 @@ def export_rows(ds: Dataset) -> list[dict[str, object]]:
                 "storrelsesgruppe": c.peer_group if c else None,
                 "gruppens_mediandekning_prosent": round(c.peer_median * 100, 1) if c else None,
                 "flagget_dekning": int(c.flagged) if c else None,
+                "dekningskategori": c.category if c else None,
+                "aar_med_avvik_siste_3": c.years_outlier if c else None,
             })
         row["kilde_arsrapport"] = a.report_url or ""
         row["kilde_regnskap"] = a.spend_source or ""
