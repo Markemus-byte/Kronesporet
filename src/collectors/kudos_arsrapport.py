@@ -353,6 +353,11 @@ def load_kudos_purchases(
     done = {o for (o,) in conn.execute(
         "SELECT DISTINCT orgnr FROM statsregnskap WHERE year = ? AND source_file LIKE ?",
         (year, SOURCE_PREFIX + "%"))}
+    # Virksomheter med tall fra statsregnskapet (rådata) trenger ikke årsrapporten
+    in_accounts = {o for (o,) in conn.execute(
+        "SELECT DISTINCT orgnr FROM statsregnskap WHERE year = ? AND source_file NOT LIKE ?",
+        (year, SOURCE_PREFIX + "%"))}
+    buyers = [b for b in buyers if b[0] not in in_accounts]
     found = 0
     for orgnr, name, _ in buyers:
         if orgnr in done and not refresh:

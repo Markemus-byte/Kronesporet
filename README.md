@@ -14,6 +14,29 @@ pip install -r requirements.txt
 python scripts/run_phase1.py --year 2025 --statsregnskap data/statsregnskap_2025.csv
 ```
 
+### Rådata fra statsregnskapet (anbefalt)
+
+DFØ publiserer «Rådata <måned> <år> (bevilgningsregnskap)» som xlsx på
+statsregnskapet.dfo.no/last-ned: én rad per virksomhet (orgnr), kapittel, post og
+artskonto, beløp hittil i år. Desember gir hele året. Flere filer kan gis samtidig,
+og hver fil blir sitt år.
+
+```bash
+python scripts/run_phase1.py --year 2025 --kudos --statsregnskap \
+    data/raadata_desember_2023_bevilgningsregnskap.xlsx \
+    data/raadata_desember_2024_bevilgningsregnskap.xlsx \
+    data/raadata_desember_2025_bevilgningsregnskap.xlsx
+```
+
+- Kjøp av varer og tjenester = artskonto 40–45 og 61–69 (varer, tjenester, husleie,
+  konsulenter m.m.), 70–77 unntatt 71 (drift ellers) og 47–49 (investeringer).
+  Lønn, tilskudd, overføringer og finans er holdt utenfor.
+- Filene dekker de bruttobudsjetterte virksomhetene (omtrent 160 per år).
+  Nettobudsjetterte virksomheter (universiteter m.fl.) står bare som tilskudd og er ikke med.
+  Med `--kudos` hentes kjøpstallene deres fra årsrapportene i stedet (se under);
+  virksomheter som finnes i rådata hentes ikke fra Kudos.
+- Doffin-tildelinger hentes for alle regnskapsårene pluss `--history` år før det første.
+
 ### Uten statsregnskap-fil: årsrapportene i Kudos
 
 Når statsregnskapet.dfo.no ikke svarer, kan kjøp av varer og tjenester hentes fra
