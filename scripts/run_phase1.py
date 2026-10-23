@@ -44,6 +44,7 @@ from src.analysis.annualize import (  # noqa: E402
     DEFAULT_FRAMEWORK_MONTHS,
     annualize_contracts,
 )
+from src.analysis.coverage import PEER_BANDS, Z_THRESHOLD, flag_coverage_outliers  # noqa: E402
 from src.collectors.doffin import DoffinClient, collect, init_db, save_contracts  # noqa: E402
 from src.collectors.kudos_arsrapport import load_kudos_purchases  # noqa: E402
 from src.collectors.statsregnskap import load_utgifter_xlsx  # noqa: E402
@@ -69,6 +70,10 @@ def parse_args() -> argparse.Namespace:
     ap.add_argument("--no-brreg", action="store_true",
                     help="Ikke slå opp kapittelnavn i Enhetsregisteret (bare navnetreff mot Doffin)")
     ap.add_argument("--top", type=int, default=10, help="Vis de N største flaggene")
+    ap.add_argument("--z-threshold", type=float, default=Z_THRESHOLD,
+                    help="Flagg Doffin-dekning som avviker mer enn så mange robuste standardavvik fra lignende virksomheter")
+    ap.add_argument("--peer-bands", type=int, default=PEER_BANDS,
+                    help="Antall størrelsesgrupper (etter kjøp) som virksomhetene sammenlignes innenfor")
     ap.add_argument("--no-annualize", action="store_true",
                     help="Ikke fordel kontraktverdi over år (hele verdien telles i publiseringsåret)")
     ap.add_argument("--history", type=int, default=8,
@@ -153,6 +158,7 @@ def main() -> int:
             print(f"      Flagger avvik over {a.threshold:.0%} "
                   f"({'årsfordelt kontraktverdi' if annualized else 'hele kontraktverdien i publiseringsåret'}) ...")
             flag_deviations(conn, a.threshold, annualized=annualized)
+            flag_coverage_outliers(conn, a.z_threshold, a.peer_bands)
 
         s = summary(conn)
         top = conn.execute(
@@ -160,6 +166,14 @@ def main() -> int:
             "ON f.source_id = c.orgnr || ':' || c.year WHERE f.flag_type = 'doffin_avvik' "
             "ORDER BY ABS(c.contract_sum - c.spend_sum) DESC LIMIT ?", (a.top,)
         ).fetchall() if compare else []
+        coverage = conn.execute(
+            "SELECT description FROM flags f JOIN doffin_coverage d ON f.source_id = d.orgnr || ':' || d.year "
+            "WHERE f.flag_type = 'doffin_dekning' ORDER BY ABS(d.z) DESC"
+        ).fetchall() if compare else []
+        median_cov = conn.execute(
+            "SELECT coverage FROM doffin_coverage ORDER BY coverage LIMIT 1 OFFSET "
+            "(SELECT COUNT(*) FROM doffin_coverage) / 2"
+        ).fetchone() if compare else None
     finally:
         conn.close()
 
@@ -167,9 +181,16 @@ def main() -> int:
     print(f"Kontrakter i databasen: {s['contracts']} ({s['contracts_with_value']} med verdi)")
     print(f"Virksomhet/år koblet:   {s['matched_agency_years']}")
     print(f"Flagg (avvik > {a.threshold:.0%}):   {s['flags']}")
+    if compare:
+        print(f"Flagg (Doffin-dekning skiller seg ut, |z| > {a.z_threshold:g}): {len(coverage)}"
+              + (f"  (mediandekning {median_cov[0]:.0%})" if median_cov else ""))
     if top:
         print(f"\nStørste avvik i kroner (topp {len(top)}):")
         for (desc,) in top:
+            print(f"  - {desc}")
+    if coverage:
+        print("\nDoffin-dekning som skiller seg ut fra lignende virksomheter:")
+        for (desc,) in coverage:
             print(f"  - {desc}")
     return 0
 
