@@ -145,3 +145,5 @@ Settings → Pages. Legg ikke inn `CNAME` før domenet er ditt: GitHub sender da
 besøkende dit.
 
 Data: Doffin og statsregnskapet (DFØ), lisensiert under NLOD.
+
+© 2026 Markemus-byte / Kronesporet. Alle rettigheter forbeholdt.

@@ -21,6 +21,7 @@ from src.web.data import Agency, Contract, Dataset
 
 ASSETS = Path(__file__).parent / "assets"
 SITE_NAME = "Kronesporet"
+COPYRIGHT = "© 2026 Markemus-byte / Kronesporet. Alle rettigheter forbeholdt."
 
 PERIOD_SOURCES = {
     "datoer": "start- og sluttdato i kunngjøringen",
@@ -105,6 +106,7 @@ def page(title: str, body: str, root: str = "", active: str = "", description: s
     <a href="https://data.norge.no/nlod/no/2.0">Norsk lisens for offentlige data (NLOD 2.0)</a>.
     Kronesporet er ikke tilknyttet DFØ eller Digdir.</p>
     <p>Sist bygget {date.today().strftime('%d.%m.%Y')}. <a href="{root}om.html">Om dataene og metoden</a>.</p>
+    <p>{COPYRIGHT}</p>
   </div>
 </footer>
 <script src="{root}assets/app.js"></script>
@@ -466,10 +468,11 @@ ikke leses.</li>
 <li><strong>Feil i kildene følger med.</strong> Navn og tall vises slik de står i Doffin og årsrapportene.</li>
 </ul>
 
-<h2>Åpen kildekode</h2>
-<p>Innsamling, kobling og denne nettsiden er laget med åpen kode. Tallene bak forsiden kan lastes ned som
+<h2>Last ned dataene</h2>
+<p>Tallene bak forsiden kan lastes ned som
 <a href="data/virksomheter.csv">CSV</a> eller <a href="data/virksomheter.json">JSON</a>, og alle kontraktene
-med leverandører som <a href="data/kontrakter.csv">kontrakter.csv</a>.</p>
+med leverandører som <a href="data/kontrakter.csv">kontrakter.csv</a>. Dataene fra Doffin og Kudos er fortsatt
+underlagt NLOD 2.0; oppgi kildene ved gjenbruk.</p>
 </div>
 """
     return page("Om dataene", body, active="om")
