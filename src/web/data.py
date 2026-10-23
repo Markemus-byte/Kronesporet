@@ -88,6 +88,7 @@ class Dataset:
     agencies: list[Agency]
     has_coverage: bool = False
     has_suppliers: bool = False
+    data_date: str = ""          # siste henting fra Doffin (DD.MM.ÅÅÅÅ), fra doffin_contracts.fetched_at
 
 
 def display_name(name: str) -> str:
@@ -180,8 +181,11 @@ def load_dataset(db_path: str | Path, year: int | None = None, threshold: float 
                 for c in a.contracts:
                     c.suppliers = by_contract.get(c.id, [])
                     has_suppliers = has_suppliers or bool(c.suppliers)
+        fetched = conn.execute("SELECT MAX(fetched_at) FROM doffin_contracts").fetchone()[0]
+        data_date = f"{fetched[8:10]}.{fetched[5:7]}.{fetched[:4]}" if fetched and len(fetched) >= 10 else ""
         return Dataset(year=year, annualized=annualized, threshold=threshold, agencies=agencies,
-                       has_coverage=any(a.coverage for a in agencies), has_suppliers=has_suppliers)
+                       has_coverage=any(a.coverage for a in agencies), has_suppliers=has_suppliers,
+                       data_date=data_date)
     finally:
         conn.close()
 

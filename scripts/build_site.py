@@ -26,6 +26,8 @@ def main() -> None:
     ap.add_argument("--out", type=Path, default=ROOT / "docs", help="Mappen nettstedet skrives til")
     ap.add_argument("--year", type=int, nargs="*",
                     help="Regnskapsår som skal med (standard: alle årene i databasen; siste blir forsiden)")
+    ap.add_argument("--base-url", default="https://markemus-byte.github.io/Kronesporet/",
+                    help="Offentlig adresse (canonical-lenker, Open Graph og sidekart); tom for å slå av")
     ap.add_argument("--cname", help="Eget domene for GitHub Pages, f.eks. kronesporet.no (skriver docs/CNAME)")
     ap.add_argument("--threshold", type=float, default=THRESHOLD, help="Terskelen flaggene ble laget med")
     args = ap.parse_args()
@@ -37,7 +39,8 @@ def main() -> None:
         sys.exit(f"{args.db}: contract_spend_comparison er tom. Kjør scripts/run_phase1.py først.")
     datasets = [load_dataset(args.db, year=y, threshold=args.threshold) for y in sorted(years)]
     ds = datasets[-1]
-    pages = build_site(datasets, args.out)
+    base_url = f"https://{args.cname.strip()}/" if args.cname else args.base_url
+    pages = build_site(datasets, args.out, base_url=base_url)
     if args.cname:
         (args.out / "CNAME").write_text(args.cname.strip() + "\n")
     flagged = sum(a.flagged for a in ds.agencies)
