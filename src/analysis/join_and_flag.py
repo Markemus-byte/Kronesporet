@@ -16,6 +16,9 @@ bokstaver og æøå spiller ingen rolle; overstyr med `columns=` ved behov):
   artskonto   : "Artskonto", "Art", "Konto"                           (valgfri, for filtrering)
 Skilletegn (; , tab) og norsk tallformat ("1 234 567,89") håndteres.
 
+DFØs månedsrapport «Utgifter til staten» (xlsx, kapittel/post uten orgnr)
+lastes med src/collectors/statsregnskap.py, som fyller samme tabell.
+
 Flaggingen bygger videre på `flags`-tabellen fra database_loader.py
 (flag_type, severity, description, source_id) med flag_type = 'doffin_avvik'.
 """
@@ -26,6 +29,7 @@ import io
 import re
 import sqlite3
 import unicodedata
+import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -37,7 +41,7 @@ COLUMN_ALIASES: dict[str, list[str]] = {
     "orgnr": ["orgnr", "organisasjonsnummer", "org_nr", "virksomhetsnummer", "orgnummer", "virksomhet_orgnr"],
     "name": ["virksomhet", "virksomhetsnavn", "navn", "virksomhet_navn", "etat"],
     "amount": ["belop", "regnskap", "sum", "belop_i_kroner", "regnskapsbelop", "belop_nok", "amount"],
-    "artskonto": ["artskonto", "art", "konto", "artskontonummer"],
+    "artskonto": ["artskonto", "artskonto_id", "art", "konto", "artskontonummer"],
 }
 
 SCHEMA = """
@@ -171,7 +175,13 @@ def load_statsregnskap_csv(
         )
     conn.executescript(SCHEMA)
 
-    raw = path.read_bytes()
+    if path.suffix.lower() == ".zip":
+        # DFØs årsfiler lastes ned som zip med én CSV inni
+        with zipfile.ZipFile(path) as z:
+            name = next(n for n in z.namelist() if n.lower().endswith(".csv"))
+            raw = z.read(name)
+    else:
+        raw = path.read_bytes()
     text = raw.decode("utf-8-sig") if _is_utf8(raw) else raw.decode("cp1252")
     sample = text[:20000]
     try:
@@ -224,23 +234,39 @@ def _is_utf8(raw: bytes) -> bool:
 # Join
 # ---------------------------------------------------------------------------
 
-def build_comparisons(conn: sqlite3.Connection, currency: str = "NOK") -> list[Comparison]:
+def build_comparisons(
+    conn: sqlite3.Connection, currency: str = "NOK", annualized: bool = False
+) -> list[Comparison]:
     """Summer kontrakter og regnskap per virksomhet og år og koble dem.
 
     1) orgnr-match: doffin_contracts.buyer_orgnr = statsregnskap.orgnr
     2) navne-match for statsregnskap-rader uten orgnr: normalisert buyer_name = virksomhet
     Kun kontrakter med verdi i valgt valuta (eller ukjent valuta) tas med.
+
+    annualized=False: hele kontraktsverdien telles i publiseringsåret.
+    annualized=True:  årsandelen av alle kontrakter som løper i året (tabellen
+    doffin_contract_years fra src/analysis/annualize.py); contract_count er da
+    antall kontrakter som løper i året.
     """
-    contracts = conn.execute(
-        """
-        SELECT buyer_orgnr, MAX(buyer_name), year, SUM(value), COUNT(*)
-        FROM doffin_contracts
-        WHERE value IS NOT NULL AND buyer_orgnr IS NOT NULL
-          AND (currency = ? OR currency IS NULL)
-        GROUP BY buyer_orgnr, year
-        """,
-        (currency,),
-    ).fetchall()
+    if annualized:
+        contracts = conn.execute(
+            """
+            SELECT y.buyer_orgnr, MAX(c.buyer_name), y.year, SUM(y.value_share), COUNT(*)
+            FROM doffin_contract_years y JOIN doffin_contracts c ON c.id = y.contract_id
+            GROUP BY y.buyer_orgnr, y.year
+            """
+        ).fetchall()
+    else:
+        contracts = conn.execute(
+            """
+            SELECT buyer_orgnr, MAX(buyer_name), year, SUM(value), COUNT(*)
+            FROM doffin_contracts
+            WHERE value IS NOT NULL AND buyer_orgnr IS NOT NULL
+              AND (currency = ? OR currency IS NULL)
+            GROUP BY buyer_orgnr, year
+            """,
+            (currency,),
+        ).fetchall()
     by_org = {(org, yr): (name, total, n) for org, name, yr, total, n in contracts}
     by_name = {(normalize_name(name), yr): (org, total, n) for org, name, yr, total, n in contracts}
 
@@ -276,13 +302,14 @@ def _fmt_nok(x: float) -> str:
     return f"{x:,.0f}".replace(",", " ") + " kr"
 
 
-def flag_deviations(conn: sqlite3.Connection, threshold: float = THRESHOLD) -> int:
+def flag_deviations(conn: sqlite3.Connection, threshold: float = THRESHOLD, annualized: bool = False) -> int:
     """Kjør join og skriv flagg der |avvik| > threshold. Returnerer antall flagg.
 
     Idempotent: tidligere 'doffin_avvik'-flagg og sammenligninger slettes først.
+    annualized=True sammenligner årsfordelt kontraktverdi (se build_comparisons).
     """
     conn.executescript(SCHEMA)
-    comparisons = build_comparisons(conn)
+    comparisons = build_comparisons(conn, annualized=annualized)
 
     conn.execute("DELETE FROM flags WHERE flag_type = ?", (FLAG_TYPE,))
     conn.execute("DELETE FROM contract_spend_comparison")
@@ -298,12 +325,14 @@ def flag_deviations(conn: sqlite3.Connection, threshold: float = THRESHOLD) -> i
         if not flagged:
             continue
         direction = "høyere" if dev > 0 else "lavere"
+        what = (f"årsandel av Doffin-kontrakter som løper i {c.year}" if annualized
+                else "Doffin-kontrakter")
         conn.execute(
             "INSERT INTO flags (flag_type, severity, description, source_id) VALUES (?, ?, ?, ?)",
             (
                 FLAG_TYPE,
                 "warning",
-                f"{c.virksomhet or c.orgnr} {c.year}: Doffin-kontrakter {_fmt_nok(c.contract_sum)} "
+                f"{c.virksomhet or c.orgnr} {c.year}: {what} {_fmt_nok(c.contract_sum)} "
                 f"({c.contract_count} stk) er {abs(dev):.1%} {direction} enn statsregnskapet "
                 f"{_fmt_nok(c.spend_sum)} (match på {c.match_method})",
                 f"{c.orgnr}:{c.year}",
