@@ -4,8 +4,8 @@
 statlige virksomheter selv rapporterer at de kjøper for, og viser hvor mye av innkjøpene som
 faktisk er synlige for offentligheten.
 
-[Nettsiden](https://markemus-byte.github.io/Kronesporet/) ·
-[Om dataene og metoden](https://markemus-byte.github.io/Kronesporet/om.html) ·
+[Nettsiden](https://kronesporet.no/) ·
+[Om dataene og metoden](https://kronesporet.no/om.html) ·
 [Last ned dataene (CSV)](docs/data/virksomheter.csv) ·
 [Endringslogg](CHANGELOG.md)
 
@@ -219,13 +219,19 @@ git add site-data/kronesporet.sql && git commit -m "Nye tall" && git push
 - **Cloudflare Pages:** Workers & Pages → Create → Pages → koble til repoet, framework «None»,
   tom byggekommando og «Build output directory» `docs`.
 
-**Eget domene (kronesporet.no).** På Netlify og Cloudflare legges domenet inn i deres
-kontrollpanel, som viser hvilke DNS-oppføringer som trengs. På GitHub Pages: bygg med
-`--cname kronesporet.no` (skriver `docs/CNAME`) og legg inn fire A-oppføringer for
-`kronesporet.no` til 185.199.108.153, 185.199.109.153, 185.199.110.153 og 185.199.111.153, og en
-CNAME for `www` til `markemus-byte.github.io`. Kryss deretter av for «Enforce HTTPS» under
-Settings → Pages. Legg ikke inn `CNAME` før domenet peker riktig, ellers sender GitHub alle
-besøkende dit.
+**Eget domene (kronesporet.no).** Nettsiden bygges med `--cname kronesporet.no` (GitHub Actions
+gjør det automatisk), som skriver `docs/CNAME` og bruker https://kronesporet.no/ i canonical-lenker,
+Open Graph og sidekartet. DNS hos domeneregistraren:
+
+| Navn | Type | Verdi |
+|---|---|---|
+| `kronesporet.no` | A | 185.199.108.153, 185.199.109.153, 185.199.110.153, 185.199.111.153 |
+| `kronesporet.no` | AAAA | 2606:50c0:8000::153, 2606:50c0:8001::153, 2606:50c0:8002::153, 2606:50c0:8003::153 |
+| `www` | CNAME | `markemus-byte.github.io` |
+
+Når DNS peker riktig, viser Settings → Pages «DNS check successful», og etter at sertifikatet er
+utstedt (vanligvis innen en time) krysses «Enforce HTTPS» av. På Netlify og Cloudflare legges
+domenet inn i deres kontrollpanel i stedet.
 
 ## Opphavsrett
 

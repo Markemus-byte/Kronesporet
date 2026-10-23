@@ -39,7 +39,7 @@ jobs:
           python-version: "3.12"
 
       - name: Bygg nettsiden
-        run: python scripts/build_site.py --db site-data/kronesporet.sql --out docs
+        run: python scripts/build_site.py --db site-data/kronesporet.sql --out docs --cname kronesporet.no
 
       - name: Sjekk lenkene
         run: python scripts/check_site.py docs
