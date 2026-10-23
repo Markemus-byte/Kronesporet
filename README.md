@@ -57,7 +57,7 @@ python scripts/run_phase1.py --year 2025 --kudos
 # 2. Hent leverandørene for kontraktene som løper i 2025 (ca. en halvtime)
 python scripts/fetch_winners.py --year 2025
 
-# 3. Bygg nettsiden til docs/
+# 3. Bygg nettsiden til docs/ (eller eksporter tallene og la GitHub Actions bygge, se under)
 python scripts/build_site.py --db data/offentlig_forbruk.db --out docs
 ```
 
@@ -79,7 +79,8 @@ hvert kall.
 src/collectors/   innsamling: Doffin, årsrapporter i Kudos, DFØs månedsrapport
 src/analysis/     kobling, årsfordeling, avvik og dekningsgrad
 src/web/          nettsiden: data.py leser SQLite, build.py lager HTML, assets/ er CSS og JS
-scripts/          run_phase1.py, fetch_winners.py, build_site.py
+scripts/          run_phase1.py, fetch_winners.py, build_site.py, export_site_data.py, check_site.py
+site-data/        tallene nettsiden bygges fra (SQL-tekst)
 docs/             ferdig bygget nettside (publiseres som den er)
 ```
 
@@ -192,6 +193,20 @@ databasen.
 - `--z-threshold` og `--peer-bands` endrer grensen og antall grupper for dekningsflagget.
 
 </details>
+
+## Automatisk bygging
+
+Tallene nettsiden bygges fra ligger som tekst i `site-data/kronesporet.sql`. GitHub Actions
+(`.github/workflows/nettside.yml`) bygger `docs/` på nytt og committer resultatet når
+`site-data/`, `src/web/` eller byggeskriptet endres på `main`. På pull requests bygges siden
+og alle interne lenker sjekkes.
+
+Slik oppdateres tallene etter en ny kjøring:
+
+```bash
+python scripts/export_site_data.py --db data/offentlig_forbruk.db   # skriver site-data/kronesporet.sql
+git add site-data/kronesporet.sql && git commit -m "Nye tall" && git push
+```
 
 ## Publisering
 

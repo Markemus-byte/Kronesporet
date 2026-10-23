@@ -88,6 +88,7 @@ class Dataset:
     agencies: list[Agency]
     has_coverage: bool = False
     has_suppliers: bool = False
+    data_date: str = ""          # siste henting fra Doffin (DD.MM.ÅÅÅÅ), fra doffin_contracts.fetched_at
 
 
 def display_name(name: str) -> str:
@@ -180,8 +181,11 @@ def load_dataset(db_path: str | Path, year: int | None = None, threshold: float 
                 for c in a.contracts:
                     c.suppliers = by_contract.get(c.id, [])
                     has_suppliers = has_suppliers or bool(c.suppliers)
+        fetched = conn.execute("SELECT MAX(fetched_at) FROM doffin_contracts").fetchone()[0]
+        data_date = f"{fetched[8:10]}.{fetched[5:7]}.{fetched[:4]}" if fetched and len(fetched) >= 10 else ""
         return Dataset(year=year, annualized=annualized, threshold=threshold, agencies=agencies,
-                       has_coverage=any(a.coverage for a in agencies), has_suppliers=has_suppliers)
+                       has_coverage=any(a.coverage for a in agencies), has_suppliers=has_suppliers,
+                       data_date=data_date)
     finally:
         conn.close()
 
@@ -201,13 +205,13 @@ def _contracts(conn: sqlite3.Connection, orgnr: str, year: int, annualized: bool
                        (SELECT MAX(year) FROM doffin_contract_years WHERE contract_id = c.id) AS last_year
                 FROM doffin_contract_years y JOIN doffin_contracts c ON c.id = y.contract_id
                 WHERE y.buyer_orgnr = ? AND y.year = ?
-                ORDER BY y.value_share DESC NULLS LAST, c.value DESC""", (orgnr, year))
+                ORDER BY y.value_share DESC NULLS LAST, c.value DESC NULLS LAST, c.id""", (orgnr, year))
     else:
         rows = conn.execute(
             f"""{base}, c.value AS value_share, 1.0 AS share, NULL AS period_source,
                        NULL AS first_year, NULL AS last_year
                 FROM doffin_contracts c WHERE c.buyer_orgnr = ? AND c.year = ?
-                ORDER BY c.value DESC NULLS LAST""", (orgnr, year))
+                ORDER BY c.value DESC NULLS LAST, c.id""", (orgnr, year))
     return [
         Contract(
             id=r["id"], title=r["title"] or "(uten tittel)", url=r["url"], value=r["value"],

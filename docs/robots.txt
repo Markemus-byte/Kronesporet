@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://markemus-byte.github.io/Kronesporet/sitemap.xml

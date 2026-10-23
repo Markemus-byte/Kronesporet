@@ -15,7 +15,6 @@ import shutil
 import statistics
 from collections import Counter
 from dataclasses import dataclass, field
-from datetime import date
 from html import escape
 from pathlib import Path
 
@@ -23,6 +22,15 @@ from src.web.data import Agency, Contract, Dataset
 
 ASSETS = Path(__file__).parent / "assets"
 SITE_NAME = "Kronesporet"
+DEFAULT_DESCRIPTION = ("Kronesporet sammenligner statlige virksomheters kunngjorte kontrakter i Doffin "
+                       "med kjøpene i regnskapet.")
+
+CURRENT = ' aria-current="page"'
+NUM_TYPE = ' data-type="num"'
+
+# Settes av build_site() for hele byggingen: offentlig adresse (for canonical, Open Graph
+# og sidekart) og datoen dataene sist ble hentet (vises i bunnteksten).
+_SITE: dict[str, str] = {"base_url": "", "data_date": ""}
 COPYRIGHT = "© 2026 Markemus-byte / Kronesporet. Alle rettigheter forbeholdt."
 
 PERIOD_SOURCES = {
@@ -75,37 +83,50 @@ def _num(x: float | None) -> str:
 
 # --- sidemal ----------------------------------------------------------------
 
-def page(title: str, body: str, root: str = "", active: str = "", description: str = "") -> str:
+def page(title: str, body: str, root: str = "", active: str = "", description: str = "", path: str = "") -> str:
     nav = [("index.html", "Virksomheter", "index"), ("leverandorer.html", "Leverandører", "leverandorer"),
            ("om.html", "Om dataene", "om")]
     links = "".join(
-        f'<a href="{root}{href}"{" aria-current=\"page\"" if key == active else ""}>{label}</a>'
+        f'<a href="{root}{href}"{CURRENT if key == active else ""}>{label}</a>'
         for href, label, key in nav
     )
     full_title = f"{title} – {SITE_NAME}" if title != SITE_NAME else f"{SITE_NAME} – hvor går statens penger?"
+    description = description or DEFAULT_DESCRIPTION
+    base = _SITE["base_url"]
+    url_meta = ""
+    if base:
+        url = base + ("" if path == "index.html" else path)
+        url_meta = (f'<link rel="canonical" href="{escape(url)}">\n'
+                    f'<meta property="og:url" content="{escape(url)}">\n'
+                    f'<meta property="og:image" content="{escape(base)}assets/og-bilde.png">\n'
+                    '<meta name="twitter:card" content="summary_large_image">\n')
+    data_date = f"Data hentet {_SITE['data_date']}. " if _SITE["data_date"] else ""
     return f"""<!doctype html>
 <html lang="nb">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{escape(full_title)}</title>
-<meta name="description" content="{escape(description or 'Kronesporet sammenligner statlige virksomheters kunngjorte kontrakter i Doffin med kjøpene i regnskapet.')}">
+<meta name="description" content="{escape(description)}">
 <meta property="og:title" content="{escape(full_title)}">
-<meta property="og:description" content="{escape(description or 'Kronesporet sammenligner statlige virksomheters kunngjorte kontrakter i Doffin med kjøpene i regnskapet.')}">
+<meta property="og:description" content="{escape(description)}">
+<meta property="og:site_name" content="{SITE_NAME}">
 <meta property="og:type" content="website">
+{url_meta}
 <meta property="og:locale" content="nb_NO">
 <meta name="theme-color" content="#0f5c4d">
 <link rel="icon" href="{root}assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="{root}assets/style.css">
 </head>
 <body>
+<a class="skip-link" href="#innhold">Hopp til innholdet</a>
 <header class="site-header">
   <div class="wrap">
     <a class="brand" href="{root}index.html"><span class="mark" aria-hidden="true">kr</span>Kronesporet</a>
-    <nav>{links}</nav>
+    <nav aria-label="Hovedmeny">{links}</nav>
   </div>
 </header>
-<main class="wrap">
+<main class="wrap" id="innhold" tabindex="-1">
 {body}
 </main>
 <footer class="site-footer">
@@ -114,7 +135,7 @@ def page(title: str, body: str, root: str = "", active: str = "", description: s
     <a href="https://kudos.dfo.no">Kudos</a> (DFØ), lisensiert under
     <a href="https://data.norge.no/nlod/no/2.0">Norsk lisens for offentlige data (NLOD 2.0)</a>.
     Kronesporet er ikke tilknyttet DFØ eller Digdir.</p>
-    <p>Sist bygget {date.today().strftime('%d.%m.%Y')}. <a href="{root}om.html">Om dataene og metoden</a>.</p>
+    <p>{data_date}<a href="{root}om.html">Om dataene og metoden</a>.</p>
     <p>{COPYRIGHT}</p>
   </div>
 </footer>
@@ -202,8 +223,8 @@ def index_page(ds: Dataset, root: str = "", years: list[int] | None = None) -> s
         head.append(("Dekning", "num", "Doffin-summen som andel av kjøpene"))
     head.append(("Flagg", "text", ""))
     thead = "".join(
-        f'<th scope="col" data-type="{t}"{f" title=\"{escape(tip)}\"" if tip else ""}>'
-        f'<button type="button">{escape(label)}</button></th>'
+        f'<th scope="col" data-type="{t}"' + (f' title="{escape(tip)}"' if tip else "")
+        + f'><button type="button">{escape(label)}</button></th>'
         for label, t, tip in head
     )
 
@@ -260,6 +281,7 @@ def index_page(ds: Dataset, root: str = "", years: list[int] | None = None) -> s
   </div>
   <div class="table-scroll">
   <table class="sortable" id="agencies">
+    <caption class="visually-hidden">Statlige virksomheter {ds.year}: Doffin-kontrakter mot kjøp</caption>
     <thead><tr>{thead}</tr></thead>
     <tbody>{''.join(rows)}</tbody>
   </table>
@@ -269,7 +291,9 @@ def index_page(ds: Dataset, root: str = "", years: list[int] | None = None) -> s
 """
     latest = max(years or [ds.year])
     title = SITE_NAME if ds.year == latest else f"Statlige virksomheter {ds.year}"
-    return page(title, body, root=root, active="index")
+    path = "index.html" if ds.year == latest else f"ar/{ds.year}.html"
+    return page(title, body, root=root, active="index", path=path,
+                description=f"Doffin-kontrakter mot kjøp for {n} statlige virksomheter i {ds.year}.")
 
 
 # --- virksomhetsside ----------------------------------------------------------
@@ -328,7 +352,7 @@ def _history_table(history: list[tuple[int, Agency]], current: int) -> str:
     """Utvikling over år for én virksomhet. history er (år, Agency)."""
     has_cov = any(a.coverage for _, a in history)
     head = ["År", "Kontrakter", "Doffin", "Kjøp", "Avvik"] + (["Dekning"] if has_cov else []) + ["Flagg"]
-    thead = "".join(f'<th scope="col"{" data-type=\"num\"" if 0 < i < len(head) - 1 else ""}>{h}</th>'
+    thead = "".join(f'<th scope="col"{NUM_TYPE if 0 < i < len(head) - 1 else ""}>{h}</th>'
                     for i, h in enumerate(head))
     rows = []
     for year, a in sorted(history, key=lambda t: -t[0]):
@@ -483,7 +507,8 @@ def agency_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]] | None
   {table}
 </section>
 """
-    return page(a.name, body, root="../", description=f"Doffin-kontrakter og kjøp for {a.name} i {ds.year}.")
+    return page(a.name, body, root="../", description=f"Doffin-kontrakter og kjøp for {a.name} i {ds.year}.",
+                path=f"virksomhet/{a.slug}.html")
 
 
 # --- leverandører -------------------------------------------------------------
@@ -547,6 +572,7 @@ fordelingen. Leverandører uten organisasjonsnummer i kunngjøringen (ofte utenl
   </div>
   <div class="table-scroll">
   <table class="sortable" id="suppliers">
+    <caption class="visually-hidden">Leverandører med kontrakter som løper i {ds.year}</caption>
     <thead><tr><th scope="col" data-type="text"><button type="button">Leverandør</button></th>
     <th scope="col" data-type="num"><button type="button">Kontrakter</button></th>
     <th scope="col" data-type="num"><button type="button">Kjøpere</button></th>
@@ -556,7 +582,7 @@ fordelingen. Leverandører uten organisasjonsnummer i kunngjøringen (ofte utenl
   </div>
 </section>
 """
-    return page("Leverandører", body, active="leverandorer",
+    return page("Leverandører", body, active="leverandorer", path="leverandorer.html",
                 description=f"Leverandørene som vinner statlige kontrakter i Doffin, {ds.year}.")
 
 
@@ -614,7 +640,7 @@ def supplier_page(ds: Dataset, s: SupplierSummary) -> str:
   <tbody>{"".join(rows)}</tbody></table></div>
 </section>
 """
-    return page(s.name, body, root="../", active="leverandorer",
+    return page(s.name, body, root="../", active="leverandorer", path=f"leverandor/{s.orgnr}.html",
                 description=f"Statlige kontrakter i Doffin vunnet av {s.name}, {ds.year}.")
 
 
@@ -698,7 +724,8 @@ med leverandører som <a href="data/kontrakter.csv">kontrakter.csv</a>. Dataene 
 underlagt NLOD 2.0; oppgi kildene ved gjenbruk.</p>
 </div>
 """
-    return page("Om dataene", body, active="om")
+    return page("Om dataene", body, active="om", path="om.html",
+                description="Kilder, metode og forbehold bak Kronesporet: Doffin, Kudos og statsregnskapet.")
 
 
 # --- nedlastbare data ---------------------------------------------------------
@@ -755,7 +782,7 @@ def _write_csv(path: Path, rows: list[dict[str, object]]) -> None:
     path.write_text("\ufeff" + buf.getvalue(), encoding="utf-8")
 
 
-def build_site(datasets: Dataset | list[Dataset], out: Path) -> int:
+def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "") -> int:
     """Skriver hele nettstedet til `out`. Returnerer antall HTML-sider.
 
     Med flere år blir index.html siste år og ar/<år>.html de andre årene. Hver
@@ -767,6 +794,8 @@ def build_site(datasets: Dataset | list[Dataset], out: Path) -> int:
     datasets = sorted(datasets, key=lambda d: d.year)
     years = [d.year for d in datasets]
     latest = datasets[-1]
+    _SITE["base_url"] = base_url.rstrip("/") + "/" if base_url else ""
+    _SITE["data_date"] = max((d.data_date for d in datasets if d.data_date), default="")
 
     for sub in ("virksomhet", "ar", "leverandor"):
         if (out / sub).exists():
@@ -810,4 +839,20 @@ def build_site(datasets: Dataset | list[Dataset], out: Path) -> int:
             "lisens": "NLOD 2.0", "kilder": ["Doffin (Digdir)", "Kudos (DFØ)", "Statsregnskapet (DFØ)"],
             "virksomheter": rows}
     (out / "data" / "virksomheter.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1), encoding="utf-8")
+    write_sitemap(out)
     return pages
+
+
+def write_sitemap(out: Path) -> None:
+    """sitemap.xml og robots.txt for søkemotorene (bare når offentlig adresse er kjent)."""
+    base = _SITE["base_url"]
+    for name in ("sitemap.xml", "robots.txt"):
+        (out / name).unlink(missing_ok=True)
+    if not base:
+        return
+    paths = sorted(p.relative_to(out).as_posix() for p in out.rglob("*.html"))
+    urls = "".join(f"<url><loc>{escape(base + ('' if p == 'index.html' else p))}</loc></url>\n" for p in paths)
+    (out / "sitemap.xml").write_text(
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}</urlset>\n', encoding="utf-8")
+    (out / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {base}sitemap.xml\n", encoding="utf-8")
