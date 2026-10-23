@@ -60,8 +60,36 @@ python scripts/run_phase1.py --year 2026 --to-month 8 \
 Resultatet havner i `data/offentlig_forbruk.db`: tabellene `doffin_contracts`,
 `statsregnskap`, `contract_spend_comparison` og `flags` (`flag_type = 'doffin_avvik'`), og for xlsx også `kapittel_orgnr`.
 
-Merk: Doffin-verdier gjelder ofte hele kontraktsperioden (rammeavtaler over flere
-år), mens statsregnskapet er årlige utgifter. Terskelen på 5 % bør justeres når
-vi ser de reelle fordelingene.
+### Årsfordelt kontraktverdi
+
+Doffin-verdier gjelder hele kontraktsperioden (ofte rammeavtaler over flere år),
+mens regnskapet er utgifter for ett år. Derfor fordeles hver kontrakt lineært over
+perioden den løper, og et regnskapsår sammenlignes med summen av årsandelene til
+alle kontrakter som løper det året, også de som ble tildelt tidligere år
+(`src/analysis/annualize.py`, tabellen `doffin_contract_years`).
+
+Kontraktsperioden leses fra kunngjøringen, i denne rekkefølgen:
+
+1. start- og sluttdato (`datoer`)
+2. «Varighet» / «Varighet, År» (`varighet`), regnet fra startdato eller publisering
+3. fritekst som «2+1+1 år» eller «total varighet inntil 4 år» (`tekst`)
+4. standard når ingenting er oppgitt: rammeavtaler 48 måneder (lovens maksimum,
+   og medianen blant rammeavtaler med oppgitt periode), andre kontrakter 24 måneder
+   (medianen blant dem med oppgitt periode)
+
+Fornyelser («Maksimal fornyelse: 2») regnes som 12 måneder hver, men ikke ut over
+48 måneder totalt. Verdien er tildelt total for prosedyren, ellers rammeavtalenes
+maksimale verdi, ellers summen av vinnernes verdier.
+
+Siden kontrakter tildelt tidligere år også teller, henter `run_phase1.py`
+tildelinger 8 år bakover (`--history`) for virksomhetene som har regnskapstall.
+Rå kunngjøringer lagres i `data/doffin_cache/`, så neste kjøring går raskt.
+
+```bash
+python scripts/run_phase1.py --year 2025 --skip-collect --kudos            # årsfordelt (standard)
+python scripts/run_phase1.py --year 2025 --skip-collect --kudos --no-annualize   # gammel sammenligning
+```
+
+`--framework-months` og `--contract-months` endrer standardvarighetene.
 
 Data: Doffin og statsregnskapet (DFØ), lisensiert under NLOD.

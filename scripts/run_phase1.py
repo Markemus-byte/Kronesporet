@@ -15,6 +15,12 @@ Last ned statsregnskapet manuelt fra https://statsregnskapet.dfo.no/last-ned
 src/analysis/join_and_flag.py for hvilke kolonner som forventes.
 
 Uten --statsregnskap samles og lagres Doffin-data, men flaggingen hoppes over.
+
+Kontraktverdier fordeles over årene kontraktene løper (src/analysis/annualize.py),
+så regnskapsåret sammenlignes med årsandelen av alle kontrakter som løper det året.
+Da trengs også tildelinger fra tidligere år (--history, standard 8 år) for
+virksomhetene som har regnskapstall. --no-annualize gir den gamle sammenligningen
+(hele kontraktsverdien i publiseringsåret).
 """
 from __future__ import annotations
 
@@ -33,7 +39,12 @@ from src.analysis.join_and_flag import (  # noqa: E402
     load_statsregnskap_csv,
     summary,
 )
-from src.collectors.doffin import collect, init_db, save_contracts  # noqa: E402
+from src.analysis.annualize import (  # noqa: E402
+    DEFAULT_CONTRACT_MONTHS,
+    DEFAULT_FRAMEWORK_MONTHS,
+    annualize_contracts,
+)
+from src.collectors.doffin import DoffinClient, collect, init_db, save_contracts  # noqa: E402
 from src.collectors.kudos_arsrapport import load_kudos_purchases  # noqa: E402
 from src.collectors.statsregnskap import load_utgifter_xlsx  # noqa: E402
 
@@ -58,6 +69,16 @@ def parse_args() -> argparse.Namespace:
     ap.add_argument("--no-brreg", action="store_true",
                     help="Ikke slå opp kapittelnavn i Enhetsregisteret (bare navnetreff mot Doffin)")
     ap.add_argument("--top", type=int, default=10, help="Vis de N største flaggene")
+    ap.add_argument("--no-annualize", action="store_true",
+                    help="Ikke fordel kontraktverdi over år (hele verdien telles i publiseringsåret)")
+    ap.add_argument("--history", type=int, default=8,
+                    help="Hent tildelinger så mange år bakover for virksomhetene med regnskapstall (0 = ingen)")
+    ap.add_argument("--framework-months", type=float, default=DEFAULT_FRAMEWORK_MONTHS,
+                    help="Standardvarighet for rammeavtaler uten oppgitt periode (måneder)")
+    ap.add_argument("--contract-months", type=float, default=DEFAULT_CONTRACT_MONTHS,
+                    help="Standardvarighet for andre kontrakter uten oppgitt periode (måneder)")
+    ap.add_argument("--cache-dir", type=Path, default=ROOT / "data" / "doffin_cache",
+                    help="Lagre rå Doffin-kunngjøringer her, så nye kjøringer slipper å hente dem på nytt")
     ap.add_argument("--skip-collect", action="store_true", help="Bruk Doffin-data som allerede ligger i databasen")
     ap.add_argument("--artskonto-prefix", nargs="*", default=[],
                     help="Ta bare med statsregnskap-rader med disse artskonto-prefiksene, f.eks. 6 7")
@@ -73,22 +94,21 @@ def main() -> int:
     try:
         # 1. Innsamling + 2. lagring
         if not a.skip_collect:
-            print(f"[1/3] Henter Doffin-kontrakter for {a.year} ...")
+            print(f"[1/4] Henter Doffin-kontrakter for {a.year} ...")
             contracts = collect(a.year, fetch_details=not a.no_details, max_notices=a.max_notices,
-                                to_month=a.to_month)
+                                to_month=a.to_month, client=DoffinClient(cache_dir=a.cache_dir))
             saved = save_contracts(conn, contracts)
-            print(f"[2/3] Lagret {saved} kontrakter i {a.db}")
+            print(f"[2/4] Lagret {saved} kontrakter i {a.db}")
         else:
-            print("[1-2/3] Hopper over innsamling, bruker eksisterende Doffin-data")
+            print("[1-2/4] Hopper over innsamling, bruker eksisterende Doffin-data")
 
-        # 3. Join + flagging
+        # 3. Regnskapstall
         if a.kudos:
-            print(f"[3/3] Henter årsrapporter {a.year} fra Kudos (topp {a.kudos_top or 'alle'} kjøpere) ...")
+            print(f"[3/4] Henter årsrapporter {a.year} fra Kudos (topp {a.kudos_top or 'alle'} kjøpere) ...")
             tried, found = load_kudos_purchases(conn, a.year, a.kudos_top or None)
-            print(f"      Kjøpstall funnet for {found} av {tried}, flagger avvik over {a.threshold:.0%} ...")
-            flag_deviations(conn, a.threshold)
+            print(f"      Kjøpstall funnet for {found} av {tried}")
         elif a.statsregnskap is None:
-            print("[3/3] Ingen --statsregnskap eller --kudos gitt, hopper over flagging.")
+            print("[3/4] Ingen --statsregnskap eller --kudos gitt, hopper over flagging.")
         else:
             columns = {f: getattr(a, f"col_{f}") for f in ("year", "orgnr", "name", "amount", "artskonto")
                        if getattr(a, f"col_{f}")}
@@ -104,15 +124,42 @@ def main() -> int:
             except (FileNotFoundError, ValueError) as e:
                 print(f"Feil i statsregnskap-filen: {e}", file=sys.stderr)
                 return 1
-            print(f"[3/3] Lastet {rows} rader fra {a.statsregnskap.name}, flagger avvik over {a.threshold:.0%} ...")
-            flag_deviations(conn, a.threshold)
+            print(f"[3/4] Lastet {rows} rader fra {a.statsregnskap.name}")
+
+        # 4. Årsfordeling + join + flagging
+        compare = a.kudos or a.statsregnskap is not None
+        annualized = compare and not a.no_annualize
+        if annualized:
+            buyers = {r[0] for r in conn.execute(
+                "SELECT DISTINCT orgnr FROM statsregnskap WHERE orgnr IS NOT NULL")}
+            years = list(range(a.year - 1, a.year - a.history - 1, -1))
+            # Doffin-data lagret før kontraktsperioden ble lest inn: hent året på nytt for disse kjøperne
+            if a.skip_collect and conn.execute(
+                "SELECT COUNT(*) FROM doffin_contracts WHERE year = ? AND value_type = 'awarded' "
+                "AND is_framework IS NULL", (a.year,)
+            ).fetchone()[0]:
+                years.insert(0, a.year)
+            if years and buyers:
+                print(f"[4/4] Henter tildelinger {min(years)}-{max(years)} for {len(buyers)} virksomheter ...")
+                client = DoffinClient(cache_dir=a.cache_dir)
+                for y in years:
+                    n = save_contracts(conn, collect(y, fetch_details=not a.no_details, buyers=buyers,
+                                                     client=client))
+                    print(f"      {y}: {n} kontrakter")
+            until = date(a.year, a.to_month + 1, 1) if a.to_month < 12 else None
+            counts = annualize_contracts(conn, a.framework_months, a.contract_months, until=until)
+            print("      Kontraktsperiode fra: " + ", ".join(f"{k} {v}" for k, v in sorted(counts.items())))
+        if compare:
+            print(f"      Flagger avvik over {a.threshold:.0%} "
+                  f"({'årsfordelt kontraktverdi' if annualized else 'hele kontraktverdien i publiseringsåret'}) ...")
+            flag_deviations(conn, a.threshold, annualized=annualized)
 
         s = summary(conn)
         top = conn.execute(
             "SELECT description FROM flags f JOIN contract_spend_comparison c "
             "ON f.source_id = c.orgnr || ':' || c.year WHERE f.flag_type = 'doffin_avvik' "
             "ORDER BY ABS(c.contract_sum - c.spend_sum) DESC LIMIT ?", (a.top,)
-        ).fetchall() if a.statsregnskap or a.kudos else []
+        ).fetchall() if compare else []
     finally:
         conn.close()
 

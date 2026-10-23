@@ -13,6 +13,10 @@ Viktige egenskaper ved API-et (testet oktober 2026):
   verdi. Faktisk tildelt verdi ("Verdien av alle kontrakter tildelt i denne
   prosedyren") finnes kun i detaljvisningen (eform-treet), med tall som
   "297 996 154 NOK" (mellomrom/hardt mellomrom som tusenskille).
+- Kontraktsperioden står også bare i detaljvisningen: eForms-kunngjøringer
+  (fra 2023) har «Varighet» («48 MONTH») eller start-/sluttdato per delkontrakt.
+  Eldre kunngjøringer (TED-format, engelske etiketter) har ofte bare fritekst
+  («Opsjon på 1+1 år, total varighet inntil 4 år»), som vi leser så godt det går.
 
 Kjør alene:
   python -m src.collectors.doffin --year 2025 --db data/offentlig_forbruk.db
@@ -20,12 +24,14 @@ Kjør alene:
 from __future__ import annotations
 
 import argparse
+import gzip
+import json
 import logging
 import re
 import sqlite3
 import time
 from dataclasses import astuple, dataclass, fields
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any, Iterable, Iterator
 
@@ -60,6 +66,12 @@ class DoffinContract:
     currency: str | None = None
     value_type: str | None = None  # "awarded" | "estimated" | None
     publication_date: str | None = None
+    # Kontraktsperiode, brukes til å fordele verdien over år (src/analysis/annualize.py).
+    is_framework: int | None = None      # 1 = rammeavtale
+    start_date: str | None = None
+    end_date: str | None = None
+    duration_months: float | None = None
+    duration_source: str | None = None   # "varighet" | "datoer" | "tekst" | None
 
 
 # ---------------------------------------------------------------------------
@@ -69,8 +81,16 @@ class DoffinContract:
 class DoffinClient:
     """Tynn klient som holder minst `min_interval` sekunder mellom kall."""
 
-    def __init__(self, min_interval: float = 1.2, max_retries: int = 5, timeout: float = 60.0) -> None:
+    def __init__(
+        self,
+        min_interval: float = 1.2,
+        max_retries: int = 5,
+        timeout: float = 60.0,
+        cache_dir: str | Path | None = None,
+    ) -> None:
         self.min_interval = min_interval
+        # Rå detaljvisninger lagres her (gzip), så parseren kan forbedres uten nye kall.
+        self.cache_dir = Path(cache_dir) if cache_dir else None
         self.max_retries = max_retries
         self.timeout = timeout
         self._last_call = 0.0
@@ -121,7 +141,16 @@ class DoffinClient:
         return self.request("POST", SEARCH_URL, body)
 
     def notice(self, notice_id: str) -> dict[str, Any]:
-        return self.request("GET", NOTICE_URL.format(notice_id))
+        cached = self.cache_dir / f"{notice_id}.json.gz" if self.cache_dir else None
+        if cached and cached.exists():
+            with gzip.open(cached, "rt", encoding="utf-8") as f:
+                return json.load(f)
+        data = self.request("GET", NOTICE_URL.format(notice_id))
+        if cached:
+            cached.parent.mkdir(parents=True, exist_ok=True)
+            with gzip.open(cached, "wt", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False)
+        return data
 
 
 # ---------------------------------------------------------------------------
@@ -201,27 +230,187 @@ def _walk_eform(sections: Iterable[dict[str, Any]] | None) -> Iterator[dict[str,
         yield from _walk_eform(node.get("sections"))
 
 
+_TOTAL_LABELS = ("verdien av alle kontrakter tildelt", "value of all contracts awarded",
+                 "total value of all contracts awarded")
+_FRAMEWORK_MAX_LABELS = ("maksimal verdi av rammeavtalene i denne prosedyren",
+                         "maximum value of the framework agreements in this procedure")
+_WINNER_LABELS = ("verdien av resultatet", "value of the result")
+
+
 def awarded_value(notice: dict[str, Any]) -> tuple[float | None, str | None]:
-    """Total tildelt verdi fra detaljvisningen, eller summen av vinnernes verdier."""
+    """Tildelt verdi fra detaljvisningen.
+
+    Prioritet: total for prosedyren > maksimal verdi av rammeavtalene > summen av
+    vinnernes verdier. Rammeavtaler oppgir ofte 1 NOK per vinner, eller samme
+    rammeverdi for hver vinner, så vinnersummen er siste utvei.
+    Eldre kunngjøringer (TED-format) har engelske etiketter.
+    """
     total: tuple[float | None, str | None] = (None, None)
+    framework_max: tuple[float | None, str | None] = (None, None)
     winner_sum, winner_cur = 0.0, None
     for node in _walk_eform(notice.get("eform")):
-        label = str(node.get("label") or "")
-        if label.startswith("Verdien av alle kontrakter tildelt") and total[0] is None:
+        label = str(node.get("label") or "").strip().lower()
+        if label.startswith(_TOTAL_LABELS) and total[0] is None:
             total = parse_amount(node.get("value"))
-        elif label == "Verdien av resultatet":
+        elif label.startswith(_FRAMEWORK_MAX_LABELS) and framework_max[0] is None:
+            framework_max = parse_amount(node.get("value"))
+        elif label in _WINNER_LABELS:
             v, c = parse_amount(node.get("value"))
             if v is not None:
                 winner_sum += v
                 winner_cur = winner_cur or c
-    if total[0] is not None:
+    if total[0]:
         return total
-    return (winner_sum, winner_cur) if winner_cur or winner_sum else (None, None)
+    if framework_max[0]:
+        return framework_max
+    return (winner_sum, winner_cur) if winner_cur or winner_sum else total
+
+
+# --- Kontraktsperiode -------------------------------------------------------
+
+_DURATION_RE = re.compile(r"(\d+(?:[.,]\d+)?)\s*(DAY|MONTH|YEAR)", re.I)
+_UNIT_MONTHS = {"DAY": 12 / 365.25, "MONTH": 1.0, "YEAR": 12.0}
+_NUMBER_WORDS = {"ett": 1, "en": 1, "to": 2, "tre": 3, "fire": 4, "fem": 5, "seks": 6,
+                 "sju": 7, "syv": 7, "åtte": 8, "ni": 9, "ti": 10}
+_N = r"(\d+|ett|en|to|tre|fire|fem|seks|sju|syv|åtte|ni|ti)"
+# «2+1+1 år», «2 år + 1 år + 1 år»: summen er varigheten med opsjoner
+_PLUS_RE = re.compile(r"\b(\d+)(?:\s*år)?((?:\s*\+\s*\d+(?:\s*år)?)+)\s*(år|måned(?:er)?)", re.I)
+# «total varighet inntil 4 år», «varighet på 24 måneder», «avtalen gjelder i 3 år», «4 års varighet»
+_TEXT_RES = [
+    re.compile(r"(?:samlet|total|maksimal)e?\s+(?:avtale|kontrakts?)?(?:varighet|lengde|periode)\s+"
+               r"(?:er\s+|blir\s+)?(?:på\s+|av\s+)?(?:inntil\s+|opp til\s+|maks(?:imalt|\.)?\s+)?" + _N
+               + r"\s*(år|måned(?:er)?)", re.I),
+    re.compile(r"(?:varighet|avtaleperiode|kontraktsperiode|løpetid):?\s+(?:er\s+|blir\s+)?(?:på\s+|av\s+)?"
+               r"(?:inntil\s+|opp til\s+|maks(?:imalt|\.)?\s+)?" + _N + r"(?:\s*\([^)]*\))?\s*(år|måned(?:er)?)", re.I),
+    re.compile(r"totalt\s+(?:inntil\s+|opptil\s+|opp til\s+|maks(?:imalt)?\s+)" + _N
+               + r"(?:\s*\([^)]*\))?\s*(år|måned(?:er)?)", re.I),
+    re.compile(r"(?:for|i)\s+en\s+periode\s+på\s+" + _N + r"(?:\s*\([^)]*\))?\s*(år|måned(?:er)?)", re.I),
+    re.compile(r"(?:gjelder|varer|løper)\s+(?:i\s+)?(?:inntil\s+)?" + _N + r"\s*(år|måned(?:er)?)", re.I),
+    re.compile(r"\b" + _N + r"\s*(års|måneders)\s+varighet", re.I),
+]
+_FRAMEWORK_LABELS = (
+    "rammeavtale uten", "rammeavtale med", "rammeavtale. delvis", "framework agreement, with",
+    "framework agreement. partly", "rammeavtalens maksimale verdi", "maksimal verdi av rammeavtalene",
+    "maximum value of the framework", "reestimert verdi av rammeavtalen", "re-estimated value of the framework",
+)
+
+
+def _months(n: str, unit: str) -> float | None:
+    v = _NUMBER_WORDS.get(n.lower()) if not n[0].isdigit() else float(n)
+    if not v:
+        return None
+    return float(v) * (12.0 if unit.lower().startswith("år") else 1.0)
+
+
+def duration_from_text(text: str) -> float | None:
+    """Varighet i måneder fra fritekst, inkludert opsjoner («2+1+1 år» -> 48)."""
+    total_rx, *other_rxs = _TEXT_RES
+    m = total_rx.search(text)
+    if m:
+        return _months(m.group(1), m.group(2))
+    m = _PLUS_RE.search(text)
+    if m:
+        total = float(m.group(1)) + sum(float(x) for x in re.findall(r"\d+", m.group(2)))
+        return total * (12.0 if m.group(3).lower() == "år" else 1.0)
+    for rx in other_rxs:
+        m = rx.search(text)
+        if m:
+            return _months(m.group(1), m.group(2))
+    return None
+
+
+def _iso(raw: Any) -> str | None:
+    """'22.04.2025' / '2025-04-22+02:00' -> '2025-04-22'."""
+    s = str(raw or "").strip()
+    m = re.match(r"(\d{2})\.(\d{2})\.(\d{4})", s)
+    if m:
+        return f"{m.group(3)}-{m.group(2)}-{m.group(1)}"
+    m = re.match(r"(\d{4}-\d{2}-\d{2})", s)
+    return m.group(1) if m else None
+
+
+@dataclass
+class ContractPeriod:
+    is_framework: int
+    start_date: str | None = None
+    end_date: str | None = None
+    duration_months: float | None = None
+    duration_source: str | None = None
+
+
+def contract_period(notice: dict[str, Any]) -> ContractPeriod:
+    """Rammeavtale ja/nei og kontraktsperiode fra detaljvisningen.
+
+    Ved flere delkontrakter brukes tidligste start, seneste slutt og lengste varighet.
+    Prioritet: start- og sluttdato > «Varighet» > fritekst. Opsjoner/fornyelser
+    («Maksimal fornyelse») er ikke med i «Varighet», men er med i «2+1+1 år».
+    """
+    framework = False
+    starts: list[str] = []
+    ends: list[str] = []
+    months: list[float] = []
+    renewals = 0
+    texts = [str(notice.get("heading") or ""), str(notice.get("description") or "")]
+    for node in _walk_eform(notice.get("eform")):
+        label = str(node.get("label") or "").strip().lower()
+        value = node.get("value")
+        if label.startswith(_FRAMEWORK_LABELS):
+            framework = True
+        if label in ("varighet", "duration"):
+            m = _DURATION_RE.search(str(value or ""))
+            if m:
+                months.append(float(m.group(1).replace(",", ".")) * _UNIT_MONTHS[m.group(2).upper()])
+        elif label.startswith(("varighet,", "duration,")) and re.fullmatch(r"\d+", str(value or "").strip()):
+            # «Varighet, År» = 2, «Varighet, Måned» = 12, «Varighet, Dag» = 90
+            unit = 12.0 if ("år" in label or "year" in label) else 1.0 if ("måned" in label or "month" in label) \
+                else 12 / 365.25
+            months.append(float(value) * unit)
+        elif label in ("maksimal fornyelse", "maximum number of renewals") and str(value or "").strip().isdigit():
+            renewals = max(renewals, int(value))
+        elif label in ("startdato", "start date") and _iso(value):
+            starts.append(_iso(value))  # type: ignore[arg-type]
+        elif label in ("sluttdato", "end date") and _iso(value):
+            ends.append(_iso(value))  # type: ignore[arg-type]
+        elif value and isinstance(value, str) and len(value) > 20:
+            texts.append(value)
+    text = "\n".join(texts)
+    if not framework and re.search(r"\brammeavtale", text, re.I):
+        framework = True
+
+    period = ContractPeriod(is_framework=int(framework))
+    if starts:
+        period.start_date = min(starts)
+    if starts and ends and max(ends) > min(starts):
+        period.end_date = max(ends)
+        d0, d1 = date.fromisoformat(min(starts)), date.fromisoformat(max(ends))
+        period.duration_months = round((d1 - d0).days / (365.25 / 12), 1)
+        period.duration_source = "datoer"
+    elif months:
+        period.duration_months, period.duration_source = max(months), "varighet"
+    else:
+        m = duration_from_text(text)
+        if m:
+            period.duration_months, period.duration_source = m, "tekst"
+    if renewals and period.duration_source in ("datoer", "varighet"):
+        # Fornyelser er ikke med i oppgitt periode, men verdien omfatter dem som regel.
+        # Regn 12 måneder per fornyelse, men ikke lenger enn 48 måneder totalt
+        # (eller grunnperioden hvis den alene er lengre).
+        base = period.duration_months or 0.0
+        period.duration_months = round(min(base + 12.0 * renewals, max(base, 48.0)), 1)
+        if period.end_date:
+            period.end_date = None  # sluttdato gjelder bare grunnperioden
+            period.duration_source = "varighet"
+    return period
 
 
 def _clean_orgnr(raw: Any) -> str | None:
     digits = re.sub(r"\D", "", str(raw or ""))
     return digits if len(digits) == 9 else None
+
+
+def _first_buyer_orgnr(hit: dict[str, Any]) -> str | None:
+    buyers = hit.get("buyer") or []
+    return _clean_orgnr(buyers[0].get("organizationId")) if buyers else None
 
 
 def normalize(hit: dict[str, Any], detail: dict[str, Any] | None = None) -> DoffinContract:
@@ -245,6 +434,7 @@ def normalize(hit: dict[str, Any], detail: dict[str, Any] | None = None) -> Doff
             value, currency, value_type = float(est["amount"]), est.get("currencyCode") or est.get("code"), "estimated"
 
     pub = hit.get("publicationDate") or (detail or {}).get("publicationDate")
+    period = contract_period(detail) if detail else None
     return DoffinContract(
         id=hit["id"],
         buyer_orgnr=orgnr,
@@ -256,6 +446,11 @@ def normalize(hit: dict[str, Any], detail: dict[str, Any] | None = None) -> Doff
         currency=currency,
         value_type=value_type,
         publication_date=pub,
+        is_framework=period.is_framework if period else None,
+        start_date=period.start_date if period else None,
+        end_date=period.end_date if period else None,
+        duration_months=period.duration_months if period else None,
+        duration_source=period.duration_source if period else None,
     )
 
 
@@ -265,10 +460,13 @@ def collect(
     max_notices: int | None = None,
     client: DoffinClient | None = None,
     to_month: int = 12,
+    buyers: set[str] | None = None,
 ) -> list[DoffinContract]:
     """Hent alle kontraktstildelinger publisert i `year` (januar til og med `to_month`).
 
     to_month lar oss matche statsregnskapets hittil-i-år-tall, f.eks. 8 for januar-august.
+    buyers: bare kunngjøringer der (første) kjøper har et av disse orgnr. Søket er
+    billig, så filteret sparer først og fremst detaljkall (brukes for historikk).
 
     fetch_details=True gir faktisk tildelt verdi, men koster ett ekstra kall per
     kunngjøring (~3 200 kall for 2025, ca. en time med 1,2 s mellom kall).
@@ -278,6 +476,8 @@ def collect(
     hits: dict[str, dict[str, Any]] = {}
     for start, end in month_ranges(year, to_month):
         for hit in iter_search_hits(client, start, end):
+            if buyers is not None and _first_buyer_orgnr(hit) not in buyers:
+                continue
             hits.setdefault(hit["id"], hit)
             if max_notices and len(hits) >= max_notices:
                 break
@@ -315,16 +515,31 @@ CREATE TABLE IF NOT EXISTS doffin_contracts (
     currency         TEXT,
     value_type       TEXT,
     publication_date TEXT,
-    fetched_at       TEXT DEFAULT CURRENT_TIMESTAMP
+    fetched_at       TEXT DEFAULT CURRENT_TIMESTAMP,
+    is_framework     INTEGER,
+    start_date       TEXT,
+    end_date         TEXT,
+    duration_months  REAL,
+    duration_source  TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_doffin_buyer_year ON doffin_contracts (buyer_orgnr, year);
 """
+# Kolonner lagt til etter fase 1; eldre databaser får dem med ALTER TABLE.
+_ADDED_COLUMNS = {
+    "is_framework": "INTEGER", "start_date": "TEXT", "end_date": "TEXT",
+    "duration_months": "REAL", "duration_source": "TEXT",
+}
 
 
 def init_db(db_path: str | Path) -> sqlite3.Connection:
     Path(db_path).parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(db_path)
     conn.executescript(SCHEMA)
+    have = {r[1] for r in conn.execute("PRAGMA table_info(doffin_contracts)")}
+    for col, typ in _ADDED_COLUMNS.items():
+        if col not in have:
+            conn.execute(f"ALTER TABLE doffin_contracts ADD COLUMN {col} {typ}")
+    conn.commit()
     return conn
 
 
