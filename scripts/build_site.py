@@ -9,7 +9,9 @@ Sidene i docs/ kan publiseres direkte med GitHub Pages
 from __future__ import annotations
 
 import argparse
+import sqlite3
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -20,9 +22,21 @@ from src.web.build import build_site  # noqa: E402
 from src.web.data import available_years, load_dataset  # noqa: E402
 
 
+def sql_to_db(sql_path: Path, tmp_dir: str) -> Path:
+    """Les en SQL-eksport (scripts/export_site_data.py) inn i en midlertidig SQLite-fil."""
+    db = Path(tmp_dir) / "kronesporet.db"
+    conn = sqlite3.connect(db)
+    try:
+        conn.executescript(sql_path.read_text(encoding="utf-8"))
+    finally:
+        conn.close()
+    return db
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--db", type=Path, default=ROOT / "data" / "offentlig_forbruk.db")
+    ap.add_argument("--db", type=Path, default=ROOT / "data" / "offentlig_forbruk.db",
+                    help="SQLite-databasen, eller en .sql-eksport som site-data/kronesporet.sql")
     ap.add_argument("--out", type=Path, default=ROOT / "docs", help="Mappen nettstedet skrives til")
     ap.add_argument("--year", type=int, nargs="*",
                     help="Regnskapsår som skal med (standard: alle årene i databasen; siste blir forsiden)")
@@ -34,10 +48,16 @@ def main() -> None:
 
     if not args.db.exists():
         sys.exit(f"Fant ikke {args.db}. Kjør scripts/run_phase1.py først, eller gi --db.")
-    years = args.year or available_years(args.db)
+    with tempfile.TemporaryDirectory() as tmp:
+        db = sql_to_db(args.db, tmp) if args.db.suffix == ".sql" else args.db
+        build(args, db)
+
+
+def build(args: argparse.Namespace, db: Path) -> None:
+    years = args.year or available_years(db)
     if not years:
         sys.exit(f"{args.db}: contract_spend_comparison er tom. Kjør scripts/run_phase1.py først.")
-    datasets = [load_dataset(args.db, year=y, threshold=args.threshold) for y in sorted(years)]
+    datasets = [load_dataset(db, year=y, threshold=args.threshold) for y in sorted(years)]
     ds = datasets[-1]
     base_url = f"https://{args.cname.strip()}/" if args.cname else args.base_url
     pages = build_site(datasets, args.out, base_url=base_url)

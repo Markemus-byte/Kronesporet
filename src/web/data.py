@@ -205,13 +205,13 @@ def _contracts(conn: sqlite3.Connection, orgnr: str, year: int, annualized: bool
                        (SELECT MAX(year) FROM doffin_contract_years WHERE contract_id = c.id) AS last_year
                 FROM doffin_contract_years y JOIN doffin_contracts c ON c.id = y.contract_id
                 WHERE y.buyer_orgnr = ? AND y.year = ?
-                ORDER BY y.value_share DESC NULLS LAST, c.value DESC""", (orgnr, year))
+                ORDER BY y.value_share DESC NULLS LAST, c.value DESC NULLS LAST, c.id""", (orgnr, year))
     else:
         rows = conn.execute(
             f"""{base}, c.value AS value_share, 1.0 AS share, NULL AS period_source,
                        NULL AS first_year, NULL AS last_year
                 FROM doffin_contracts c WHERE c.buyer_orgnr = ? AND c.year = ?
-                ORDER BY c.value DESC NULLS LAST""", (orgnr, year))
+                ORDER BY c.value DESC NULLS LAST, c.id""", (orgnr, year))
     return [
         Contract(
             id=r["id"], title=r["title"] or "(uten tittel)", url=r["url"], value=r["value"],

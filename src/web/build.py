@@ -25,6 +25,9 @@ SITE_NAME = "Kronesporet"
 DEFAULT_DESCRIPTION = ("Kronesporet sammenligner statlige virksomheters kunngjorte kontrakter i Doffin "
                        "med kjøpene i regnskapet.")
 
+CURRENT = ' aria-current="page"'
+NUM_TYPE = ' data-type="num"'
+
 # Settes av build_site() for hele byggingen: offentlig adresse (for canonical, Open Graph
 # og sidekart) og datoen dataene sist ble hentet (vises i bunnteksten).
 _SITE: dict[str, str] = {"base_url": "", "data_date": ""}
@@ -84,7 +87,7 @@ def page(title: str, body: str, root: str = "", active: str = "", description: s
     nav = [("index.html", "Virksomheter", "index"), ("leverandorer.html", "Leverandører", "leverandorer"),
            ("om.html", "Om dataene", "om")]
     links = "".join(
-        f'<a href="{root}{href}"{" aria-current=\"page\"" if key == active else ""}>{label}</a>'
+        f'<a href="{root}{href}"{CURRENT if key == active else ""}>{label}</a>'
         for href, label, key in nav
     )
     full_title = f"{title} – {SITE_NAME}" if title != SITE_NAME else f"{SITE_NAME} – hvor går statens penger?"
@@ -220,8 +223,8 @@ def index_page(ds: Dataset, root: str = "", years: list[int] | None = None) -> s
         head.append(("Dekning", "num", "Doffin-summen som andel av kjøpene"))
     head.append(("Flagg", "text", ""))
     thead = "".join(
-        f'<th scope="col" data-type="{t}"{f" title=\"{escape(tip)}\"" if tip else ""}>'
-        f'<button type="button">{escape(label)}</button></th>'
+        f'<th scope="col" data-type="{t}"' + (f' title="{escape(tip)}"' if tip else "")
+        + f'><button type="button">{escape(label)}</button></th>'
         for label, t, tip in head
     )
 
@@ -349,7 +352,7 @@ def _history_table(history: list[tuple[int, Agency]], current: int) -> str:
     """Utvikling over år for én virksomhet. history er (år, Agency)."""
     has_cov = any(a.coverage for _, a in history)
     head = ["År", "Kontrakter", "Doffin", "Kjøp", "Avvik"] + (["Dekning"] if has_cov else []) + ["Flagg"]
-    thead = "".join(f'<th scope="col"{" data-type=\"num\"" if 0 < i < len(head) - 1 else ""}>{h}</th>'
+    thead = "".join(f'<th scope="col"{NUM_TYPE if 0 < i < len(head) - 1 else ""}>{h}</th>'
                     for i, h in enumerate(head))
     rows = []
     for year, a in sorted(history, key=lambda t: -t[0]):
