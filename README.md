@@ -92,4 +92,23 @@ python scripts/run_phase1.py --year 2025 --skip-collect --kudos --no-annualize  
 
 `--framework-months` og `--contract-months` endrer standardvarighetene.
 
+### Doffin-dekning mot lignende virksomheter
+
+Doffin viser bare kunngjorte kontrakter. Kjøp under terskelverdi, avrop og husleie
+kunngjøres ikke, så årsandelen fra Doffin ligger typisk langt under kjøpene, og
+5 %-regelen flagger alle. I tillegg til 5 %-flaggene (`doffin_avvik`) regnes derfor
+**Doffin-dekning** = årsandel av Doffin-kontrakter / kjøp av varer og tjenester
+(`src/analysis/coverage.py`, tabellen `doffin_coverage`).
+
+Hver virksomhet sammenlignes med lignende virksomheter, det vil si samme
+størrelsesgruppe etter kjøp (små, mellomstore og store per år). Avstanden måles
+som robust z-verdi på log10(dekning) mot gruppens median og MAD.
+Ved |z| > 2 får virksomheten et flagg med `flag_type = 'doffin_dekning'`.
+
+- Høy dekning: kontraktverdiene er langt over kjøpene, for eksempel rammeavtaler
+  som tak, kjøp for andre, eller kjøp som føres utenfor drift.
+- Lav dekning: lite er kunngjort sammenlignet med kjøpene.
+
+`--z-threshold` og `--peer-bands` endrer grensen og antall grupper.
+
 Data: Doffin og statsregnskapet (DFØ), lisensiert under NLOD.
