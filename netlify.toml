@@ -1,0 +1,4 @@
+# Netlify: ferdig bygget statisk side i docs/, ingen byggekommando.
+[build]
+  publish = "docs"
+  command = ""

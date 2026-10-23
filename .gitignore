@@ -1,5 +1,18 @@
+# Python
 __pycache__/
 *.pyc
 .venv/
-data/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Lokale data (databaser, nedlastinger, Doffin-cache). Nettsidens data ligger i docs/data/.
+/data/
 *.db
+
+# Editor og OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+.env
