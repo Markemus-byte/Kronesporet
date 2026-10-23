@@ -87,6 +87,12 @@ def page(title: str, body: str, root: str = "", active: str = "", description: s
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{escape(full_title)}</title>
 <meta name="description" content="{escape(description or 'Kronesporet sammenligner statlige virksomheters kunngjorte kontrakter i Doffin med kjøpene i regnskapet.')}">
+<meta property="og:title" content="{escape(full_title)}">
+<meta property="og:description" content="{escape(description or 'Kronesporet sammenligner statlige virksomheters kunngjorte kontrakter i Doffin med kjøpene i regnskapet.')}">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="nb_NO">
+<meta name="theme-color" content="#0f5c4d">
+<link rel="icon" href="{root}assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="{root}assets/style.css">
 </head>
 <body>
