@@ -52,7 +52,9 @@ from src.analysis.annualize import (  # noqa: E402
     DEFAULT_FRAMEWORK_MONTHS,
     annualize_contracts,
 )
-from src.analysis.coverage import PEER_BANDS, Z_THRESHOLD, flag_coverage_outliers  # noqa: E402
+from src.analysis.coverage import (  # noqa: E402
+    PEER_BANDS, PERSIST_MIN, PERSIST_WINDOW, Z_THRESHOLD, flag_coverage_outliers,
+)  # noqa: E402
 from src.collectors.doffin import DoffinClient, collect, init_db, save_contracts  # noqa: E402
 from src.collectors.kudos_arsrapport import load_kudos_purchases  # noqa: E402
 from src.collectors.brreg import load_subunits, parent_map  # noqa: E402
@@ -87,6 +89,10 @@ def parse_args() -> argparse.Namespace:
                     help="Flagg Doffin-dekning som avviker mer enn så mange robuste standardavvik fra lignende virksomheter")
     ap.add_argument("--peer-bands", type=int, default=PEER_BANDS,
                     help="Antall størrelsesgrupper (etter kjøp) som virksomhetene sammenlignes innenfor")
+    ap.add_argument("--persist-window", type=int, default=PERSIST_WINDOW,
+                    help="Antall år bakover som vurderes for dekningsflagget (standard 3)")
+    ap.add_argument("--persist-min", type=int, default=PERSIST_MIN,
+                    help="Antall av disse årene med avvik samme vei som gir flagg (standard 2); færre gir observasjon")
     ap.add_argument("--no-annualize", action="store_true",
                     help="Ikke fordel kontraktverdi over år (hele verdien telles i publiseringsåret)")
     ap.add_argument("--history", type=int, default=8,
@@ -188,7 +194,8 @@ def main() -> int:
             print(f"      Flagger avvik over {a.threshold:.0%} "
                   f"({'årsfordelt kontraktverdi' if annualized else 'hele kontraktverdien i publiseringsåret'}) ...")
             flag_deviations(conn, a.threshold, annualized=annualized)
-            flag_coverage_outliers(conn, a.z_threshold, a.peer_bands)
+            flag_coverage_outliers(conn, a.z_threshold, a.peer_bands,
+                                   persist_window=a.persist_window, persist_min=a.persist_min)
 
         s = summary(conn)
         top = conn.execute(
@@ -212,7 +219,8 @@ def main() -> int:
     print(f"Virksomhet/år koblet:   {s['matched_agency_years']}")
     print(f"Flagg (avvik > {a.threshold:.0%}):   {s['flags']}")
     if compare:
-        print(f"Flagg (Doffin-dekning skiller seg ut, |z| > {a.z_threshold:g}): {len(coverage)}"
+        print(f"Flagg (Doffin-dekning skiller seg ut {a.persist_min} av {a.persist_window} år, |z| > {a.z_threshold:g}): "
+              f"{len(coverage)}"
               + (f"  (mediandekning {median_cov[0]:.0%})" if median_cov else ""))
     if top:
         print(f"\nStørste avvik i kroner (topp {len(top)}):")

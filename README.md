@@ -147,12 +147,25 @@ summen av vinnernes verdier. Siden kontrakter tildelt tidligere år også teller
 **Doffin-dekning** = årsandel av Doffin-kontrakter / kjøp av varer og tjenester
 (`src/analysis/coverage.py`, tabellen `doffin_coverage`). Hver virksomhet sammenlignes med
 virksomheter i samme størrelsesgruppe etter kjøp (små, mellomstore og store per år). Avstanden
-måles som robust z-verdi på log10(dekning) mot gruppens median og MAD, og ved |z| > 2 blir
-virksomheten flagget (`flag_type = 'doffin_dekning'`).
+måles som robust z-verdi på log10(dekning) mot gruppens median og MAD. |z| > 2 et år er et avvik.
 
-- **Høy dekning:** kontraktverdiene er langt over kjøpene, for eksempel rammeavtaler som tak,
-  kjøp for andre eller kjøp som føres utenfor drift.
-- **Lav dekning:** lite er kunngjort sammenlignet med kjøpene.
+Ett år alene kan skyldes en enkelt stor rammeavtale, så flagget krever at avviket varer:
+
+| Kategori (`doffin_coverage.category`) | Regel | I `flags` |
+|---|---|---|
+| `flagg` | avvik samme vei i minst 2 av de siste 3 årene, med året selv blant dem | `doffin_dekning`, warning |
+| `observasjon` | avvik bare dette året | `doffin_dekning_observasjon`, info |
+| `tilskudd` | dekning over 100 %, og tilskuddene ut av staten (artskonto 870–876, 878) er minst like store som Doffin-andelen | ingen |
+| `avtaler_for_andre` | dekning over 100 % ellers: avtaler for andre virksomheter, eller kjøp som føres utenfor kjøp av varer og tjenester | ingen |
+
+- **Høy dekning over 100 %** har som regel en kjent forklaring og blir en kategori, ikke et flagg.
+  Samferdselsdepartementet kunngjør flyruter og togtrafikk, men betaler dem som tilskudd til foretak.
+  DFØ og DSS inngår avtaler som andre virksomheter bruker.
+- **Høy dekning under 100 %:** kontraktverdiene er tak i rammeavtaler som ikke brukes fullt ut.
+- **Lav dekning:** lite er kunngjort sammenlignet med kjøpene, for eksempel mye kjøp under
+  terskelverdiene eller via andres avtaler.
+- Det første året i databasen og et år uten året før kan bare gi observasjoner.
+  `--persist-window` og `--persist-min` endrer regelen.
 
 ### Leverandører
 
@@ -222,7 +235,8 @@ databasen. Sammen med `--statsregnskap` hentes bare virksomheter som mangler i r
 - `--max-notices 50` for en rask prøvekjøring.
 - `--no-annualize` gir den gamle sammenligningen (hele kontraktsverdien i publiseringsåret).
 - `--framework-months` og `--contract-months` endrer standardvarighetene.
-- `--z-threshold` og `--peer-bands` endrer grensen og antall grupper for dekningsflagget.
+- `--z-threshold` og `--peer-bands` endrer grensen og antall grupper for dekningsflagget,
+  `--persist-window` og `--persist-min` hvor mange år avviket må vare.
 
 </details>
 

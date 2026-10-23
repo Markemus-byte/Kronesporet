@@ -222,8 +222,11 @@ def load_utgifter_xlsx(
     rows = [r for r in rows if r.post in posts]
     orgnr = resolve_orgnr(conn, {r.kapittel: r.kapittel_navn for r in rows}, use_brreg)
 
-    conn.executescript(ANALYSIS_SCHEMA)
+    conn.executescript(ANALYSIS_SCHEMA + TILSKUDD_SCHEMA)
     conn.execute("DELETE FROM statsregnskap WHERE source_file = ?", (path.name,))
+    conn.execute("DELETE FROM statsregnskap_tilskudd WHERE source_file = ?", (path.name,))
+    conn.executemany("INSERT INTO statsregnskap_tilskudd VALUES (?, ?, ?, ?)",
+                     [(year, org, amount, path.name) for org, amount in tilskudd.items()])
     conn.executemany(
         "INSERT INTO statsregnskap (year, orgnr, virksomhet, artskonto, amount, source_file) "
         "VALUES (?, ?, ?, ?, ?, ?)",
@@ -251,6 +254,21 @@ def load_utgifter_xlsx(
 # Lønn (5), tilskudd (8), finans, tap og erstatninger (78) holdes utenfor.
 
 RAADATA_REQUIRED = {"Orgnr", "Artskonto", "Regnskap HIÅ"}
+
+# Tilskudd ut av staten: kommuner, fylker, foretak, finansielle foretak, husholdninger,
+# ideelle organisasjoner og utlandet (877 til statsforvaltningen er holdt utenfor). Kjøp som
+# kunngjøres i Doffin, men betales som tilskudd (f.eks. flyruter og togtrafikk fra
+# Samferdselsdepartementet), havner her og ikke i kjøp av varer og tjenester.
+TILSKUDD_ARTSKONTO = {"870", "871", "872", "873", "874", "875", "876", "878"}
+
+TILSKUDD_SCHEMA = """
+CREATE TABLE IF NOT EXISTS statsregnskap_tilskudd (
+    year         INTEGER,
+    orgnr        TEXT,
+    amount       REAL,     -- sum artskonto 870-876 og 878 (kr)
+    source_file  TEXT
+);
+"""
 
 
 def purchase_category(artskonto: str) -> str | None:
@@ -304,14 +322,18 @@ def load_raadata_xlsx(conn: sqlite3.Connection, path: str | Path) -> tuple[int, 
     names: dict[str, str] = {}
     org_names: dict[str, str] = {}
     unit_orgs: dict[str, set[str]] = {}
+    tilskudd: dict[str, float] = {}
     for r in rows[head_i + 1:]:
         art = r.get(col["Artskonto"], "")
         orgnr = re.sub(r"\D", "", r.get(col["Orgnr"], ""))
-        if purchase_category(art) is None or len(orgnr) != 9:
+        if (purchase_category(art) is None and art not in TILSKUDD_ARTSKONTO) or len(orgnr) != 9:
             continue
         try:
             amount = float(r.get(col["Regnskap HIÅ"], "0"))
         except ValueError:
+            continue
+        if art in TILSKUDD_ARTSKONTO:
+            tilskudd[orgnr] = tilskudd.get(orgnr, 0.0) + amount
             continue
         sums[(orgnr, art)] = sums.get((orgnr, art), 0.0) + amount
         org_names.setdefault(orgnr, r.get(col.get("Orgnavn", ""), ""))
@@ -325,8 +347,11 @@ def load_raadata_xlsx(conn: sqlite3.Connection, path: str | Path) -> tuple[int, 
         if len(unit_orgs.get(names.get(orgnr, ""), ())) != 1:
             names[orgnr] = org_names[orgnr] or names.get(orgnr, "")
 
-    conn.executescript(ANALYSIS_SCHEMA)
+    conn.executescript(ANALYSIS_SCHEMA + TILSKUDD_SCHEMA)
     conn.execute("DELETE FROM statsregnskap WHERE source_file = ?", (path.name,))
+    conn.execute("DELETE FROM statsregnskap_tilskudd WHERE source_file = ?", (path.name,))
+    conn.executemany("INSERT INTO statsregnskap_tilskudd VALUES (?, ?, ?, ?)",
+                     [(year, org, amount, path.name) for org, amount in tilskudd.items()])
     # Rådata er regnskapet selv: erstatter tall lest fra årsrapporter (Kudos) for de samme virksomhetene.
     # Nettobudsjetterte virksomheter (universiteter m.fl.) finnes ikke i rådata og beholder Kudos-tallene.
     conn.executemany("DELETE FROM statsregnskap WHERE year = ? AND orgnr = ? AND source_file LIKE 'kudos:%'",
