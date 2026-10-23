@@ -222,8 +222,11 @@ def load_utgifter_xlsx(
     rows = [r for r in rows if r.post in posts]
     orgnr = resolve_orgnr(conn, {r.kapittel: r.kapittel_navn for r in rows}, use_brreg)
 
-    conn.executescript(ANALYSIS_SCHEMA)
+    conn.executescript(ANALYSIS_SCHEMA + TILSKUDD_SCHEMA)
     conn.execute("DELETE FROM statsregnskap WHERE source_file = ?", (path.name,))
+    conn.execute("DELETE FROM statsregnskap_tilskudd WHERE source_file = ?", (path.name,))
+    conn.executemany("INSERT INTO statsregnskap_tilskudd VALUES (?, ?, ?, ?)",
+                     [(year, org, amount, path.name) for org, amount in tilskudd.items()])
     conn.executemany(
         "INSERT INTO statsregnskap (year, orgnr, virksomhet, artskonto, amount, source_file) "
         "VALUES (?, ?, ?, ?, ?, ?)",
@@ -232,3 +235,131 @@ def load_utgifter_xlsx(
     )
     conn.commit()
     return year, month, len(rows)
+
+
+# ---------------------------------------------------------------------------
+# Rådata (bevilgningsregnskap per virksomhet og artskonto)
+# ---------------------------------------------------------------------------
+#
+# «Rådata <år> <måned> (bevilgningsregnskap)» fra statsregnskapet.dfo.no har én rad
+# per kapittel, post, artskonto og virksomhet, med orgnr (kolonne J) og beløp i
+# kroner hittil i år (kolonne N, «Regnskap HIÅ»). Desemberfilen (periode 13 =
+# årsoppgjøret) gir hele året. Bare bruttobudsjetterte virksomheter er med;
+# universitetene finnes bare som tilskudd fra departementet.
+#
+# Kjøp av varer og tjenester etter standard kontoplan for staten:
+#   drift:       40-45 (varer, fremmedytelser), 61-69 (unntatt 60x avskrivninger),
+#                70-77 (unntatt 71x godtgjørelser til ansatte)
+#   investering: 47-49 (anskaffelse av anleggsmidler i kontantregnskapet)
+# Lønn (5), tilskudd (8), finans, tap og erstatninger (78) holdes utenfor.
+
+RAADATA_REQUIRED = {"Orgnr", "Artskonto", "Regnskap HIÅ"}
+
+# Tilskudd ut av staten: kommuner, fylker, foretak, finansielle foretak, husholdninger,
+# ideelle organisasjoner og utlandet (877 til statsforvaltningen er holdt utenfor). Kjøp som
+# kunngjøres i Doffin, men betales som tilskudd (f.eks. flyruter og togtrafikk fra
+# Samferdselsdepartementet), havner her og ikke i kjøp av varer og tjenester.
+TILSKUDD_ARTSKONTO = {"870", "871", "872", "873", "874", "875", "876", "878"}
+
+TILSKUDD_SCHEMA = """
+CREATE TABLE IF NOT EXISTS statsregnskap_tilskudd (
+    year         INTEGER,
+    orgnr        TEXT,
+    amount       REAL,     -- sum artskonto 870-876 og 878 (kr)
+    source_file  TEXT
+);
+"""
+
+
+def purchase_category(artskonto: str) -> str | None:
+    """'drift', 'investering' eller None for en artskonto (tre sifre)."""
+    if not re.fullmatch(r"\d{3}", artskonto or ""):
+        return None
+    k2 = int(artskonto[:2])
+    if 47 <= k2 <= 49:
+        return "investering"
+    if 40 <= k2 <= 45 or 61 <= k2 <= 69 or (70 <= k2 <= 77 and k2 != 71):
+        return "drift"
+    return None
+
+
+def is_raadata(path: str | Path) -> bool:
+    """Har filen rådata-oppsettet (Orgnr, Artskonto, Regnskap HIÅ)?"""
+    for row in read_xlsx(path)[:10]:
+        if RAADATA_REQUIRED <= set(row.values()):
+            return True
+    return False
+
+
+def _raadata_period(header_rows: list[dict[str, str]]) -> tuple[int, int]:
+    """(år, til-og-med-måned) fra topptekstene: «periode 202501 til: 202513» eller «01.01.- 31.12.2023»."""
+    text = " ".join(" ".join(r.values()) for r in header_rows)
+    m = re.search(r"til:?\s*(20\d\d)(\d\d)\b", text)
+    if m:
+        return int(m.group(1)), min(int(m.group(2)), 12)
+    m = re.search(r"\d\d\.(\d\d)\.(20\d\d)", text.split("-")[-1]) or re.search(r"\d\d\.(\d\d)\.(20\d\d)", text)
+    if m:
+        return int(m.group(2)), int(m.group(1))
+    raise ValueError("Fant ikke regnskapsperioden i toppteksten")
+
+
+def load_raadata_xlsx(conn: sqlite3.Connection, path: str | Path) -> tuple[int, int, int]:
+    """Last kjøp av varer og tjenester per virksomhet inn i `statsregnskap`.
+
+    Én rad per orgnr og artskonto (summert over kapittel og post), source_file = filnavnet.
+    Tidligere rader for samme år fra Kudos-årsrapportene fjernes, så tallene ikke telles dobbelt.
+    Returnerer (år, måned, antall virksomheter).
+    """
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"Fant ikke {path}. Last ned fra https://statsregnskapet.dfo.no/last-ned først.")
+    rows = read_xlsx(path)
+    head_i = next(i for i, r in enumerate(rows[:20]) if RAADATA_REQUIRED <= set(r.values()))
+    col = {v: k for k, v in rows[head_i].items()}
+    year, month = _raadata_period(rows[:head_i])
+
+    sums: dict[tuple[str, str], float] = {}
+    names: dict[str, str] = {}
+    org_names: dict[str, str] = {}
+    unit_orgs: dict[str, set[str]] = {}
+    tilskudd: dict[str, float] = {}
+    for r in rows[head_i + 1:]:
+        art = r.get(col["Artskonto"], "")
+        orgnr = re.sub(r"\D", "", r.get(col["Orgnr"], ""))
+        if (purchase_category(art) is None and art not in TILSKUDD_ARTSKONTO) or len(orgnr) != 9:
+            continue
+        try:
+            amount = float(r.get(col["Regnskap HIÅ"], "0"))
+        except ValueError:
+            continue
+        if art in TILSKUDD_ARTSKONTO:
+            tilskudd[orgnr] = tilskudd.get(orgnr, 0.0) + amount
+            continue
+        sums[(orgnr, art)] = sums.get((orgnr, art), 0.0) + amount
+        org_names.setdefault(orgnr, r.get(col.get("Orgnavn", ""), ""))
+        unit = r.get(col.get("Virksomhet", ""), "")
+        if unit:
+            unit_orgs.setdefault(unit, set()).add(orgnr)
+            names.setdefault(orgnr, unit)
+    # «Virksomhet» er den rapporterende virksomheten og kan samle flere orgnr (Helsedirektoratet
+    # fører også HELFO). Bruk da navnet på orgnr («Orgnavn») så de skilles.
+    for orgnr in org_names:
+        if len(unit_orgs.get(names.get(orgnr, ""), ())) != 1:
+            names[orgnr] = org_names[orgnr] or names.get(orgnr, "")
+
+    conn.executescript(ANALYSIS_SCHEMA + TILSKUDD_SCHEMA)
+    conn.execute("DELETE FROM statsregnskap WHERE source_file = ?", (path.name,))
+    conn.execute("DELETE FROM statsregnskap_tilskudd WHERE source_file = ?", (path.name,))
+    conn.executemany("INSERT INTO statsregnskap_tilskudd VALUES (?, ?, ?, ?)",
+                     [(year, org, amount, path.name) for org, amount in tilskudd.items()])
+    # Rådata er regnskapet selv: erstatter tall lest fra årsrapporter (Kudos) for de samme virksomhetene.
+    # Nettobudsjetterte virksomheter (universiteter m.fl.) finnes ikke i rådata og beholder Kudos-tallene.
+    conn.executemany("DELETE FROM statsregnskap WHERE year = ? AND orgnr = ? AND source_file LIKE 'kudos:%'",
+                     [(year, org) for org in names])
+    conn.executemany(
+        "INSERT INTO statsregnskap (year, orgnr, virksomhet, artskonto, amount, source_file) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
+        [(year, org, names[org], art, amount, path.name) for (org, art), amount in sums.items()],
+    )
+    conn.commit()
+    return year, month, len(names)

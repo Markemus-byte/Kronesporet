@@ -39,7 +39,8 @@ leverandørene deres.
 |---|---|---|
 | [Doffin](https://doffin.no) | Kunngjøringer om tildelte kontrakter: kjøper, tittel, verdi, periode, leverandører | Digitaliseringsdirektoratet (Digdir) |
 | [Kudos](https://kudos.dfo.no) | Årsrapporter fra statlige virksomheter (oppstilling av artskontorapportering) | Direktoratet for forvaltning og økonomistyring (DFØ) |
-| [Statsregnskapet](https://statsregnskapet.dfo.no) | Valgfritt: regnskapstall som CSV eller månedsrapport (xlsx) | DFØ |
+| [Statsregnskapet](https://statsregnskapet.dfo.no) | Rådata fra bevilgningsregnskapet (xlsx): kjøp per virksomhet og artskonto | DFØ |
+| [Enhetsregisteret](https://data.brreg.no) | Underenheter og organisasjonsledd, så kunngjøringer fra f.eks. politidistriktene føres på Politiet | Brønnøysundregistrene |
 
 Inneholder data under [Norsk lisens for offentlige data (NLOD 2.0)](https://data.norge.no/nlod/no/2.0),
 tilgjengeliggjort av Digdir og DFØ. Kronesporet er ikke tilknyttet Digdir eller DFØ.
@@ -64,6 +65,33 @@ python scripts/build_site.py --db data/offentlig_forbruk.db --out docs
 `build_site.py` tar med alle årene i databasen. Siste år blir forsiden, de andre årene får
 egne sider (`docs/ar/<år>.html`), og hver virksomhet får en tabell over utviklingen. Velg år med
 `--year 2024 2025`.
+
+### Rådata fra statsregnskapet (anbefalt)
+
+DFØ publiserer «Rådata <måned> <år> (bevilgningsregnskap)» som xlsx på
+statsregnskapet.dfo.no/last-ned: én rad per virksomhet (orgnr), kapittel, post og
+artskonto, beløp hittil i år. Desember gir hele året. Flere filer kan gis samtidig,
+og hver fil blir sitt år.
+
+```bash
+python scripts/run_phase1.py --year 2025 --kudos --statsregnskap \
+    data/raadata_desember_2023_bevilgningsregnskap.xlsx \
+    data/raadata_desember_2024_bevilgningsregnskap.xlsx \
+    data/raadata_desember_2025_bevilgningsregnskap.xlsx
+```
+
+- Kjøp av varer og tjenester = artskonto 40–45 og 61–69 (varer, tjenester, husleie,
+  konsulenter m.m.), 70–77 unntatt 71 (drift ellers) og 47–49 (investeringer).
+  Lønn, tilskudd, overføringer og finans er holdt utenfor.
+- Filene dekker de bruttobudsjetterte virksomhetene (omtrent 160 per år).
+  Nettobudsjetterte virksomheter (universiteter m.fl.) står bare som tilskudd og er ikke med.
+  Med `--kudos` hentes kjøpstallene deres fra årsrapportene i stedet (se under);
+  virksomheter som finnes i rådata hentes ikke fra Kudos.
+- Doffin-tildelinger hentes for alle regnskapsårene pluss `--history` år før det første.
+- Mange virksomheter kunngjør på underenheter eller organisasjonsledd: politidistriktene og
+  Politiets fellestjenester for Politiet, FLO for Forsvaret. Disse slås opp i Enhetsregisteret
+  (tabellen `orgnr_parent`, `src/collectors/brreg.py`) og føres på virksomheten i regnskapet.
+  En underenhet som selv står i regnskapet (f.eks. HELFO under Helsedirektoratet) beholder sitt eget orgnr.
 
 Med leverandører i databasen får nettsiden også en leverandøroversikt (`leverandorer.html`) og én
 side per leverandør med organisasjonsnummer (`docs/leverandor/<orgnr>.html`) med kontraktene på
@@ -119,12 +147,25 @@ summen av vinnernes verdier. Siden kontrakter tildelt tidligere år også teller
 **Doffin-dekning** = årsandel av Doffin-kontrakter / kjøp av varer og tjenester
 (`src/analysis/coverage.py`, tabellen `doffin_coverage`). Hver virksomhet sammenlignes med
 virksomheter i samme størrelsesgruppe etter kjøp (små, mellomstore og store per år). Avstanden
-måles som robust z-verdi på log10(dekning) mot gruppens median og MAD, og ved |z| > 2 blir
-virksomheten flagget (`flag_type = 'doffin_dekning'`).
+måles som robust z-verdi på log10(dekning) mot gruppens median og MAD. |z| > 2 et år er et avvik.
 
-- **Høy dekning:** kontraktverdiene er langt over kjøpene, for eksempel rammeavtaler som tak,
-  kjøp for andre eller kjøp som føres utenfor drift.
-- **Lav dekning:** lite er kunngjort sammenlignet med kjøpene.
+Ett år alene kan skyldes en enkelt stor rammeavtale, så flagget krever at avviket varer:
+
+| Kategori (`doffin_coverage.category`) | Regel | I `flags` |
+|---|---|---|
+| `flagg` | avvik samme vei i minst 2 av de siste 3 årene, med året selv blant dem | `doffin_dekning`, warning |
+| `observasjon` | avvik bare dette året | `doffin_dekning_observasjon`, info |
+| `tilskudd` | dekning over 100 %, og tilskuddene ut av staten (artskonto 870–876, 878) er minst like store som Doffin-andelen | ingen |
+| `avtaler_for_andre` | dekning over 100 % ellers: avtaler for andre virksomheter, eller kjøp som føres utenfor kjøp av varer og tjenester | ingen |
+
+- **Høy dekning over 100 %** har som regel en kjent forklaring og blir en kategori, ikke et flagg.
+  Samferdselsdepartementet kunngjør flyruter og togtrafikk, men betaler dem som tilskudd til foretak.
+  DFØ og DSS inngår avtaler som andre virksomheter bruker.
+- **Høy dekning under 100 %:** kontraktverdiene er tak i rammeavtaler som ikke brukes fullt ut.
+- **Lav dekning:** lite er kunngjort sammenlignet med kjøpene, for eksempel mye kjøp under
+  terskelverdiene eller via andres avtaler.
+- Det første året i databasen og et år uten året før kan bare gi observasjoner.
+  `--persist-window` og `--persist-min` endrer regelen.
 
 ### Leverandører
 
@@ -143,9 +184,9 @@ leverandørene.
   5 %-terskelen flagger nesten alle. Et flagg betyr «verdt å se nærmere på», ikke at noe er galt.
 - **Kontraktverdier er anslag.** For rammeavtaler er verdien ofte et tak, ikke det som faktisk
   blir kjøpt. Kontrakter uten oppgitt periode får en antatt varighet.
-- **Ikke alle virksomheter er med.** Kommuner, fylker, helseforetak og selskaper har ikke
-  årsrapport i Kudos. Forvaltningsbedrifter (Statsbygg) og universitetene bruker et annet oppsett
-  som foreløpig ikke leses.
+- **Ikke alle virksomheter er med.** Kommuner, fylker, helseforetak og selskaper er verken i
+  statsregnskapet eller har årsrapport i Kudos. Statens direkte økonomiske engasjement (SDØE)
+  står i regnskapet, men kunngjør ikke i Doffin.
 - **Feil i kildene følger med.** Navn og tall vises slik de står i Doffin og årsrapportene.
 
 <details>
@@ -181,7 +222,11 @@ python scripts/run_phase1.py --year 2026 --to-month 8 \
 
 `--kudos` henter kjøp fra årsrapportene i Kudos (ingen nøkkel): «Andre utbetalinger til drift» +
 «Utbetaling til investeringer». Med `--skip-collect` brukes Doffin-dataene som allerede ligger i
-databasen.
+databasen. Sammen med `--statsregnskap` hentes bare virksomheter som mangler i regnskapsfilene.
+
+- Nettobudsjetterte virksomheter (universiteter) har ikke artskontorapportering. For dem brukes
+  SRS-regnskapets «utbetalinger for kjøp av varer og tjenester» (KS.12, ellers «Andre
+  driftskostnader», RE.10) og investeringer (KS.17).
 
 #### Andre valg
 
@@ -190,7 +235,8 @@ databasen.
 - `--max-notices 50` for en rask prøvekjøring.
 - `--no-annualize` gir den gamle sammenligningen (hele kontraktsverdien i publiseringsåret).
 - `--framework-months` og `--contract-months` endrer standardvarighetene.
-- `--z-threshold` og `--peer-bands` endrer grensen og antall grupper for dekningsflagget.
+- `--z-threshold` og `--peer-bands` endrer grensen og antall grupper for dekningsflagget,
+  `--persist-window` og `--persist-min` hvor mange år avviket må vare.
 
 </details>
 
