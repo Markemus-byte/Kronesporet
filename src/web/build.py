@@ -4,6 +4,7 @@ Sider:
   index.html                 forside med alle virksomhetene
   virksomhet/<orgnr>.html    én side per virksomhet med Doffin-kontraktene
   om.html                    om dataene og metoden
+  404.html                   «fant ikke siden» (GitHub Pages viser den for ukjente adresser)
   data/virksomheter.csv|json nedlastbare tall (NLOD)
 """
 from __future__ import annotations
@@ -30,7 +31,7 @@ NUM_TYPE = ' data-type="num"'
 
 # Settes av build_site() for hele byggingen: offentlig adresse (for canonical, Open Graph
 # og sidekart) og datoen dataene sist ble hentet (vises i bunnteksten).
-_SITE: dict[str, str] = {"base_url": "", "data_date": ""}
+_SITE: dict[str, str] = {"base_url": "", "data_date": "", "years": ""}
 COPYRIGHT = "© 2026 Markemus-byte / Kronesporet. Alle rettigheter forbeholdt."
 
 PERIOD_SOURCES = {
@@ -83,7 +84,8 @@ def _num(x: float | None) -> str:
 
 # --- sidemal ----------------------------------------------------------------
 
-def page(title: str, body: str, root: str = "", active: str = "", description: str = "", path: str = "") -> str:
+def page(title: str, body: str, root: str = "", active: str = "", description: str = "", path: str = "",
+         head: str = "") -> str:
     nav = [("index.html", "Virksomheter", "index"), ("leverandorer.html", "Leverandører", "leverandorer"),
            ("om.html", "Om dataene", "om")]
     links = "".join(
@@ -94,7 +96,7 @@ def page(title: str, body: str, root: str = "", active: str = "", description: s
     description = description or DEFAULT_DESCRIPTION
     base = _SITE["base_url"]
     url_meta = ""
-    if base:
+    if base and path:
         url = base + ("" if path == "index.html" else path)
         url_meta = (f'<link rel="canonical" href="{escape(url)}">\n'
                     f'<meta property="og:url" content="{escape(url)}">\n'
@@ -117,7 +119,7 @@ def page(title: str, body: str, root: str = "", active: str = "", description: s
 <meta name="theme-color" content="#0f5c4d">
 <link rel="icon" href="{root}assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="{root}assets/style.css">
-</head>
+{head}</head>
 <body>
 <a class="skip-link" href="#innhold">Hopp til innholdet</a>
 <header class="site-header">
@@ -725,10 +727,59 @@ underlagt NLOD 2.0; oppgi kildene ved gjenbruk.</p>
 </div>
 """
     return page("Om dataene", body, active="om", path="om.html",
-                description="Kilder, metode og forbehold bak Kronesporet: Doffin, Kudos og statsregnskapet.")
+                description="Kilder, metode og forbehold bak Kronesporet: Doffin, Kudos og statsregnskapet.",
+                head=_dataset_jsonld())
 
 
 # --- nedlastbare data ---------------------------------------------------------
+
+def not_found_page() -> str:
+    """404-siden. Den vises på vilkårlige adresser, så lenkene må være absolutte når adressen er kjent."""
+    root = _SITE["base_url"]
+    body = f"""<section class="hero">
+  <h1>Fant ikke siden</h1>
+  <p class="lede">Adressen finnes ikke på Kronesporet. Kanskje virksomheten har fått ny side,
+  eller lenken er skrevet feil.</p>
+</section>
+<ul class="notes">
+  <li><a href="{root}index.html">Se alle virksomhetene</a></li>
+  <li><a href="{root}leverandorer.html">Se leverandørene</a></li>
+  <li><a href="{root}om.html">Les om dataene og metoden</a></li>
+</ul>"""
+    return page("Fant ikke siden", body, root=root, head='<meta name="robots" content="noindex">\n')
+
+
+def _dataset_jsonld() -> str:
+    """Strukturerte data (schema.org/Dataset) så søkemotorene forstår de nedlastbare tallene."""
+    base = _SITE["base_url"]
+    if not base:
+        return ""
+    data = {
+        "@context": "https://schema.org",
+        "@type": "Dataset",
+        "name": "Kronesporet: statlige kontrakter i Doffin sammenlignet med kjøp i regnskapet",
+        "description": DEFAULT_DESCRIPTION,
+        "url": base + "om.html",
+        "inLanguage": "nb",
+        "isAccessibleForFree": True,
+        "creator": {"@type": "Organization", "name": SITE_NAME, "url": base},
+        "isBasedOn": ["https://doffin.no", "https://kudos.dfo.no"],
+        "license": "https://data.norge.no/nlod/no/2.0",
+        "temporalCoverage": _SITE["years"],
+        "spatialCoverage": "Norge",
+        "distribution": [
+            {"@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": base + "data/virksomheter.csv"},
+            {"@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": base + "data/kontrakter.csv"},
+            {"@type": "DataDownload", "encodingFormat": "application/json",
+             "contentUrl": base + "data/virksomheter.json"},
+        ],
+    }
+    if _SITE["data_date"]:
+        d, m, y = _SITE["data_date"].split(".")
+        data["dateModified"] = f"{y}-{m}-{d}"
+    text = json.dumps(data, ensure_ascii=False, indent=1).replace("</", "<\\/")
+    return f'<script type="application/ld+json">\n{text}\n</script>\n'
+
 
 def export_rows(ds: Dataset) -> list[dict[str, object]]:
     rows = []
@@ -796,6 +847,7 @@ def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "")
     latest = datasets[-1]
     _SITE["base_url"] = base_url.rstrip("/") + "/" if base_url else ""
     _SITE["data_date"] = max((d.data_date for d in datasets if d.data_date), default="")
+    _SITE["years"] = str(years[0]) if len(years) == 1 else f"{years[0]}/{years[-1]}"
 
     for sub in ("virksomhet", "ar", "leverandor"):
         if (out / sub).exists():
@@ -808,6 +860,7 @@ def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "")
     pages = 2
     (out / "index.html").write_text(index_page(latest, years=years), encoding="utf-8")
     (out / "om.html").write_text(about_page(latest), encoding="utf-8")
+    (out / "404.html").write_text(not_found_page(), encoding="utf-8")
     if len(datasets) > 1:
         (out / "ar").mkdir()
         for ds in datasets[:-1]:
@@ -850,7 +903,7 @@ def write_sitemap(out: Path) -> None:
         (out / name).unlink(missing_ok=True)
     if not base:
         return
-    paths = sorted(p.relative_to(out).as_posix() for p in out.rglob("*.html"))
+    paths = sorted(p.relative_to(out).as_posix() for p in out.rglob("*.html") if p.name != "404.html")
     urls = "".join(f"<url><loc>{escape(base + ('' if p == 'index.html' else p))}</loc></url>\n" for p in paths)
     (out / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n'
