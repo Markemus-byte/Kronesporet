@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 from html import escape
 from pathlib import Path
 
-from src.web.data import Agency, Contract, Dataset
+from src.web.data import MONTHS, Agency, Contract, Dataset, source_month
 
 ASSETS = Path(__file__).parent / "assets"
 SITE_NAME = "Kronesporet"
@@ -68,8 +68,9 @@ ARTSKONTO_GROUPS = {
     "76": "Lisenser og patenter",
     "77": "Annen kostnad",
 }
-MONTHS = ("januar", "februar", "mars", "april", "mai", "juni", "juli", "august",
-          "september", "oktober", "november", "desember")
+# Delår (år -> siste måned med regnskapstall) og året forsiden viser; settes av build_site().
+_PARTIAL: dict[int, int] = {}
+_FRONT: dict[str, int] = {"year": 0}
 
 
 # --- formatering -----------------------------------------------------------
@@ -219,12 +220,12 @@ def _row_flags(a: Agency) -> str:
 def _year_nav(years: list[int], current: int, root: str) -> str:
     if len(years) < 2:
         return ""
-    latest = max(years)
+    front = _FRONT["year"] or max(years)
     links = []
     for y in sorted(years, reverse=True):
-        href = f"{root}index.html" if y == latest else f"{root}ar/{y}.html"
+        href = f"{root}index.html" if y == front else f"{root}ar/{y}.html"
         attr = ' aria-current="page"' if y == current else ""
-        links.append(f'<a href="{href}"{attr}>{y}</a>')
+        links.append(f'<a href="{href}"{attr}>{year_text(y, short=True)}</a>')
     return f'<nav class="years" aria-label="Regnskapsår"><span class="muted">År:</span> {"".join(links)}</nav>'
 
 
@@ -251,7 +252,7 @@ def index_page(ds: Dataset, root: str = "", years: list[int] | None = None) -> s
          else "Antall kontrakter tildelt i året"),
         (doffin_label, "num", "Den delen av kontraktsverdien som faller i regnskapsåret" if ds.annualized
          else "Sum tildelt kontraktsverdi i året"),
-        (f"Kjøp {ds.year}", "num", "Kjøp av varer og tjenester (drift + investering) fra årsrapporten"),
+        (f"Kjøp {year_text(ds.year, short=True)}", "num", "Kjøp av varer og tjenester fra regnskapet"),
         ("Avvik", "num", "(Doffin − kjøp) / kjøp"),
     ]
     if ds.has_coverage:
@@ -295,7 +296,7 @@ def index_page(ds: Dataset, root: str = "", years: list[int] | None = None) -> s
     intro = (
         f"<p class=\"lede\">Hvor mye av statens innkjøp kan du faktisk se i Doffin? Kronesporet legger "
         f"kunngjorte kontrakter for {n} statlige virksomheter ved siden av hva de selv rapporterer at de "
-        f"kjøpte varer og tjenester for i {ds.year}.</p>"
+        f"kjøpte varer og tjenester for i {year_text(ds.year)}.</p>"
     )
     body = f"""
 <section class="hero">
@@ -305,6 +306,7 @@ def index_page(ds: Dataset, root: str = "", years: list[int] | None = None) -> s
 </section>
 <div class="stats">{stat_html}</div>
 {_caveat(ds, root)}
+{_partial_caveat(ds)}
 <section>
   <div class="table-tools">
     <label for="filter">Søk etter virksomhet</label>
@@ -324,9 +326,9 @@ def index_page(ds: Dataset, root: str = "", years: list[int] | None = None) -> s
   <p class="muted small">Klikk på en kolonne for å sortere. Beløp i kortform; hold pekeren over for nøyaktig tall.</p>
 </section>
 """
-    latest = max(years or [ds.year])
-    title = SITE_NAME if ds.year == latest else f"Statlige virksomheter {ds.year}"
-    path = "index.html" if ds.year == latest else f"ar/{ds.year}.html"
+    front = _FRONT["year"] or max(years or [ds.year])
+    title = SITE_NAME if ds.year == front else f"Statlige virksomheter {year_text(ds.year, short=True)}"
+    path = "index.html" if ds.year == front else f"ar/{ds.year}.html"
     return page(title, body, root=root, active="index", path=path,
                 description=f"Doffin-kontrakter mot kjøp for {n} statlige virksomheter i {ds.year}.")
 
@@ -387,10 +389,28 @@ def _spend_label(key: str) -> str:
 
 def _spend_source_label(source: str) -> str:
     """'raadata_desember_2025_bevilgningsregnskap.xlsx' -> 'Statsregnskapet (rådata, desember 2025)'."""
-    m = re.search(r"(?i)r(?:aa|å)data[ _-]+([a-zæøå]+)[ _-]+(\d{4})", source)
-    if m and m.group(1).lower() in MONTHS:
-        return f"Statsregnskapet (rådata, {m.group(1).lower()} {m.group(2)})"
+    month, year = source_month(source), re.search(r"\d{4}", source)
+    if month and year:
+        return f"Statsregnskapet (rådata, {MONTHS[month - 1]} {year.group()})"
     return f"Statsregnskapet ({source})"
+
+
+def year_text(year: int, short: bool = False) -> str:
+    """'2025', eller for delår '2026 (jan–aug)' / 'januar–august 2026'."""
+    month = _PARTIAL.get(year)
+    if not month:
+        return str(year)
+    if short:
+        return f"{year} (jan–{MONTHS[month - 1][:3]})"
+    return f"januar–{MONTHS[month - 1]} {year}"
+
+
+def _partial_caveat(ds: Dataset) -> str:
+    if not ds.partial:
+        return ""
+    return (f'<aside class="caveat"><strong>Delår.</strong> Regnskapstallene for {ds.year} gjelder bare '
+            f"januar–{MONTHS[ds.through_month - 1]}, mens Doffin-tallene er for hele året. Avvik og dekning er derfor ikke "
+            f"sammenlignbare med hele år, og flaggene bør leses med ekstra forsiktighet.</aside>")
 
 
 def _history_table(history: list[tuple[int, Agency]], current: int) -> str:
@@ -404,7 +424,7 @@ def _history_table(history: list[tuple[int, Agency]], current: int) -> str:
         cov = (f'<td class="num">{pct(a.coverage.ratio) if a.coverage else "–"}</td>' if has_cov else "")
         mark = ' aria-current="true"' if year == current else ""
         rows.append(
-            f'<tr{mark}><td>{year}</td><td class="num">{a.contract_count}</td>'
+            f'<tr{mark}><td>{year_text(year, short=True)}</td><td class="num">{a.contract_count}</td>'
             f'<td class="num" title="{kr_full(a.contract_sum)}">{kr(a.contract_sum)}</td>'
             f'<td class="num" title="{kr_full(a.spend_sum)}">{kr(a.spend_sum)}</td>'
             f'<td class="num dev dev-{a.direction}">{pct(a.deviation, signed=True)}</td>{cov}'
@@ -418,7 +438,7 @@ def agency_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]] | None
     facts = [
         ("Organisasjonsnummer", f'<a href="https://data.brreg.no/enhetsregisteret/oppslag/enheter/{escape(a.orgnr)}">'
                                 f'{escape(a.orgnr)}</a>'),
-        (f"Kjøp av varer og tjenester {ds.year}", kr_full(a.spend_sum)),
+        (f"Kjøp av varer og tjenester {year_text(ds.year)}", kr_full(a.spend_sum)),
     ]
     parts = [(f"\u2003{escape(_spend_label(k))}", kr_full(v))
              for k, v in sorted(a.spend_parts.items(), key=lambda kv: (not kv[0].isdigit(), kv[0].zfill(4)))]
@@ -844,6 +864,7 @@ def export_rows(ds: Dataset) -> list[dict[str, object]]:
     for a in ds.agencies:
         row: dict[str, object] = {
             "virksomhet": a.name, "orgnr": a.orgnr, "år": a.year,
+            "regnskap_maaneder": ds.through_month,
             "antall_kontrakter": a.contract_count,
             "doffin_sum_kr": round(a.contract_sum),
             "kjop_varer_tjenester_kr": round(a.spend_sum),
@@ -885,7 +906,8 @@ def contract_rows(ds: Dataset) -> list[dict[str, object]]:
 def _write_csv(path: Path, rows: list[dict[str, object]]) -> None:
     buf = io.StringIO()
     if rows:
-        w = csv.DictWriter(buf, fieldnames=list(rows[0]), delimiter=";")
+        fields = list(dict.fromkeys(k for r in rows for k in r))  # årene kan ha ulike kolonner
+        w = csv.DictWriter(buf, fieldnames=fields, delimiter=";")
         w.writeheader()
         w.writerows(rows)
     path.write_text("\ufeff" + buf.getvalue(), encoding="utf-8")
@@ -902,7 +924,11 @@ def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "")
         datasets = [datasets]
     datasets = sorted(datasets, key=lambda d: d.year)
     years = [d.year for d in datasets]
-    latest = datasets[-1]
+    # Forsiden viser siste hele år; et delår (som 2026 jan–aug) får egen årsside.
+    _PARTIAL.clear()
+    _PARTIAL.update({d.year: d.through_month for d in datasets if d.partial})
+    latest = next((d for d in reversed(datasets) if not d.partial), datasets[-1])
+    _FRONT["year"] = latest.year
     _SITE["base_url"] = base_url.rstrip("/") + "/" if base_url else ""
     _SITE["data_date"] = max((d.data_date for d in datasets if d.data_date), default="",
                              key=lambda d: d.split(".")[::-1])
@@ -923,7 +949,7 @@ def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "")
     (out / "404.html").write_text(not_found_page(), encoding="utf-8")
     if len(datasets) > 1:
         (out / "ar").mkdir()
-        for ds in datasets[:-1]:
+        for ds in (d for d in datasets if d is not latest):
             (out / "ar" / f"{ds.year}.html").write_text(index_page(ds, root="../", years=years), encoding="utf-8")
             pages += 1
 
@@ -940,7 +966,8 @@ def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "")
     for ds in datasets:
         for a in ds.agencies:
             history.setdefault(a.slug, []).append((ds.year, a))
-            newest[a.slug] = (ds, a)
+            if not ds.partial or a.slug not in newest:
+                newest[a.slug] = (ds, a)
     for slug, (ds, a) in newest.items():
         (out / "virksomhet" / f"{slug}.html").write_text(agency_page(ds, a, history[slug], linked), encoding="utf-8")
         pages += 1

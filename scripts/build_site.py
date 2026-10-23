@@ -58,7 +58,7 @@ def build(args: argparse.Namespace, db: Path) -> None:
     if not years:
         sys.exit(f"{args.db}: contract_spend_comparison er tom. Kjør scripts/run_phase1.py først.")
     datasets = [load_dataset(db, year=y, threshold=args.threshold) for y in sorted(years)]
-    ds = datasets[-1]
+    ds = next((d for d in reversed(datasets) if not d.partial), datasets[-1])  # forsiden
     base_url = f"https://{args.cname.strip()}/" if args.cname else args.base_url
     pages = build_site(datasets, args.out, base_url=base_url)
     if args.cname:

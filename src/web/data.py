@@ -89,6 +89,23 @@ class Dataset:
     has_coverage: bool = False
     has_suppliers: bool = False
     data_date: str = ""          # siste henting fra Doffin (DD.MM.ÅÅÅÅ), fra doffin_contracts.fetched_at
+    through_month: int = 12      # siste måned regnskapstallene dekker; under 12 betyr delår (f.eks. jan–aug)
+
+    @property
+    def partial(self) -> bool:
+        return self.through_month < 12
+
+
+MONTHS = ("januar", "februar", "mars", "april", "mai", "juni", "juli", "august",
+          "september", "oktober", "november", "desember")
+
+
+def source_month(source_file: str | None) -> int | None:
+    """Måneden i et rådatafilnavn fra statsregnskapet: 'raadata_august_2026_….xlsx' -> 8."""
+    m = re.search(r"(?i)r(?:aa|å)data[ _-]+([a-zæøå]+)[ _-]+\d{4}", source_file or "")
+    if m and m.group(1).lower() in MONTHS:
+        return MONTHS.index(m.group(1).lower()) + 1
+    return None
 
 
 def display_name(name: str) -> str:
@@ -187,9 +204,10 @@ def load_dataset(db_path: str | Path, year: int | None = None, threshold: float 
                     has_suppliers = has_suppliers or bool(c.suppliers)
         fetched = conn.execute("SELECT MAX(fetched_at) FROM doffin_contracts").fetchone()[0]
         data_date = f"{fetched[8:10]}.{fetched[5:7]}.{fetched[:4]}" if fetched and len(fetched) >= 10 else ""
+        months = [m for a in agencies if (m := source_month(a.spend_source))]
         return Dataset(year=year, annualized=annualized, threshold=threshold, agencies=agencies,
                        has_coverage=any(a.coverage for a in agencies), has_suppliers=has_suppliers,
-                       data_date=data_date)
+                       data_date=data_date, through_month=max(months, default=12))
     finally:
         conn.close()
 
