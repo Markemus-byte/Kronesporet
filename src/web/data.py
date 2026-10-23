@@ -164,6 +164,10 @@ def load_dataset(db_path: str | Path, year: int | None = None, threshold: float 
                 a.report_url = a.report_url or _report_url(s["source_file"])
                 if s["source_file"] and not _report_url(s["source_file"]):
                     a.spend_source = a.spend_source or s["source_file"]
+            if a.spend_source:
+                # Statsregnskapet går foran årsrapporten; Kudos-radene beholdes bare for lenken.
+                for key in ("drift", "investering"):
+                    a.spend_parts.pop(key, None)
 
             awarded = conn.execute(
                 "SELECT COUNT(*), COALESCE(SUM(value), 0) FROM doffin_contracts WHERE buyer_orgnr = ? AND year = ?",

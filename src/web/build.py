@@ -12,6 +12,7 @@ from __future__ import annotations
 import csv
 import io
 import json
+import re
 import shutil
 import statistics
 from collections import Counter
@@ -31,7 +32,7 @@ NUM_TYPE = ' data-type="num"'
 
 # Settes av build_site() for hele byggingen: offentlig adresse (for canonical, Open Graph
 # og sidekart) og datoen dataene sist ble hentet (vises i bunnteksten).
-_SITE: dict[str, str] = {"base_url": "", "data_date": "", "years": ""}
+_SITE: dict[str, str] = {"base_url": "", "data_date": "", "years": "", "statsregnskap": ""}
 COPYRIGHT = "© 2026 Markemus-byte / Kronesporet. Alle rettigheter forbeholdt."
 
 PERIOD_SOURCES = {
@@ -41,6 +42,34 @@ PERIOD_SOURCES = {
     "standard": "ingen periode oppgitt, antatt standardvarighet",
 }
 SPEND_PARTS = {"drift": "Andre utbetalinger til drift", "investering": "Utbetaling til investeringer"}
+# Artskontogruppene (to første sifre i statens standard kontoplan) som telles som kjøp i statsregnskapet.
+ARTSKONTO_GROUPS = {
+    "40": "Innkjøp av råvarer og halvfabrikater",
+    "41": "Frakt, toll og spedisjon",
+    "43": "Forbruk av innkjøpte varer og tjenester",
+    "45": "Fremmedytelse og underentreprise",
+    "47": "Programvarelisenser",
+    "48": "Bygninger og anlegg",
+    "49": "Maskiner, transportmidler, inventar og IKT-utstyr",
+    "61": "Frakt og transport",
+    "62": "Energi og brensel",
+    "63": "Lokaler",
+    "64": "Leie av maskiner, inventar og datasystemer",
+    "65": "Verktøy, inventar og driftsmateriale",
+    "66": "Reparasjon og vedlikehold",
+    "67": "Konsulenter og andre fremmede tjenester",
+    "68": "Kontorkostnader, trykksaker, møter og kurs",
+    "69": "Telefoni, datakommunikasjon og porto",
+    "70": "Kostnader til transportmidler",
+    "72": "Provisjonskostnader",
+    "73": "Salg, reklame og representasjon",
+    "74": "Kontingenter og gaver",
+    "75": "Forsikring, garanti og service",
+    "76": "Lisenser og patenter",
+    "77": "Annen kostnad",
+}
+MONTHS = ("januar", "februar", "mars", "april", "mai", "juni", "juli", "august",
+          "september", "oktober", "november", "desember")
 
 
 # --- formatering -----------------------------------------------------------
@@ -103,6 +132,11 @@ def page(title: str, body: str, root: str = "", active: str = "", description: s
                     f'<meta property="og:image" content="{escape(base)}assets/og-bilde.png">\n'
                     '<meta name="twitter:card" content="summary_large_image">\n')
     data_date = f"Data hentet {_SITE['data_date']}. " if _SITE["data_date"] else ""
+    sources = ('<a href="https://doffin.no">Doffin</a> (Digdir), '
+               '<a href="https://statsregnskapet.dfo.no">statsregnskapet</a> og årsrapporter i\n    '
+               '<a href="https://kudos.dfo.no">Kudos</a> (DFØ)' if _SITE["statsregnskap"] else
+               '<a href="https://doffin.no">Doffin</a> (Digdir) og årsrapporter i\n    '
+               '<a href="https://kudos.dfo.no">Kudos</a> (DFØ)')
     return f"""<!doctype html>
 <html lang="nb">
 <head>
@@ -133,8 +167,7 @@ def page(title: str, body: str, root: str = "", active: str = "", description: s
 </main>
 <footer class="site-footer">
   <div class="wrap">
-    <p>Data: <a href="https://doffin.no">Doffin</a> (Digdir) og årsrapporter i
-    <a href="https://kudos.dfo.no">Kudos</a> (DFØ), lisensiert under
+    <p>Data: {sources}, lisensiert under
     <a href="https://data.norge.no/nlod/no/2.0">Norsk lisens for offentlige data (NLOD 2.0)</a>.
     Kronesporet er ikke tilknyttet DFØ eller Digdir.</p>
     <p>{data_date}<a href="{root}om.html">Om dataene og metoden</a>.</p>
@@ -347,7 +380,17 @@ def top_suppliers(ds: Dataset, a: Agency, limit: int = 10) -> list[tuple[str, st
 def _spend_label(key: str) -> str:
     if key in SPEND_PARTS:
         return SPEND_PARTS[key]
+    if key in ARTSKONTO_GROUPS:
+        return f"{key} {ARTSKONTO_GROUPS[key]}"
     return f"Artskonto {key}" if key.isdigit() else key
+
+
+def _spend_source_label(source: str) -> str:
+    """'raadata_desember_2025_bevilgningsregnskap.xlsx' -> 'Statsregnskapet (rådata, desember 2025)'."""
+    m = re.search(r"(?i)r(?:aa|å)data[ _-]+([a-zæøå]+)[ _-]+(\d{4})", source)
+    if m and m.group(1).lower() in MONTHS:
+        return f"Statsregnskapet (rådata, {m.group(1).lower()} {m.group(2)})"
+    return f"Statsregnskapet ({source})"
 
 
 def _history_table(history: list[tuple[int, Agency]], current: int) -> str:
@@ -382,7 +425,8 @@ def agency_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]] | None
     if len(parts) <= 3:
         facts += parts
     if a.spend_source:
-        facts.append(("\u2003Kilde", f"statsregnskapet ({escape(a.spend_source)})"))
+        facts.append(("\u2003Kilde", f'<a href="https://statsregnskapet.dfo.no">'
+                                      f'{escape(_spend_source_label(a.spend_source))}</a>'))
     if ds.annualized:
         facts.append((f"Doffin-kontrakter som løper i {ds.year}", f"{a.contract_count}"))
         facts.append((f"Årsandel av kontraktsverdien {ds.year}", kr_full(a.contract_sum)))
@@ -677,6 +721,21 @@ Perioden leses fra kunngjøringen (start- og sluttdato, oppgitt varighet eller f
 Står det ingenting, antas 48 måneder for rammeavtaler og 24 måneder for andre kontrakter; slike
 kontrakter er merket «antatt varighet».</p>
 """
+    statsregnskap = ""
+    if _SITE["statsregnskap"]:
+        groups = ", ".join(sorted(ARTSKONTO_GROUPS))
+        statsregnskap = f"""
+<dt><a href="https://statsregnskapet.dfo.no">Statsregnskapet</a> (DFØ)</dt>
+<dd>Bevilgningsregnskapet for alle statlige virksomheter, som DFØ publiserer som rådata per måned.
+Desembertallene gir hele året. Kjøp av varer og tjenester er summen av artskontogruppene {groups}
+(varer, fremmedytelser, investeringer og driftskostnader), uten lønn, avskrivninger, reiser og tilskudd.
+Når en virksomhet har tall både her og i årsrapporten, brukes statsregnskapet, og årsrapporten lenkes til
+når den finnes.</dd>"""
+    coverage_caveat = (
+        "Kommuner, fylker, helseforetak og statlige selskaper er ikke en del av statsregnskapet og er ikke med."
+        if _SITE["statsregnskap"] else
+        "Kommuner, fylker, helseforetak og selskaper har ikke årsrapport i Kudos. Forvaltningsbedrifter som "
+        "Statsbygg og universitetene bruker et annet oppsett som foreløpig ikke leses.")
     body = f"""
 <section class="hero"><h1>Om dataene og metoden</h1>
 <p class="lede">Kronesporet er et åpenhetsverktøy for offentlig pengebruk. Første versjon sammenligner
@@ -692,11 +751,12 @@ Mangler tildelt verdi, brukes anslått verdi (merket «anslått verdi»).{" Leve
 <dd>Kunnskapsdatabasen for offentlige utredninger, der statlige virksomheter publiserer årsrapportene sine.
 Fra den standardiserte «Oppstilling av artskontorapportering» bruker vi
 <em>Andre utbetalinger til drift</em> + <em>Utbetaling til investeringer</em> som «kjøp av varer og tjenester».
-Lønn, tilskudd og finansposter er holdt utenfor.</dd>
+Lønn, tilskudd og finansposter er holdt utenfor.</dd>{statsregnskap}
 </dl>
-<p>Begge kildene er lisensiert under <a href="https://data.norge.no/nlod/no/2.0">Norsk lisens for offentlige data
+<p>{"Kildene" if _SITE["statsregnskap"] else "Begge kildene"} er lisensiert under <a href="https://data.norge.no/nlod/no/2.0">Norsk lisens for offentlige data
 (NLOD 2.0)</a>, som tillater gjenbruk, også kommersielt, med kildehenvisning. Inneholder data under NLOD
-tilgjengeliggjort av Digitaliseringsdirektoratet (Doffin) og Direktoratet for forvaltning og økonomistyring (Kudos).</p>
+tilgjengeliggjort av Digitaliseringsdirektoratet (Doffin) og Direktoratet for forvaltning og økonomistyring
+({"statsregnskapet og Kudos" if _SITE["statsregnskap"] else "Kudos"}).</p>
 
 <h2>Slik kobles tallene</h2>
 <p>Regnskapet har ikke leverandører, så koblingen går på <em>kjøper</em>: organisasjonsnummeret til kjøperen i
@@ -713,9 +773,7 @@ flagger nesten alle. Den er beholdt fordi den er den opprinnelige målestokken, 
 selv tyder på feil.</li>
 <li><strong>Kontraktverdier er anslag.</strong> For rammeavtaler er verdien ofte et tak, ikke det som faktisk
 blir kjøpt.</li>
-<li><strong>Ikke alle virksomheter er med.</strong> Kommuner, fylker, helseforetak og selskaper har ikke
-årsrapport i Kudos. Forvaltningsbedrifter som Statsbygg og universitetene bruker et annet oppsett som foreløpig
-ikke leses.</li>
+<li><strong>Ikke alle virksomheter er med.</strong> {coverage_caveat}</li>
 <li><strong>Feil i kildene følger med.</strong> Navn og tall vises slik de står i Doffin og årsrapportene.</li>
 </ul>
 
@@ -846,7 +904,9 @@ def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "")
     years = [d.year for d in datasets]
     latest = datasets[-1]
     _SITE["base_url"] = base_url.rstrip("/") + "/" if base_url else ""
-    _SITE["data_date"] = max((d.data_date for d in datasets if d.data_date), default="")
+    _SITE["data_date"] = max((d.data_date for d in datasets if d.data_date), default="",
+                             key=lambda d: d.split(".")[::-1])
+    _SITE["statsregnskap"] = "1" if any(a.spend_source for d in datasets for a in d.agencies) else ""
     _SITE["years"] = str(years[0]) if len(years) == 1 else f"{years[0]}/{years[-1]}"
 
     for sub in ("virksomhet", "ar", "leverandor"):
