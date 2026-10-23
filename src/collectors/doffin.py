@@ -502,9 +502,10 @@ def collect(
 # --- Leverandører (vinnere) ---------------------------------------------------
 
 _ORG_SECTION_LABELS = ("virksomheter", "organisations")
+_RESULT_SECTION_LABELS = ("resultater", "results")
+_WINNER_LABELS_NODE = ("vinner", "winner")
 _NAME_LABELS = ("offisielt navn", "official name")
 _ORGNR_LABELS = ("registreringsnummer", "registration number", "national registration number")
-_WINNER_ROLE_LABELS = ("vinner av disse delkontraktene", "winner of these lots")
 
 
 @dataclass
@@ -517,31 +518,47 @@ def _label(node: dict[str, Any]) -> str:
     return str(node.get("label") or "").strip().lower()
 
 
+def _clean_name(raw: Any) -> str:
+    # TED-kunngjøringer pakker navnet inn som "[ PAS Ingeniører AS ] --- "
+    text = re.sub(r"^\[|\]?\s*-*\s*$", "", str(raw or "").strip()).strip(" []")
+    text = re.sub(r"\*[^*]*\*|\binvitasjon ønskes her\b", "", text, flags=re.I)  # "NORCONSULT AS *INVITASJON ØNSKES HER*"
+    return re.sub(r"\s+", " ", text).strip()
+
+
 def winners(notice: dict[str, Any]) -> list[Winner]:
     """Leverandørene som vant kontrakten, med orgnr når kunngjøringen har det.
 
-    eForms (og TED-varianten med engelske etiketter) har en liste over
-    virksomheter der vinnerne har rollen «Vinner av disse delkontraktene».
-    Finnes ikke den, brukes `awardedNames` fra detaljvisningen (bare navn).
+    Navnene tas fra `awardedNames` i detaljvisningen, ellers fra «Vinner» under
+    «Resultater». Rollene i virksomhetslisten kan ikke brukes: når en kunngjøring
+    har flere virksomheter, får alle (også kjøperen og tingretten) alle rollene.
+    Orgnr hentes derfor ved å slå opp vinnernavnet i virksomhetslisten.
     """
-    found: dict[str, Winner] = {}
+    names = [_clean_name(n) for n in notice.get("awardedNames") or []]
+    if not any(names):
+        names = []
+        for section in notice.get("eform") or []:
+            if _label(section) not in _RESULT_SECTION_LABELS:
+                continue
+            for node in _walk_eform(section.get("sections")):
+                if _label(node) in _WINNER_LABELS_NODE:
+                    names += [_clean_name(n.get("value")) for n in node.get("sections") or []
+                              if _label(n) in _NAME_LABELS]
+
+    orgnr_by_name: dict[str, str] = {}
     for section in notice.get("eform") or []:
         if _label(section) not in _ORG_SECTION_LABELS:
             continue
         for org in section.get("sections") or []:
-            nodes = list(_walk_eform(org.get("sections")))
-            if not any(_label(n).startswith(_WINNER_ROLE_LABELS) for n in nodes):
-                continue
-            name = next((str(n.get("value")).strip() for n in nodes
-                         if _label(n) in _NAME_LABELS and n.get("value")), None)
-            orgnr = next((_clean_orgnr(n.get("value")) for n in nodes
-                          if _label(n) in _ORGNR_LABELS and n.get("value")), None)
-            if name:
-                found.setdefault((orgnr or name).lower(), Winner(name=name, orgnr=orgnr))
-    if not found:
-        for name in notice.get("awardedNames") or []:
-            if name and str(name).strip():
-                found.setdefault(str(name).strip().lower(), Winner(name=str(name).strip(), orgnr=None))
+            fields_ = {_label(n): n.get("value") for n in org.get("sections") or []}
+            name = next((_clean_name(fields_[k]) for k in _NAME_LABELS if fields_.get(k)), None)
+            orgnr = next((_clean_orgnr(fields_[k]) for k in _ORGNR_LABELS if fields_.get(k)), None)
+            if name and orgnr:
+                orgnr_by_name.setdefault(name.lower(), orgnr)
+
+    found: dict[str, Winner] = {}
+    for name in names:
+        if name:
+            found.setdefault(name.lower(), Winner(name=name, orgnr=orgnr_by_name.get(name.lower())))
     return list(found.values())
 
 
