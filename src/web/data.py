@@ -40,6 +40,7 @@ class Contract:
     is_framework: bool
     value_type: str | None       # 'awarded' | 'estimated'
     suppliers: list[Supplier] = field(default_factory=list)  # vinnerne, når doffin_winners finnes
+    buyer_unit: str | None = None  # underenheten som står som kjøper i Doffin (f.eks. et politidistrikt)
 
 
 @dataclass
@@ -49,7 +50,10 @@ class Coverage:
     peer_count: int
     peer_median: float
     z: float                     # robust z-verdi på log10(dekning)
-    flagged: bool
+    flagged: bool                # vedvarende avvik (flere av de siste årene)
+    outlier: bool = False        # avvik dette året
+    years_outlier: int = 0       # år med avvik blant de siste tre
+    category: str = ""           # 'flagg' | 'observasjon' | 'tilskudd' | 'avtaler_for_andre' | ''
 
 
 @dataclass
@@ -165,19 +169,27 @@ def load_dataset(db_path: str | Path, year: int | None = None, threshold: float 
             agencies.append(a)
 
         has_coverage = _has_table(conn, "doffin_coverage")
+        cov_cols = {r[1] for r in conn.execute("PRAGMA table_info(doffin_coverage)")} if has_coverage else set()
+        extra = ", ".join(c if c in cov_cols else f"NULL AS {c}" for c in ("outlier", "years_outlier", "category"))
+        has_parents = _has_table(conn, "orgnr_parent")
         for a in agencies:
             if has_coverage:
                 c = conn.execute(
-                    "SELECT coverage, peer_group, peer_count, peer_median, z, flagged "
+                    f"SELECT coverage, peer_group, peer_count, peer_median, z, flagged, {extra} "
                     "FROM doffin_coverage WHERE orgnr = ? AND year = ?", (a.orgnr, year)).fetchone()
                 if c is not None and c["coverage"] is not None:
                     a.coverage = Coverage(ratio=c["coverage"], peer_group=c["peer_group"] or "",
                                           peer_count=c["peer_count"] or 0, peer_median=c["peer_median"] or 0.0,
-                                          z=c["z"] or 0.0, flagged=bool(c["flagged"]))
+                                          z=c["z"] or 0.0, flagged=bool(c["flagged"]),
+                                          outlier=bool(c["outlier"] if c["outlier"] is not None else c["flagged"]),
+                                          years_outlier=c["years_outlier"] or 0, category=c["category"] or "")
             for s in conn.execute(
                 "SELECT artskonto, SUM(amount) AS amount, MAX(source_file) AS source_file "
                 "FROM statsregnskap WHERE orgnr = ? AND year = ? GROUP BY artskonto", (a.orgnr, year)):
-                a.spend_parts[s["artskonto"] or "sum"] = s["amount"] or 0.0
+                key = s["artskonto"] or "sum"
+                if len(key) == 3 and key.isdigit():   # rådata har tresifret artskonto; vis gruppen
+                    key = key[:2]
+                a.spend_parts[key] = a.spend_parts.get(key, 0.0) + (s["amount"] or 0.0)
                 a.report_url = a.report_url or _report_url(s["source_file"])
                 if s["source_file"] and not _report_url(s["source_file"]):
                     a.spend_source = a.spend_source or s["source_file"]
@@ -186,9 +198,12 @@ def load_dataset(db_path: str | Path, year: int | None = None, threshold: float 
                 for key in ("drift", "investering"):
                     a.spend_parts.pop(key, None)
 
+            # Underenheter (orgnr_parent) kunngjør på vegne av virksomheten.
+            units = ("buyer_orgnr = ? OR buyer_orgnr IN (SELECT child FROM orgnr_parent WHERE parent = ?)"
+                     if has_parents else "buyer_orgnr = ? OR buyer_orgnr = ?")
             awarded = conn.execute(
-                "SELECT COUNT(*), COALESCE(SUM(value), 0) FROM doffin_contracts WHERE buyer_orgnr = ? AND year = ?",
-                (a.orgnr, year)).fetchone()
+                f"SELECT COUNT(*), COALESCE(SUM(value), 0) FROM doffin_contracts WHERE ({units}) AND year = ?",
+                (a.orgnr, a.orgnr, year)).fetchone()
             a.awarded_in_year_count, a.awarded_in_year_sum = awarded[0], awarded[1]
             a.contracts = _contracts(conn, a.orgnr, year, annualized)
 
@@ -218,7 +233,8 @@ def _contracts(conn: sqlite3.Connection, orgnr: str, year: int, annualized: bool
     def col(name: str) -> str:
         return f"c.{name}" if name in cols else f"NULL AS {name}"
 
-    base = (f"SELECT c.id, c.title, c.url, c.value, c.value_type, c.publication_date, "
+    base = (f"SELECT c.id, c.title, c.url, c.value, c.value_type, c.publication_date, c.buyer_orgnr, "
+            f"{col('buyer_name')}, "
             f"{col('start_date')}, {col('end_date')}, {col('duration_months')}, {col('is_framework')}")
     if annualized:
         rows = conn.execute(
@@ -241,6 +257,7 @@ def _contracts(conn: sqlite3.Connection, orgnr: str, year: int, annualized: bool
             start_date=r["start_date"], end_date=r["end_date"], duration_months=r["duration_months"],
             period_source=r["period_source"], first_year=r["first_year"], last_year=r["last_year"],
             is_framework=bool(r["is_framework"]), value_type=r["value_type"],
+            buyer_unit=display_name(r["buyer_name"] or r["buyer_orgnr"] or "") if r["buyer_orgnr"] != orgnr else None,
         )
         for r in rows
     ]

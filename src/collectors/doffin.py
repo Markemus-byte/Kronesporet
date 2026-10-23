@@ -653,15 +653,22 @@ def collect_winners(
     client = client or DoffinClient()
     sql = "SELECT id FROM doffin_contracts c WHERE 1 = 1"
     params: list[Any] = []
-    if buyers is not None:
-        sql += f" AND buyer_orgnr IN ({', '.join('?' for _ in buyers)})"
+    marks = ", ".join("?" for _ in buyers or ())
+    if buyers is not None and running_in is None:
+        sql += f" AND buyer_orgnr IN ({marks})"
         params += sorted(buyers)
     if year_from is not None:
         sql += " AND year >= ?"
         params.append(year_from)
     if running_in is not None:
-        sql += " AND id IN (SELECT contract_id FROM doffin_contract_years WHERE year = ?)"
+        # Kjøperen i doffin_contract_years er regnskapsvirksomheten, også når en underenhet
+        # (f.eks. et politidistrikt) står som kjøper i Doffin.
+        sql += " AND id IN (SELECT contract_id FROM doffin_contract_years WHERE year = ?"
         params.append(running_in)
+        if buyers is not None:
+            sql += f" AND buyer_orgnr IN ({marks})"
+            params += sorted(buyers)
+        sql += ")"
     if not refresh:
         sql += " AND NOT EXISTS (SELECT 1 FROM doffin_winners w WHERE w.contract_id = c.id)"
     ids = [r[0] for r in conn.execute(sql + " ORDER BY id", params)]
