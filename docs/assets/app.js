@@ -39,14 +39,21 @@
     });
   });
 
-  var filter = document.getElementById("filter");
-  var agencies = document.getElementById("agencies");
-  if (filter && agencies) {
-    filter.addEventListener("input", function () {
-      var q = filter.value.trim().toLowerCase();
-      Array.prototype.forEach.call(agencies.tBodies[0].rows, function (row) {
-        row.hidden = q !== "" && row.getAttribute("data-name").indexOf(q) === -1;
+  // Søkefelt med data-filter="<tabell-id>": skjul rader som ikke inneholder teksten.
+  // Rader med data-name søkes i det feltet, ellers i hele radteksten.
+  document.querySelectorAll("input[data-filter]").forEach(function (input) {
+    var table = document.getElementById(input.getAttribute("data-filter"));
+    var counter = document.querySelector('[data-count-for="' + input.getAttribute("data-filter") + '"]');
+    if (!table) return;
+    input.addEventListener("input", function () {
+      var q = input.value.trim().toLowerCase();
+      var shown = 0;
+      Array.prototype.forEach.call(table.tBodies[0].rows, function (row) {
+        var text = (row.getAttribute("data-name") || row.textContent).toLowerCase();
+        row.hidden = q !== "" && text.indexOf(q) === -1;
+        if (!row.hidden) shown++;
       });
+      if (counter) counter.textContent = q ? shown + " treff" : "";
     });
-  }
+  });
 })();

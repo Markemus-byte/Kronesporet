@@ -206,7 +206,8 @@ def index_page(ds: Dataset) -> str:
 <section>
   <div class="table-tools">
     <label for="filter">Søk etter virksomhet</label>
-    <input id="filter" type="search" placeholder="F.eks. vegvesen eller 971032081" autocomplete="off">
+    <input id="filter" data-filter="agencies" type="search" placeholder="F.eks. vegvesen eller 971032081" autocomplete="off">
+    <span class="muted small" data-count-for="agencies" aria-live="polite"></span>
     <a class="download" href="data/virksomheter.csv" download>Last ned CSV</a>
   </div>
   <div class="table-scroll">
@@ -334,9 +335,14 @@ def agency_page(ds: Dataset, a: Agency) -> str:
                          f'{kr(c.year_value)}</td>')
         else:
             cells.append(f'<td class="num" data-sort="{_num(c.value)}" title="{kr_full(c.value)}">{kr(c.value)}</td>')
-        rows.append(f"<tr>{''.join(cells)}</tr>")
+        haystack = " ".join([c.title] + [f"{w.name} {w.orgnr or ''}" for w in c.suppliers]).lower()
+        rows.append(f'<tr data-name="{escape(haystack)}">{"".join(cells)}</tr>')
 
-    table = (f'<div class="table-scroll"><table class="sortable"><thead><tr>{thead}</tr></thead>'
+    tools = ('<div class="table-tools"><label for="contract-filter">Søk i kontraktene</label>'
+             '<input id="contract-filter" data-filter="contracts" type="search" autocomplete="off" '
+             f'placeholder="{"Tittel eller leverandør" if ds.has_suppliers else "Tittel"}">'
+             '<span class="muted small" data-count-for="contracts" aria-live="polite"></span></div>')
+    table = (f'{tools}<div class="table-scroll"><table class="sortable" id="contracts"><thead><tr>{thead}</tr></thead>'
              f'<tbody>{"".join(rows)}</tbody></table></div>') if rows else \
         '<p class="muted">Ingen Doffin-kontrakter funnet for året.</p>'
     explain = (f"Kontrakter i Doffin der {escape(a.name)} er kjøper og som løper i {ds.year}. Verdien er fordelt "

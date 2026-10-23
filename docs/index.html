@@ -25,7 +25,8 @@
 <section>
   <div class="table-tools">
     <label for="filter">Søk etter virksomhet</label>
-    <input id="filter" type="search" placeholder="F.eks. vegvesen eller 971032081" autocomplete="off">
+    <input id="filter" data-filter="agencies" type="search" placeholder="F.eks. vegvesen eller 971032081" autocomplete="off">
+    <span class="muted small" data-count-for="agencies" aria-live="polite"></span>
     <a class="download" href="data/virksomheter.csv" download>Last ned CSV</a>
   </div>
   <div class="table-scroll">

@@ -124,13 +124,21 @@ python scripts/build_site.py --db data/offentlig_forbruk.db --out docs
 ```
 
 Koden ligger i `src/web/` (`data.py` leser SQLite, `build.py` lager sidene, `assets/` er CSS og JS).
-Publiser med GitHub Pages: Settings → Pages → Source «Deploy from a branch» → `main` og `/docs`.
+**Publisering.** `docs/` er ferdig bygget, så ingen byggekommando trengs:
+
+- *GitHub Pages* (krever offentlig repo på gratisplanen): Settings → Pages → Source
+  «Deploy from a branch» → `main` og `/docs`.
+- *Netlify* (repoet kan være privat): «Add new site» → «Import an existing project» →
+  velg repoet. `netlify.toml` setter publiseringsmappe `docs` og tom byggekommando.
+- *Cloudflare Pages* (repoet kan være privat): Workers & Pages → Create → Pages →
+  koble til repoet, framework «None», byggekommando tom, «Build output directory» `docs`.
 
 Leverandører i kontraktlistene hentes med `scripts/fetch_winners.py --year 2025` før
 `build_site.py` (ett detaljkall per kontrakt, cachet i `data/doffin_cache/`).
 
-**Eget domene (kronesporet.no).** Bygg med `--cname kronesporet.no` (skriver `docs/CNAME`)
-og legg inn DNS hos registraren: fire A-oppføringer for `kronesporet.no` til
+**Eget domene (kronesporet.no).** På Netlify og Cloudflare legges domenet inn i
+deres kontrollpanel, som viser hvilke DNS-oppføringer som trengs. På GitHub Pages: bygg
+med `--cname kronesporet.no` (skriver `docs/CNAME`) og legg inn DNS hos registraren: fire A-oppføringer for `kronesporet.no` til
 185.199.108.153, 185.199.109.153, 185.199.110.153 og 185.199.111.153, og en CNAME for
 `www` til `markemus-byte.github.io`. Kryss deretter av for «Enforce HTTPS» under
 Settings → Pages. Legg ikke inn `CNAME` før domenet er ditt: GitHub sender da alle
