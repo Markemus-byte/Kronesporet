@@ -1,5 +1,10 @@
 # Endringslogg
 
+## Ikke utgitt
+
+- **Nettside:** egen «Fant ikke siden»-side (404) med lenker videre, og strukturerte data
+  (schema.org/Dataset) på siden om dataene, så søkemotorene finner de nedlastbare tallene.
+
 ## v0.1.0 – 2026-10-23
 
 Første versjon av Kronesporet.
