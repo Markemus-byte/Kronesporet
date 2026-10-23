@@ -17,26 +17,32 @@ sys.path.insert(0, str(ROOT))
 
 from src.analysis.join_and_flag import THRESHOLD  # noqa: E402
 from src.web.build import build_site  # noqa: E402
-from src.web.data import load_dataset  # noqa: E402
+from src.web.data import available_years, load_dataset  # noqa: E402
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--db", type=Path, default=ROOT / "data" / "offentlig_forbruk.db")
     ap.add_argument("--out", type=Path, default=ROOT / "docs", help="Mappen nettstedet skrives til")
-    ap.add_argument("--year", type=int, help="Regnskapsår (standard: siste år i databasen)")
+    ap.add_argument("--year", type=int, nargs="*",
+                    help="Regnskapsår som skal med (standard: alle årene i databasen; siste blir forsiden)")
     ap.add_argument("--cname", help="Eget domene for GitHub Pages, f.eks. kronesporet.no (skriver docs/CNAME)")
     ap.add_argument("--threshold", type=float, default=THRESHOLD, help="Terskelen flaggene ble laget med")
     args = ap.parse_args()
 
     if not args.db.exists():
         sys.exit(f"Fant ikke {args.db}. Kjør scripts/run_phase1.py først, eller gi --db.")
-    ds = load_dataset(args.db, year=args.year, threshold=args.threshold)
-    pages = build_site(ds, args.out)
+    years = args.year or available_years(args.db)
+    if not years:
+        sys.exit(f"{args.db}: contract_spend_comparison er tom. Kjør scripts/run_phase1.py først.")
+    datasets = [load_dataset(args.db, year=y, threshold=args.threshold) for y in sorted(years)]
+    ds = datasets[-1]
+    pages = build_site(datasets, args.out)
     if args.cname:
         (args.out / "CNAME").write_text(args.cname.strip() + "\n")
     flagged = sum(a.flagged for a in ds.agencies)
-    print(f"{pages} sider skrevet til {args.out} ({len(ds.agencies)} virksomheter, {ds.year}, "
+    print(f"{pages} sider skrevet til {args.out} (år {', '.join(map(str, sorted(years)))}; "
+          f"{len(ds.agencies)} virksomheter i {ds.year}, "
           f"{flagged} med avvik over {ds.threshold:.0%}"
           + (f", {sum(1 for a in ds.agencies if a.coverage and a.coverage.flagged)} med uvanlig dekning"
              if ds.has_coverage else "") + ")")

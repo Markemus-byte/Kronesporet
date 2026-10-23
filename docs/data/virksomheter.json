@@ -1,11 +1,14 @@
 {
- "år": 2025,
+ "år": [
+  2025
+ ],
  "årsfordelt": true,
  "terskel": 0.05,
  "lisens": "NLOD 2.0",
  "kilder": [
   "Doffin (Digdir)",
-  "Kudos (DFØ)"
+  "Kudos (DFØ)",
+  "Statsregnskapet (DFØ)"
  ],
  "virksomheter": [
   {
@@ -21,7 +24,8 @@
    "storrelsesgruppe": "store",
    "gruppens_mediandekning_prosent": 13.0,
    "flagget_dekning": 1,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c5ca2e-9230-4d86-a661-b80d6809a0f7/filer/a1c5ca2e-9988-464f-84ae-1a98a9149fba.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c5ca2e-9230-4d86-a661-b80d6809a0f7/filer/a1c5ca2e-9988-464f-84ae-1a98a9149fba.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Arbeidstilsynet",
@@ -36,7 +40,8 @@
    "storrelsesgruppe": "mellomstore",
    "gruppens_mediandekning_prosent": 68.2,
    "flagget_dekning": 1,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c91669-5cc2-4117-9da2-772cc6619c41/filer/a1c91669-6426-412c-8def-ca1880ec1574.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c91669-5cc2-4117-9da2-772cc6619c41/filer/a1c91669-6426-412c-8def-ca1880ec1574.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Artsdatabanken",
@@ -51,7 +56,8 @@
    "storrelsesgruppe": "små",
    "gruppens_mediandekning_prosent": 8.4,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c728f7-06b3-447d-9214-03a17502255b/filer/a1c728f7-0eb2-42c2-a438-f0cb411da62c.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c728f7-06b3-447d-9214-03a17502255b/filer/a1c728f7-0eb2-42c2-a438-f0cb411da62c.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Barne-, ungdoms- og familiedirektoratet",
@@ -66,7 +72,8 @@
    "storrelsesgruppe": "store",
    "gruppens_mediandekning_prosent": 13.0,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c5786e-9542-44ee-8a43-ecbcae0ef867/filer/a1c5786e-a191-4b41-ace8-d41044fb6eac.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c5786e-9542-44ee-8a43-ecbcae0ef867/filer/a1c5786e-a191-4b41-ace8-d41044fb6eac.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Departementenes digitaliseringsorganisasjon (DIO)",
@@ -81,7 +88,8 @@
    "storrelsesgruppe": "store",
    "gruppens_mediandekning_prosent": 13.0,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1b78fa1-29b8-4727-8c48-23afad1a55b6/filer/a1b790b8-b2a2-433b-9c18-8df663f99218.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1b78fa1-29b8-4727-8c48-23afad1a55b6/filer/a1b790b8-b2a2-433b-9c18-8df663f99218.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Departementenes sikkerhets- og serviceorganisasjon",
@@ -96,7 +104,8 @@
    "storrelsesgruppe": "mellomstore",
    "gruppens_mediandekning_prosent": 68.2,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c3a188-a28d-4d96-b95a-2ab7cd0cf565/filer/a1c3a18b-d573-447e-bbf9-5fffa9b38bc9.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c3a188-a28d-4d96-b95a-2ab7cd0cf565/filer/a1c3a18b-d573-447e-bbf9-5fffa9b38bc9.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Eksportfinansiering Norge",
@@ -111,7 +120,8 @@
    "storrelsesgruppe": "små",
    "gruppens_mediandekning_prosent": 8.4,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c702f6-27ec-4ecf-be6d-68bf08bb7b3e/filer/a1c702f6-2f7e-4ef2-a399-226c6da53a36.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c702f6-27ec-4ecf-be6d-68bf08bb7b3e/filer/a1c702f6-2f7e-4ef2-a399-226c6da53a36.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Fiskeridirektoratet",
@@ -126,7 +136,8 @@
    "storrelsesgruppe": "mellomstore",
    "gruppens_mediandekning_prosent": 68.2,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a160dbfb-ffdb-4fc1-878c-2e693516f086/filer/a160dbfc-018e-4142-9df3-35035d29653d.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a160dbfb-ffdb-4fc1-878c-2e693516f086/filer/a160dbfc-018e-4142-9df3-35035d29653d.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Folkhelseinsituttet",
@@ -141,7 +152,8 @@
    "storrelsesgruppe": "store",
    "gruppens_mediandekning_prosent": 13.0,
    "flagget_dekning": 1,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a2173379-6b09-4de1-ae1d-e36ad4bfcb1a/filer/a2173379-7635-4146-8085-646c5fe9578e.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a2173379-6b09-4de1-ae1d-e36ad4bfcb1a/filer/a2173379-7635-4146-8085-646c5fe9578e.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Forsvarsbygg",
@@ -156,7 +168,8 @@
    "storrelsesgruppe": "store",
    "gruppens_mediandekning_prosent": 13.0,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c6a23e-415c-4c2e-9699-d7fafaee99a7/filer/a1c6a23e-490c-4d1c-be60-08b7b022240d.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c6a23e-415c-4c2e-9699-d7fafaee99a7/filer/a1c6a23e-490c-4d1c-be60-08b7b022240d.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Forsvarshistorisk museum",
@@ -171,7 +184,8 @@
    "storrelsesgruppe": "små",
    "gruppens_mediandekning_prosent": 8.4,
    "flagget_dekning": 1,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c6723a-3481-45b7-a044-1b4061a6c36b/filer/a1c6723a-3bee-4b92-9345-329b00c771b2.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c6723a-3481-45b7-a044-1b4061a6c36b/filer/a1c6723a-3bee-4b92-9345-329b00c771b2.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Forsvarsmateriell",
@@ -186,7 +200,8 @@
    "storrelsesgruppe": "store",
    "gruppens_mediandekning_prosent": 13.0,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a26f8323-214a-49a8-9d9f-44407457ee3c/filer/a26f8323-2d22-42b2-a907-3757e1b663ac.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a26f8323-214a-49a8-9d9f-44407457ee3c/filer/a26f8323-2d22-42b2-a907-3757e1b663ac.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Havforskningsinstituttet",
@@ -201,7 +216,8 @@
    "storrelsesgruppe": "store",
    "gruppens_mediandekning_prosent": 13.0,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c5c6fe-1c85-4b53-aba3-278b40c97b23/filer/a1c5c6fe-284a-44ed-9cd3-2809b500f6ce.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c5c6fe-1c85-4b53-aba3-278b40c97b23/filer/a1c5c6fe-284a-44ed-9cd3-2809b500f6ce.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Havindustritilsynet",
@@ -216,7 +232,8 @@
    "storrelsesgruppe": "mellomstore",
    "gruppens_mediandekning_prosent": 68.2,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1b9929e-04f0-4fb7-8fcc-8a1189755233/filer/a1b992a1-89ec-4897-95d7-57dc9bf56f85.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1b9929e-04f0-4fb7-8fcc-8a1189755233/filer/a1b992a1-89ec-4897-95d7-57dc9bf56f85.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Husbanken",
@@ -231,7 +248,8 @@
    "storrelsesgruppe": "små",
    "gruppens_mediandekning_prosent": 8.4,
    "flagget_dekning": 1,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1b58ca7-d02b-40b2-9f9e-d8db909a6e6a/filer/a1b58ca8-825e-4ef1-9193-856d73c2d373.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1b58ca7-d02b-40b2-9f9e-d8db909a6e6a/filer/a1b58ca8-825e-4ef1-9193-856d73c2d373.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Integrerings- og mangfoldsdirektoratet (IMDi)",
@@ -246,7 +264,8 @@
    "storrelsesgruppe": "mellomstore",
    "gruppens_mediandekning_prosent": 68.2,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1ab7d75-c4e3-457f-bfff-a353d9d97ce8/filer/a1ab7d75-d0cd-4587-811a-e2fb30f29680.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1ab7d75-c4e3-457f-bfff-a353d9d97ce8/filer/a1ab7d75-d0cd-4587-811a-e2fb30f29680.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Jernbanedirektoratet",
@@ -261,7 +280,8 @@
    "storrelsesgruppe": "mellomstore",
    "gruppens_mediandekning_prosent": 68.2,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c57ae9-a52f-4377-93ba-955cdce8c47f/filer/a1c57ae9-acf1-4f47-8916-f176e1124287.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c57ae9-a52f-4377-93ba-955cdce8c47f/filer/a1c57ae9-acf1-4f47-8916-f176e1124287.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Kulturtanken - Den Kulturelle Skolesekken Norge",
@@ -276,7 +296,8 @@
    "storrelsesgruppe": "små",
    "gruppens_mediandekning_prosent": 8.4,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a20a7778-f4d3-4223-91d2-721de32b0fc1/filer/a1ef01e2-bd1b-40c2-98cf-7fd58f6c91bf.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a20a7778-f4d3-4223-91d2-721de32b0fc1/filer/a1ef01e2-bd1b-40c2-98cf-7fd58f6c91bf.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Landbruksdirektoratet",
@@ -291,7 +312,8 @@
    "storrelsesgruppe": "mellomstore",
    "gruppens_mediandekning_prosent": 68.2,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a19b65da-a521-4eee-be1a-d666df19d173/filer/a19b65df-56de-4b45-a296-078e6bd94653.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a19b65da-a521-4eee-be1a-d666df19d173/filer/a19b65df-56de-4b45-a296-078e6bd94653.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Mattilsynet",
@@ -306,7 +328,8 @@
    "storrelsesgruppe": "store",
    "gruppens_mediandekning_prosent": 13.0,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a18b4df6-4928-41f1-a8c2-3f72f0d3917a/filer/a18b4f0a-2451-4d03-9e4d-f01b73d376e2.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a18b4df6-4928-41f1-a8c2-3f72f0d3917a/filer/a18b4f0a-2451-4d03-9e4d-f01b73d376e2.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Miljødirektoratet",
@@ -321,7 +344,8 @@
    "storrelsesgruppe": "store",
    "gruppens_mediandekning_prosent": 13.0,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a2b10990-72da-46be-92e6-feecb45001b3/filer/a2b10990-7c7c-4ac8-8c48-b913bcbd70c4.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a2b10990-72da-46be-92e6-feecb45001b3/filer/a2b10990-7c7c-4ac8-8c48-b913bcbd70c4.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Nasjonalt organ for kvalitet i utdanningen (NOKUT)",
@@ -336,7 +360,8 @@
    "storrelsesgruppe": "små",
    "gruppens_mediandekning_prosent": 8.4,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a148eb7d-1411-4d20-a192-2b8dcf3cbdfd/filer/a148eb7f-b7b0-4ae8-9d83-d4ee132105d8.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a148eb7d-1411-4d20-a192-2b8dcf3cbdfd/filer/a148eb7f-b7b0-4ae8-9d83-d4ee132105d8.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Norges geologiske undersøkelse",
@@ -351,7 +376,8 @@
    "storrelsesgruppe": "små",
    "gruppens_mediandekning_prosent": 8.4,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c70df9-598a-495d-96e1-fa119402bd42/filer/a1c70df9-613c-4b4e-958b-7a1186d1dc30.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c70df9-598a-495d-96e1-fa119402bd42/filer/a1c70df9-613c-4b4e-958b-7a1186d1dc30.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Norsk filminstitutt",
@@ -366,7 +392,8 @@
    "storrelsesgruppe": "små",
    "gruppens_mediandekning_prosent": 8.4,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a20f5c87-0f16-4f99-b5af-2b7303936321/filer/a20f5c8b-f2fc-443a-887e-e367e261f50d.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a20f5c87-0f16-4f99-b5af-2b7303936321/filer/a20f5c8b-f2fc-443a-887e-e367e261f50d.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Norsk nukleær dekommisjonering (NND)",
@@ -381,7 +408,8 @@
    "storrelsesgruppe": "mellomstore",
    "gruppens_mediandekning_prosent": 68.2,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a16d2134-1ab3-400e-9c2e-030f1a53d152/filer/a16d2137-556f-4c09-befe-310a6fe4d658.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a16d2134-1ab3-400e-9c2e-030f1a53d152/filer/a16d2137-556f-4c09-befe-310a6fe4d658.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Norsk pasientskadeerstatning (NPE)",
@@ -396,7 +424,8 @@
    "storrelsesgruppe": "mellomstore",
    "gruppens_mediandekning_prosent": 68.2,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c19e8e-0e24-4a06-b974-64a7b13f91f5/filer/a1c19e91-8e49-4b01-8db6-5ab4197192b3.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c19e8e-0e24-4a06-b974-64a7b13f91f5/filer/a1c19e91-8e49-4b01-8db6-5ab4197192b3.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Norsk senter for utvekslingssamarbei",
@@ -411,7 +440,8 @@
    "storrelsesgruppe": "små",
    "gruppens_mediandekning_prosent": 8.4,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1a97abe-cff4-4f4a-baa9-14cdcdb37b6b/filer/a1a97ac0-c68f-487a-a192-e69668e4b6f9.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1a97abe-cff4-4f4a-baa9-14cdcdb37b6b/filer/a1a97ac0-c68f-487a-a192-e69668e4b6f9.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Registerenheten i Brønnøysund",
@@ -426,7 +456,8 @@
    "storrelsesgruppe": "mellomstore",
    "gruppens_mediandekning_prosent": 68.2,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a19a9794-0fb0-413d-a83e-7ba08fc3feb9/filer/a19a9794-1640-48bf-8e05-2081c18f558a.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a19a9794-0fb0-413d-a83e-7ba08fc3feb9/filer/a19a9794-1640-48bf-8e05-2081c18f558a.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Riksrevisjonen",
@@ -441,7 +472,8 @@
    "storrelsesgruppe": "mellomstore",
    "gruppens_mediandekning_prosent": 68.2,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1f92e2f-7dba-4018-9dfa-a1ece50f692c/filer/a1f92e2f-890c-46d0-b107-87758d341a85.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1f92e2f-7dba-4018-9dfa-a1ece50f692c/filer/a1f92e2f-890c-46d0-b107-87758d341a85.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Sjøfartsdirektoratet",
@@ -456,7 +488,8 @@
    "storrelsesgruppe": "mellomstore",
    "gruppens_mediandekning_prosent": 68.2,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c72e3f-2442-462d-90ff-2b7f6d7d5774/filer/a1c72e3f-2ca8-482b-8146-2c99278cbd61.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c72e3f-2442-462d-90ff-2b7f6d7d5774/filer/a1c72e3f-2ca8-482b-8146-2c99278cbd61.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Skatteetaten",
@@ -471,7 +504,8 @@
    "storrelsesgruppe": "store",
    "gruppens_mediandekning_prosent": 13.0,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1b58ca7-a945-4267-9a37-faa9ace17414/filer/a1b58ca8-7d0d-4b80-81fb-770c74caf72c.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1b58ca7-a945-4267-9a37-faa9ace17414/filer/a1b58ca8-7d0d-4b80-81fb-770c74caf72c.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Statens innkjøpssenter v/DFØ",
@@ -486,7 +520,8 @@
    "storrelsesgruppe": "mellomstore",
    "gruppens_mediandekning_prosent": 68.2,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1b389ad-da84-4c7a-953a-1e9e76018724/filer/a1b389b2-48c2-4912-adeb-e96531b0956b.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1b389ad-da84-4c7a-953a-1e9e76018724/filer/a1b389b2-48c2-4912-adeb-e96531b0956b.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Statens jernbanetilsyn",
@@ -501,7 +536,8 @@
    "storrelsesgruppe": "små",
    "gruppens_mediandekning_prosent": 8.4,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1ab7db9-d815-4796-85a8-1bfad6284e63/filer/a1ab7dbb-06ae-453f-b08e-e7efa765bd4a.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1ab7db9-d815-4796-85a8-1bfad6284e63/filer/a1ab7dbb-06ae-453f-b08e-e7efa765bd4a.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Statens pensjonskasse forvaltningsbedrift",
@@ -516,7 +552,8 @@
    "storrelsesgruppe": "store",
    "gruppens_mediandekning_prosent": 13.0,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a2806eec-c849-4452-b06e-378fdaae2913/filer/a2807002-bc4a-41ac-823d-ed24e18ef331.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a2806eec-c849-4452-b06e-378fdaae2913/filer/a2807002-bc4a-41ac-823d-ed24e18ef331.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Statens vegvesen",
@@ -531,7 +568,8 @@
    "storrelsesgruppe": "store",
    "gruppens_mediandekning_prosent": 13.0,
    "flagget_dekning": 1,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c0f1bb-c9e9-4692-9c1f-662345515e2e/filer/a1c0f1bb-d5d5-40b2-ad85-daf73a53f5fe.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c0f1bb-c9e9-4692-9c1f-662345515e2e/filer/a1c0f1bb-d5d5-40b2-ad85-daf73a53f5fe.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Statsforvalterens fellestjenester",
@@ -546,7 +584,8 @@
    "storrelsesgruppe": "små",
    "gruppens_mediandekning_prosent": 8.4,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c68073-f2c4-46a4-aea0-4267bb835a14/filer/a1c68074-15be-407f-8917-b1d042e1fe26.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1c68073-f2c4-46a4-aea0-4267bb835a14/filer/a1c68074-15be-407f-8917-b1d042e1fe26.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Stortinget",
@@ -561,7 +600,8 @@
    "storrelsesgruppe": "store",
    "gruppens_mediandekning_prosent": 13.0,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1defc59-bc6c-49f5-9f28-a192efa630c9/filer/a1defc59-c3eb-4683-ab73-9f12b6425bb7.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a1defc59-bc6c-49f5-9f28-a192efa630c9/filer/a1defc59-c3eb-4683-ab73-9f12b6425bb7.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Utdanningsdirektoratet",
@@ -576,7 +616,8 @@
    "storrelsesgruppe": "store",
    "gruppens_mediandekning_prosent": 13.0,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a19962db-1312-4d47-aa48-1d26e9813153/filer/a19962de-5f4b-4c85-a095-012ee079bf79.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a19962db-1312-4d47-aa48-1d26e9813153/filer/a19962de-5f4b-4c85-a095-012ee079bf79.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Utlendingsnemnda",
@@ -591,7 +632,8 @@
    "storrelsesgruppe": "små",
    "gruppens_mediandekning_prosent": 8.4,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a18d50f3-7294-4d94-a4bf-9ef7ddc37f2e/filer/a18d50f5-f652-47a1-8cb9-754f8b36a541.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a18d50f3-7294-4d94-a4bf-9ef7ddc37f2e/filer/a18d50f5-f652-47a1-8cb9-754f8b36a541.pdf",
+   "kilde_regnskap": ""
   },
   {
    "virksomhet": "Valgdirektoratet",
@@ -606,7 +648,8 @@
    "storrelsesgruppe": "små",
    "gruppens_mediandekning_prosent": 8.4,
    "flagget_dekning": 0,
-   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a21d310c-0a9d-44ec-a0a1-44b516a2c31a/filer/a21d310e-edec-44f6-b39d-ead744cbc494.pdf"
+   "kilde_arsrapport": "https://kudos.dfo.no/dokument/a21d310c-0a9d-44ec-a0a1-44b516a2c31a/filer/a21d310e-edec-44f6-b39d-ead744cbc494.pdf",
+   "kilde_regnskap": ""
   }
  ]
 }

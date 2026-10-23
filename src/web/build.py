@@ -133,19 +133,43 @@ def _flag_badges(a: Agency) -> str:
     return " ".join(out) or '<span class="muted">–</span>'
 
 
-def _caveat(ds: Dataset) -> str:
+def _caveat(ds: Dataset, root: str = "") -> str:
     return (
         '<aside class="caveat"><strong>Les dette først.</strong> Doffin viser bare kontrakter som er kunngjort. '
         "Kjøp under terskelverdiene, avrop på eksisterende avtaler, husleie og mye annet kommer ikke med, "
         f"så Doffin-summen er nesten alltid langt lavere enn kjøpene i regnskapet. Med en fast terskel på "
         f"{pct(ds.threshold, decimals=0)} blir derfor alle virksomhetene flagget. Et flagg betyr «verdt å se nærmere på», "
-        f'ikke at noe er galt. <a href="om.html#forbehold">Mer om forbeholdene</a>.</aside>'
+        f'ikke at noe er galt. <a href="{root}om.html#forbehold">Mer om forbeholdene</a>.</aside>'
     )
 
 
 # --- forside ----------------------------------------------------------------
 
-def index_page(ds: Dataset) -> str:
+def _row_flags(a: Agency) -> str:
+    """Nøkkelord som filteret på forsiden matcher mot (data-flags)."""
+    tags = [a.direction]
+    if a.flagged:
+        tags.append("avvik")
+    if a.coverage:
+        tags.append(f"gruppe-{a.coverage.peer_group}")
+        if a.coverage.flagged:
+            tags += ["dekning", "dekning-hoy" if a.coverage.z > 0 else "dekning-lav"]
+    return " ".join(tags)
+
+
+def _year_nav(years: list[int], current: int, root: str) -> str:
+    if len(years) < 2:
+        return ""
+    latest = max(years)
+    links = []
+    for y in sorted(years, reverse=True):
+        href = f"{root}index.html" if y == latest else f"{root}ar/{y}.html"
+        attr = ' aria-current="page"' if y == current else ""
+        links.append(f'<a href="{href}"{attr}>{y}</a>')
+    return f'<nav class="years" aria-label="Regnskapsår"><span class="muted">År:</span> {"".join(links)}</nav>'
+
+
+def index_page(ds: Dataset, root: str = "", years: list[int] | None = None) -> str:
     n = len(ds.agencies)
     n_flag = sum(a.flagged for a in ds.agencies)
     stats = [
@@ -188,8 +212,8 @@ def index_page(ds: Dataset) -> str:
                    if a.coverage else '<td class="num" data-sort="">–</td>')
         flag_sort = (2 if a.coverage and a.coverage.flagged else 0) + (1 if a.flagged else 0)
         rows.append(
-            f'<tr data-name="{escape(a.name.lower())} {a.orgnr}">'
-            f'<td><a href="virksomhet/{a.slug}.html">{escape(a.name)}</a></td>'
+            f'<tr data-name="{escape(a.name.lower())} {a.orgnr}" data-flags="{escape(_row_flags(a))}">'
+            f'<td><a href="{root}virksomhet/{a.slug}.html">{escape(a.name)}</a></td>'
             f'<td class="num" data-sort="{a.contract_count}">{a.contract_count}</td>'
             f'<td class="num" data-sort="{_num(a.contract_sum)}" title="{kr_full(a.contract_sum)}">{kr(a.contract_sum)}</td>'
             f'<td class="num" data-sort="{_num(a.spend_sum)}" title="{kr_full(a.spend_sum)}">{kr(a.spend_sum)}</td>'
@@ -198,6 +222,16 @@ def index_page(ds: Dataset) -> str:
             f'<td data-sort="{flag_sort}">{_flag_badges(a)}</td>'
             "</tr>"
         )
+
+    options = [("", "Alle virksomheter"), ("avvik", f"Avvik over {pct(ds.threshold, decimals=0)}"),
+               ("over", "Mer i Doffin enn i regnskapet"), ("under", "Mindre i Doffin enn i regnskapet")]
+    if ds.has_coverage:
+        options[1:1] = [("dekning", "Uvanlig dekning (alle)"), ("dekning-hoy", "Uvanlig høy dekning"),
+                        ("dekning-lav", "Uvanlig lav dekning")]
+        groups = sorted({a.coverage.peer_group for a in ds.agencies if a.coverage},
+                        key=lambda g: ["små", "mellomstore", "store"].index(g) if g in ("små", "mellomstore", "store") else 9)
+        options += [(f"gruppe-{g}", f"{g.capitalize()} virksomheter") for g in groups]
+    select = "".join(f'<option value="{escape(v)}">{escape(label)}</option>' for v, label in options)
 
     intro = (
         f"<p class=\"lede\">Hvor mye av statens innkjøp kan du faktisk se i Doffin? Kronesporet legger "
@@ -208,15 +242,18 @@ def index_page(ds: Dataset) -> str:
 <section class="hero">
   <h1>Hvor går statens penger?</h1>
   {intro}
+  {_year_nav(years or [ds.year], ds.year, root)}
 </section>
 <div class="stats">{stat_html}</div>
-{_caveat(ds)}
+{_caveat(ds, root)}
 <section>
   <div class="table-tools">
     <label for="filter">Søk etter virksomhet</label>
     <input id="filter" data-filter="agencies" type="search" placeholder="F.eks. vegvesen eller 971032081" autocomplete="off">
+    <label for="flag-filter" class="visually-hidden">Vis</label>
+    <select id="flag-filter" data-flag-filter="agencies">{select}</select>
     <span class="muted small" data-count-for="agencies" aria-live="polite"></span>
-    <a class="download" href="data/virksomheter.csv" download>Last ned CSV</a>
+    <a class="download" href="{root}data/virksomheter.csv" download>Last ned CSV</a>
   </div>
   <div class="table-scroll">
   <table class="sortable" id="agencies">
@@ -227,7 +264,9 @@ def index_page(ds: Dataset) -> str:
   <p class="muted small">Klikk på en kolonne for å sortere. Beløp i kortform; hold pekeren over for nøyaktig tall.</p>
 </section>
 """
-    return page(SITE_NAME, body, active="index")
+    latest = max(years or [ds.year])
+    title = SITE_NAME if ds.year == latest else f"Statlige virksomheter {ds.year}"
+    return page(title, body, root=root, active="index")
 
 
 # --- virksomhetsside ----------------------------------------------------------
@@ -268,14 +307,44 @@ def top_suppliers(ds: Dataset, a: Agency, limit: int = 10) -> list[tuple[str, st
     return rows[:limit]  # type: ignore[return-value]
 
 
-def agency_page(ds: Dataset, a: Agency) -> str:
+def _spend_label(key: str) -> str:
+    if key in SPEND_PARTS:
+        return SPEND_PARTS[key]
+    return f"Artskonto {key}" if key.isdigit() else key
+
+
+def _history_table(history: list[tuple[int, Agency]], current: int) -> str:
+    """Utvikling over år for én virksomhet. history er (år, Agency)."""
+    has_cov = any(a.coverage for _, a in history)
+    head = ["År", "Kontrakter", "Doffin", "Kjøp", "Avvik"] + (["Dekning"] if has_cov else []) + ["Flagg"]
+    thead = "".join(f'<th scope="col"{" data-type=\"num\"" if 0 < i < len(head) - 1 else ""}>{h}</th>'
+                    for i, h in enumerate(head))
+    rows = []
+    for year, a in sorted(history, key=lambda t: -t[0]):
+        cov = (f'<td class="num">{pct(a.coverage.ratio) if a.coverage else "–"}</td>' if has_cov else "")
+        mark = ' aria-current="true"' if year == current else ""
+        rows.append(
+            f'<tr{mark}><td>{year}</td><td class="num">{a.contract_count}</td>'
+            f'<td class="num" title="{kr_full(a.contract_sum)}">{kr(a.contract_sum)}</td>'
+            f'<td class="num" title="{kr_full(a.spend_sum)}">{kr(a.spend_sum)}</td>'
+            f'<td class="num dev dev-{a.direction}">{pct(a.deviation, signed=True)}</td>{cov}'
+            f"<td>{_flag_badges(a)}</td></tr>")
+    return (f'<section><h2>Utvikling</h2><div class="table-scroll"><table class="history">'
+            f'<thead><tr>{thead}</tr></thead><tbody>{"".join(rows)}</tbody></table></div></section>')
+
+
+def agency_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]] | None = None) -> str:
     facts = [
         ("Organisasjonsnummer", f'<a href="https://data.brreg.no/enhetsregisteret/oppslag/enheter/{escape(a.orgnr)}">'
                                 f'{escape(a.orgnr)}</a>'),
         (f"Kjøp av varer og tjenester {ds.year}", kr_full(a.spend_sum)),
     ]
-    for key, amount in a.spend_parts.items():
-        facts.append((f" {SPEND_PARTS.get(key, key)}", kr_full(amount)))
+    parts = [(f"\u2003{escape(_spend_label(k))}", kr_full(v))
+             for k, v in sorted(a.spend_parts.items(), key=lambda kv: (not kv[0].isdigit(), kv[0].zfill(4)))]
+    if len(parts) <= 3:
+        facts += parts
+    if a.spend_source:
+        facts.append(("\u2003Kilde", f"statsregnskapet ({escape(a.spend_source)})"))
     if ds.annualized:
         facts.append((f"Doffin-kontrakter som løper i {ds.year}", f"{a.contract_count}"))
         facts.append((f"Årsandel av kontraktsverdien {ds.year}", kr_full(a.contract_sum)))
@@ -290,6 +359,10 @@ def agency_page(ds: Dataset, a: Agency) -> str:
         facts.append(("Doffin-dekning", f"{pct(c.ratio)} (lignende virksomheter, {escape(c.peer_group)}: "
                                          f"median {pct(c.peer_median)})"))
     facts_html = "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in facts)
+    parts_html = ""
+    if len(parts) > 3:
+        parts_html = ('<details class="parts"><summary>Kjøpene fordelt på artskonto</summary><dl class="facts">'
+                      + "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in parts) + "</dl></details>")
 
     notes = []
     if a.coverage and a.coverage.flagged:
@@ -303,7 +376,7 @@ def agency_page(ds: Dataset, a: Agency) -> str:
         word = "høyere" if a.deviation > 0 else "lavere"
         notes.append(
             f"<li><strong>Avvik over {pct(ds.threshold, decimals=0)}.</strong> Doffin-summen er "
-            f"{pct(abs(a.deviation))} {word} enn kjøpene i årsrapporten. Det gjelder nesten alle virksomhetene, "
+            f"{pct(abs(a.deviation))} {word} enn kjøpene i regnskapet. Det gjelder nesten alle virksomhetene, "
             f"se <a href=\"../om.html#forbehold\">forbeholdene</a>.</li>")
     notes_html = f'<ul class="notes">{"".join(notes)}</ul>' if notes else ""
 
@@ -385,12 +458,13 @@ def agency_page(ds: Dataset, a: Agency) -> str:
   <div class="badges">{_flag_badges(a)}</div>
 </section>
 <div class="two-col">
-  <dl class="facts">{facts_html}</dl>
+  <div><dl class="facts">{facts_html}</dl>{parts_html}</div>
   <div>
     {notes_html}
     <p class="actions">{report}</p>
   </div>
 </div>
+{_history_table(history, ds.year) if history and len(history) > 1 else ""}
 {suppliers_html}
 <section>
   <h2>Doffin-kontrakter ({len(a.contracts)})</h2>
@@ -506,6 +580,7 @@ def export_rows(ds: Dataset) -> list[dict[str, object]]:
                 "flagget_dekning": int(c.flagged) if c else None,
             })
         row["kilde_arsrapport"] = a.report_url or ""
+        row["kilde_regnskap"] = a.spend_source or ""
         rows.append(row)
     return rows
 
@@ -515,13 +590,14 @@ def contract_rows(ds: Dataset) -> list[dict[str, object]]:
     for a in ds.agencies:
         for c in a.contracts:
             rows.append({
-                "virksomhet": a.name, "virksomhet_orgnr": a.orgnr, "kontrakt_id": c.id, "tittel": c.title,
+                "regnskapsår": ds.year, "virksomhet": a.name, "virksomhet_orgnr": a.orgnr,
+                "kontrakt_id": c.id, "tittel": c.title,
                 "leverandorer": "; ".join(w.name for w in c.suppliers),
                 "leverandor_orgnr": "; ".join(w.orgnr or "" for w in c.suppliers),
                 "publisert": c.published or "", "rammeavtale": int(c.is_framework),
                 "verdi_kr": round(c.value) if c.value is not None else "",
                 "verditype": c.value_type or "",
-                f"andel_{ds.year}_kr": round(c.year_value) if c.year_value is not None else "",
+                "andel_i_året_kr": round(c.year_value) if c.year_value is not None else "",
                 "lenke": c.url or "",
             })
     return rows
@@ -536,24 +612,51 @@ def _write_csv(path: Path, rows: list[dict[str, object]]) -> None:
     path.write_text("\ufeff" + buf.getvalue(), encoding="utf-8")
 
 
-def build_site(ds: Dataset, out: Path) -> int:
-    """Skriver hele nettstedet til `out`. Returnerer antall HTML-sider."""
-    if (out / "virksomhet").exists():
-        shutil.rmtree(out / "virksomhet")
+def build_site(datasets: Dataset | list[Dataset], out: Path) -> int:
+    """Skriver hele nettstedet til `out`. Returnerer antall HTML-sider.
+
+    Med flere år blir index.html siste år og ar/<år>.html de andre årene. Hver
+    virksomhet får én side for det siste året den har tall, med utviklingen over
+    alle årene.
+    """
+    if isinstance(datasets, Dataset):
+        datasets = [datasets]
+    datasets = sorted(datasets, key=lambda d: d.year)
+    years = [d.year for d in datasets]
+    latest = datasets[-1]
+
+    for sub in ("virksomhet", "ar"):
+        if (out / sub).exists():
+            shutil.rmtree(out / sub)
     (out / "virksomhet").mkdir(parents=True, exist_ok=True)
     (out / "data").mkdir(exist_ok=True)
     shutil.copytree(ASSETS, out / "assets", dirs_exist_ok=True)
     (out / ".nojekyll").write_text("")
 
-    (out / "index.html").write_text(index_page(ds), encoding="utf-8")
-    (out / "om.html").write_text(about_page(ds), encoding="utf-8")
-    for a in ds.agencies:
-        (out / "virksomhet" / f"{a.slug}.html").write_text(agency_page(ds, a), encoding="utf-8")
+    pages = 2
+    (out / "index.html").write_text(index_page(latest, years=years), encoding="utf-8")
+    (out / "om.html").write_text(about_page(latest), encoding="utf-8")
+    if len(datasets) > 1:
+        (out / "ar").mkdir()
+        for ds in datasets[:-1]:
+            (out / "ar" / f"{ds.year}.html").write_text(index_page(ds, root="../", years=years), encoding="utf-8")
+            pages += 1
 
-    rows = export_rows(ds)
+    history: dict[str, list[tuple[int, Agency]]] = {}
+    newest: dict[str, tuple[Dataset, Agency]] = {}
+    for ds in datasets:
+        for a in ds.agencies:
+            history.setdefault(a.slug, []).append((ds.year, a))
+            newest[a.slug] = (ds, a)
+    for slug, (ds, a) in newest.items():
+        (out / "virksomhet" / f"{slug}.html").write_text(agency_page(ds, a, history[slug]), encoding="utf-8")
+        pages += 1
+
+    rows = [r for ds in datasets for r in export_rows(ds)]
     _write_csv(out / "data" / "virksomheter.csv", rows)
-    _write_csv(out / "data" / "kontrakter.csv", contract_rows(ds))
-    meta = {"år": ds.year, "årsfordelt": ds.annualized, "terskel": ds.threshold,
-            "lisens": "NLOD 2.0", "kilder": ["Doffin (Digdir)", "Kudos (DFØ)"], "virksomheter": rows}
+    _write_csv(out / "data" / "kontrakter.csv", [r for ds in datasets for r in contract_rows(ds)])
+    meta = {"år": years, "årsfordelt": latest.annualized, "terskel": latest.threshold,
+            "lisens": "NLOD 2.0", "kilder": ["Doffin (Digdir)", "Kudos (DFØ)", "Statsregnskapet (DFØ)"],
+            "virksomheter": rows}
     (out / "data" / "virksomheter.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1), encoding="utf-8")
-    return 2 + len(ds.agencies)
+    return pages

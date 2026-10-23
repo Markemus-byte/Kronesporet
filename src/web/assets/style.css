@@ -117,3 +117,13 @@ td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: now
 .site-footer p { margin: .3rem 0; }
 td.suppliers { font-size: .88rem; min-width: 10rem; }
 .orgnr { font-size: .8rem; color: var(--muted); margin-left: 4px; }
+.table-tools select { padding: 8px 10px; font: inherit; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--text); }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.years { margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.years a { padding: 3px 10px; border: 1px solid var(--line); border-radius: 999px; text-decoration: none; background: var(--surface); }
+.years a[aria-current="page"] { background: var(--accent); color: var(--surface); border-color: var(--accent); }
+.history td.num, .history th { white-space: nowrap; }
+.parts { margin-top: 10px; }
+.parts summary { cursor: pointer; color: var(--accent); }
+.parts .facts { margin-top: 8px; }
+tr[aria-current="true"] td { font-weight: 600; }
