@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import sqlite3
 import sys
 from datetime import date
 from pathlib import Path
@@ -54,6 +55,7 @@ from src.analysis.annualize import (  # noqa: E402
 from src.analysis.coverage import PEER_BANDS, Z_THRESHOLD, flag_coverage_outliers  # noqa: E402
 from src.collectors.doffin import DoffinClient, collect, init_db, save_contracts  # noqa: E402
 from src.collectors.kudos_arsrapport import load_kudos_purchases  # noqa: E402
+from src.collectors.brreg import load_subunits, parent_map  # noqa: E402
 from src.collectors.statsregnskap import is_raadata, load_raadata_xlsx, load_utgifter_xlsx  # noqa: E402
 
 
@@ -78,7 +80,8 @@ def parse_args() -> argparse.Namespace:
     ap.add_argument("--posts", default="1-49",
                     help="Postene som tas med fra xlsx-rapporten, f.eks. 1-49 (drift og investering) eller 1-99")
     ap.add_argument("--no-brreg", action="store_true",
-                    help="Ikke slå opp kapittelnavn i Enhetsregisteret (bare navnetreff mot Doffin)")
+                    help="Ikke bruk Enhetsregisteret: verken kapittelnavn (xlsx-rapporten) eller underenheter "
+                         "(kunngjøringer fra f.eks. politidistriktene føres da ikke på Politiet)")
     ap.add_argument("--top", type=int, default=10, help="Vis de N største flaggene")
     ap.add_argument("--z-threshold", type=float, default=Z_THRESHOLD,
                     help="Flagg Doffin-dekning som avviker mer enn så mange robuste standardavvik fra lignende virksomheter")
@@ -100,6 +103,10 @@ def parse_args() -> argparse.Namespace:
     for field in ("year", "orgnr", "name", "amount", "artskonto"):
         ap.add_argument(f"--col-{field}", help=f"Kolonnenavn for {field} i statsregnskap-CSV")
     return ap.parse_args()
+
+
+def _spend_orgnrs(conn: sqlite3.Connection) -> set[str]:
+    return {r[0] for r in conn.execute("SELECT DISTINCT orgnr FROM statsregnskap WHERE orgnr IS NOT NULL")}
 
 
 def main() -> int:
@@ -140,17 +147,23 @@ def main() -> int:
                 print(f"Feil i statsregnskap-filen: {e}", file=sys.stderr)
                 return 1
             print(f"[3/4] Lastet {rows} rader fra {path.name}")
+        if a.statsregnskap and not a.no_brreg:
+            # Underenheter først, så Kudos ikke prøver politidistrikter o.l. som egne virksomheter
+            load_subunits(conn, _spend_orgnrs(conn))
         if a.kudos:
-            print(f"[3/4] Henter årsrapporter {a.year} fra Kudos for virksomheter uten tall i statsregnskapet (topp {a.kudos_top or 'alle'} kjøpere) ...")
+            print(f"[3/4] Henter årsrapporter {a.year} fra Kudos for virksomheter uten tall i statsregnskapet "
+                  f"(topp {a.kudos_top or 'alle'} kjøpere) ...")
             tried, found = load_kudos_purchases(conn, a.year, a.kudos_top or None)
             print(f"      Kjøpstall funnet for {found} av {tried}")
+        if (a.statsregnskap or a.kudos) and not a.no_brreg:
+            n_sub = load_subunits(conn, _spend_orgnrs(conn))
+            print(f"      {n_sub} underenheter/organisasjonsledd fra Enhetsregisteret føres på virksomheten sin")
 
         # 4. Årsfordeling + join + flagging
         compare = a.kudos or a.statsregnskap is not None
         annualized = compare and not a.no_annualize
         if annualized:
-            buyers = {r[0] for r in conn.execute(
-                "SELECT DISTINCT orgnr FROM statsregnskap WHERE orgnr IS NOT NULL")}
+            buyers = _spend_orgnrs(conn) | set(parent_map(conn))
             # Alle regnskapsår (flere rådatafiler gir flere år) pluss --history år før det første,
             # så kontrakter tildelt før perioden også får sin årsandel
             spend_years = [r[0] for r in conn.execute("SELECT DISTINCT year FROM statsregnskap")] or [a.year]

@@ -33,6 +33,8 @@ import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 
+from src.collectors.brreg import parent_map
+
 THRESHOLD = 0.05  # 5 %: flagg når kontraktsum og regnskap avviker mer enn dette
 FLAG_TYPE = "doffin_avvik"
 
@@ -267,6 +269,16 @@ def build_comparisons(
             """,
             (currency,),
         ).fetchall()
+    if not annualized:
+        # Underenheter føres på regnskapsvirksomheten (doffin_contract_years har det allerede)
+        parents = parent_map(conn)
+        merged: dict[tuple[str, int], list] = {}
+        for org, name, yr, total, n in contracts:
+            key = (parents.get(org, org), yr)
+            m = merged.setdefault(key, [name, 0.0, 0])
+            m[1] += total
+            m[2] += n
+        contracts = [(org, name, yr, total, n) for (org, yr), (name, total, n) in merged.items()]
     by_org = {(org, yr): (name, total, n) for org, name, yr, total, n in contracts}
     by_name = {(normalize_name(name), yr): (org, total, n) for org, name, yr, total, n in contracts}
 

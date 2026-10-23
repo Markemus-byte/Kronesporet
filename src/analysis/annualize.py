@@ -16,11 +16,16 @@ Kontraktsperiode (i prioritert rekkefølge, lest av src/collectors/doffin.py):
 Uten startdato regnes perioden fra publiseringsdatoen for tildelingen.
 
 Resultatet ligger i tabellen `doffin_contract_years` (én rad per kontrakt og år).
+buyer_orgnr der er regnskapsvirksomheten: kjøpere som er underenheter eller
+organisasjonsledd (tabellen `orgnr_parent`, se src/collectors/brreg.py) føres
+på virksomheten de hører til i statsregnskapet.
 """
 from __future__ import annotations
 
 import sqlite3
 from datetime import date, timedelta
+
+from src.collectors.brreg import parent_map
 
 DEFAULT_FRAMEWORK_MONTHS = 48.0
 DEFAULT_CONTRACT_MONTHS = 24.0
@@ -116,9 +121,11 @@ def annualize_contracts(
         """,
         (currency,),
     ).fetchall()
+    parents = parent_map(conn)
     counts: dict[str, int] = {}
     out = []
     for cid, org, value, pub, s, e, months, src, fw in rows:
+        org = parents.get(org, org)
         period = contract_period(pub, s, e, months, src, fw, default_framework_months, default_contract_months)
         if period is None:
             continue

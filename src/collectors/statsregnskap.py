@@ -302,6 +302,8 @@ def load_raadata_xlsx(conn: sqlite3.Connection, path: str | Path) -> tuple[int, 
 
     sums: dict[tuple[str, str], float] = {}
     names: dict[str, str] = {}
+    org_names: dict[str, str] = {}
+    unit_orgs: dict[str, set[str]] = {}
     for r in rows[head_i + 1:]:
         art = r.get(col["Artskonto"], "")
         orgnr = re.sub(r"\D", "", r.get(col["Orgnr"], ""))
@@ -312,7 +314,16 @@ def load_raadata_xlsx(conn: sqlite3.Connection, path: str | Path) -> tuple[int, 
         except ValueError:
             continue
         sums[(orgnr, art)] = sums.get((orgnr, art), 0.0) + amount
-        names.setdefault(orgnr, r.get(col.get("Virksomhet", ""), "") or r.get(col.get("Orgnavn", ""), ""))
+        org_names.setdefault(orgnr, r.get(col.get("Orgnavn", ""), ""))
+        unit = r.get(col.get("Virksomhet", ""), "")
+        if unit:
+            unit_orgs.setdefault(unit, set()).add(orgnr)
+            names.setdefault(orgnr, unit)
+    # «Virksomhet» er den rapporterende virksomheten og kan samle flere orgnr (Helsedirektoratet
+    # fører også HELFO). Bruk da navnet på orgnr («Orgnavn») så de skilles.
+    for orgnr in org_names:
+        if len(unit_orgs.get(names.get(orgnr, ""), ())) != 1:
+            names[orgnr] = org_names[orgnr] or names.get(orgnr, "")
 
     conn.executescript(ANALYSIS_SCHEMA)
     conn.execute("DELETE FROM statsregnskap WHERE source_file = ?", (path.name,))

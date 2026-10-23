@@ -34,6 +34,7 @@ from pathlib import Path
 import requests
 
 from src.analysis.join_and_flag import SCHEMA as ANALYSIS_SCHEMA
+from src.collectors.brreg import parent_map
 
 log = logging.getLogger(__name__)
 
@@ -357,6 +358,8 @@ def load_kudos_purchases(
     in_accounts = {o for (o,) in conn.execute(
         "SELECT DISTINCT orgnr FROM statsregnskap WHERE year = ? AND source_file NOT LIKE ?",
         (year, SOURCE_PREFIX + "%"))}
+    # Underenheter (politidistrikter o.l.) føres på virksomheten sin og har ikke egen årsrapport
+    in_accounts |= set(parent_map(conn))
     buyers = [b for b in buyers if b[0] not in in_accounts]
     found = 0
     for orgnr, name, _ in buyers:

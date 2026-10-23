@@ -36,6 +36,10 @@ python scripts/run_phase1.py --year 2025 --kudos --statsregnskap \
   Med `--kudos` hentes kjøpstallene deres fra årsrapportene i stedet (se under);
   virksomheter som finnes i rådata hentes ikke fra Kudos.
 - Doffin-tildelinger hentes for alle regnskapsårene pluss `--history` år før det første.
+- Mange virksomheter kunngjør på underenheter eller organisasjonsledd: politidistriktene og
+  Politiets fellestjenester for Politiet, FLO for Forsvaret. Disse slås opp i Enhetsregisteret
+  (tabellen `orgnr_parent`, `src/collectors/brreg.py`) og føres på virksomheten i regnskapet.
+  En underenhet som selv står i regnskapet (f.eks. HELFO under Helsedirektoratet) beholder sitt eget orgnr.
 
 ### Uten statsregnskap-fil: årsrapportene i Kudos
 
