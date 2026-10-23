@@ -25,6 +25,7 @@ def main() -> None:
     ap.add_argument("--db", type=Path, default=ROOT / "data" / "offentlig_forbruk.db")
     ap.add_argument("--out", type=Path, default=ROOT / "docs", help="Mappen nettstedet skrives til")
     ap.add_argument("--year", type=int, help="Regnskapsår (standard: siste år i databasen)")
+    ap.add_argument("--cname", help="Eget domene for GitHub Pages, f.eks. kronesporet.no (skriver docs/CNAME)")
     ap.add_argument("--threshold", type=float, default=THRESHOLD, help="Terskelen flaggene ble laget med")
     args = ap.parse_args()
 
@@ -32,6 +33,8 @@ def main() -> None:
         sys.exit(f"Fant ikke {args.db}. Kjør scripts/run_phase1.py først, eller gi --db.")
     ds = load_dataset(args.db, year=args.year, threshold=args.threshold)
     pages = build_site(ds, args.out)
+    if args.cname:
+        (args.out / "CNAME").write_text(args.cname.strip() + "\n")
     flagged = sum(a.flagged for a in ds.agencies)
     print(f"{pages} sider skrevet til {args.out} ({len(ds.agencies)} virksomheter, {ds.year}, "
           f"{flagged} med avvik over {ds.threshold:.0%}"

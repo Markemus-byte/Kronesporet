@@ -5,7 +5,9 @@ Kilden er databasen som `scripts/run_phase1.py` skriver: tabellene
 kontraktverdien er årsfordelt) `doffin_contract_years`.
 
 Finnes tabellen `doffin_coverage` (src/analysis/coverage.py), tas
-Doffin-dekningsgraden og dekningsflagget med; ellers bygges siden uten dem.
+Doffin-dekningsgraden og dekningsflagget med, og finnes `doffin_winners`
+(scripts/fetch_winners.py), får kontraktene leverandører; ellers bygges
+siden uten dem.
 """
 from __future__ import annotations
 
@@ -13,6 +15,12 @@ import re
 import sqlite3
 from dataclasses import dataclass, field
 from pathlib import Path
+
+@dataclass
+class Supplier:
+    name: str
+    orgnr: str | None
+
 
 @dataclass
 class Contract:
@@ -31,6 +39,7 @@ class Contract:
     last_year: int | None
     is_framework: bool
     value_type: str | None       # 'awarded' | 'estimated'
+    suppliers: list[Supplier] = field(default_factory=list)  # vinnerne, når doffin_winners finnes
 
 
 @dataclass
@@ -77,6 +86,7 @@ class Dataset:
     threshold: float
     agencies: list[Agency]
     has_coverage: bool = False
+    has_suppliers: bool = False
 
 
 def display_name(name: str) -> str:
@@ -149,8 +159,17 @@ def load_dataset(db_path: str | Path, year: int | None = None, threshold: float 
             a.contracts = _contracts(conn, a.orgnr, year, annualized)
 
         agencies.sort(key=lambda a: a.name.lower())
+        has_suppliers = False
+        if _has_table(conn, "doffin_winners"):
+            by_contract: dict[str, list[Supplier]] = {}
+            for w in conn.execute("SELECT contract_id, name, orgnr FROM doffin_winners ORDER BY contract_id, position"):
+                by_contract.setdefault(w["contract_id"], []).append(Supplier(name=w["name"], orgnr=w["orgnr"]))
+            for a in agencies:
+                for c in a.contracts:
+                    c.suppliers = by_contract.get(c.id, [])
+                    has_suppliers = has_suppliers or bool(c.suppliers)
         return Dataset(year=year, annualized=annualized, threshold=threshold, agencies=agencies,
-                       has_coverage=any(a.coverage for a in agencies))
+                       has_coverage=any(a.coverage for a in agencies), has_suppliers=has_suppliers)
     finally:
         conn.close()
 

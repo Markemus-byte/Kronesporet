@@ -231,6 +231,34 @@ def _period(c: Contract) -> str:
     return "–"
 
 
+def _suppliers_cell(c: Contract) -> str:
+    if not c.suppliers:
+        return '<td class="muted" data-sort="">–</td>'
+    names = [escape(w.name) for w in c.suppliers]
+    full = escape("; ".join(f"{w.name} ({w.orgnr})" if w.orgnr else w.name for w in c.suppliers))
+    shown = names if len(names) <= 3 else names[:2] + [f"og {len(names) - 2} til"]
+    return f'<td class="suppliers" data-sort="{names[0]}" title="{full}">{"<br>".join(shown)}</td>'
+
+
+def top_suppliers(ds: Dataset, a: Agency, limit: int = 10) -> list[tuple[str, str | None, int, float]]:
+    """(navn, orgnr, antall kontrakter, verdi) for de største leverandørene.
+
+    Verdien er årsandelen (eller hele verdien uten årsfordeling), delt likt når
+    flere leverandører vant samme kontrakt, siden Doffin sjelden fordeler den.
+    """
+    acc: dict[str, list] = {}
+    for c in a.contracts:
+        if not c.suppliers:
+            continue
+        part = (c.year_value or 0.0) / len(c.suppliers)
+        for w in c.suppliers:
+            row = acc.setdefault((w.orgnr or w.name).lower(), [w.name, w.orgnr, 0, 0.0])
+            row[2] += 1
+            row[3] += part
+    rows = sorted((tuple(r) for r in acc.values()), key=lambda r: (-r[3], -r[2], r[0]))
+    return rows[:limit]  # type: ignore[return-value]
+
+
 def agency_page(ds: Dataset, a: Agency) -> str:
     facts = [
         ("Organisasjonsnummer", f'<a href="https://data.brreg.no/enhetsregisteret/oppslag/enheter/{escape(a.orgnr)}">'
@@ -273,13 +301,15 @@ def agency_page(ds: Dataset, a: Agency) -> str:
     report = (f'<a class="button" href="{escape(a.report_url)}">Årsrapport {ds.year} i Kudos (PDF)</a>'
               if a.report_url else "")
 
+    cols = [("Kontrakt", "text")]
+    if ds.has_suppliers:
+        cols.append(("Leverandør", "text"))
+    cols.append(("Tildelt", "num"))
     if ds.annualized:
-        cols = ["Kontrakt", "Tildelt", "Løper", "Hele verdien", f"Andel {ds.year}"]
+        cols += [("Løper", "num"), ("Hele verdien", "num"), (f"Andel {ds.year}", "num")]
     else:
-        cols = ["Kontrakt", "Tildelt", "Verdi"]
-    thead = "".join(
-        f'<th scope="col" data-type="{"text" if i == 0 else "num"}"><button type="button">{c}</button></th>'
-        for i, c in enumerate(cols))
+        cols.append(("Verdi", "num"))
+    thead = "".join(f'<th scope="col" data-type="{t}"><button type="button">{c}</button></th>' for c, t in cols)
     rows = []
     for c in a.contracts:
         title = escape(c.title)
@@ -292,10 +322,10 @@ def agency_page(ds: Dataset, a: Agency) -> str:
         if c.period_source == "standard":
             tags.append("antatt varighet")
         tag_html = "".join(f'<span class="tag">{t}</span>' for t in tags)
-        cells = [
-            f"<td>{link}{tag_html}</td>",
-            f'<td class="num" data-sort="{escape(c.published or "")}">{escape((c.published or "–")[:10])}</td>',
-        ]
+        cells = [f"<td>{link}{tag_html}</td>"]
+        if ds.has_suppliers:
+            cells.append(_suppliers_cell(c))
+        cells.append(f'<td class="num" data-sort="{escape(c.published or "")}">{escape((c.published or "–")[:10])}</td>')
         if ds.annualized:
             src = PERIOD_SOURCES.get(c.period_source or "", "")
             cells.append(f'<td class="num" data-sort="{c.first_year or ""}" title="{escape(src)}">{_period(c)}</td>')
@@ -314,6 +344,26 @@ def agency_page(ds: Dataset, a: Agency) -> str:
                if ds.annualized else
                f"Kontrakter i Doffin der {escape(a.name)} er kjøper, tildelt i {ds.year}.")
 
+    suppliers_html = ""
+    top = top_suppliers(ds, a) if ds.has_suppliers else []
+    if top:
+        value_label = f"Andel {ds.year}" if ds.annualized else "Verdi"
+        srows = "".join(
+            f"<tr><td>{escape(name)}"
+            + (f' <a class="orgnr" href="https://data.brreg.no/enhetsregisteret/oppslag/enheter/{escape(orgnr)}">'
+               f"{escape(orgnr)}</a>" if orgnr else "")
+            + f'</td><td class="num">{n}</td><td class="num" title="{kr_full(v)}">{kr(v)}</td></tr>'
+            for name, orgnr, n, v in top)
+        suppliers_html = f"""
+<section>
+  <h2>Største leverandører</h2>
+  <p class="muted">Etter verdi av kontraktene som løper i {ds.year}. Når flere leverandører vant samme kontrakt
+  (typisk rammeavtaler), er verdien delt likt mellom dem, fordi Doffin sjelden viser fordelingen.</p>
+  <div class="table-scroll"><table><thead><tr><th scope="col">Leverandør</th>
+  <th scope="col" data-type="num">Kontrakter</th><th scope="col" data-type="num">{value_label}</th></tr></thead>
+  <tbody>{srows}</tbody></table></div>
+</section>"""
+
     body = f"""
 <p class="crumbs"><a href="../index.html">Alle virksomheter</a></p>
 <section class="hero">
@@ -327,6 +377,7 @@ def agency_page(ds: Dataset, a: Agency) -> str:
     <p class="actions">{report}</p>
   </div>
 </div>
+{suppliers_html}
 <section>
   <h2>Doffin-kontrakter ({len(a.contracts)})</h2>
   <p class="muted">{explain}</p>
@@ -377,7 +428,7 @@ kunngjorte kontrakter i Doffin med det statlige virksomheter selv rapporterer at
 <dt><a href="https://doffin.no">Doffin</a></dt>
 <dd>Den nasjonale kunngjøringsdatabasen for offentlige anskaffelser, drevet av Digdir. Vi henter
 kunngjøringer om tildelte kontrakter, med kjøperens organisasjonsnummer, tittel og tildelt verdi.
-Mangler tildelt verdi, brukes anslått verdi (merket «anslått verdi»).</dd>
+Mangler tildelt verdi, brukes anslått verdi (merket «anslått verdi»).{" Leverandørene er vinnerne slik de står i kunngjøringen, med organisasjonsnummer når det er oppgitt." if ds.has_suppliers else ""}</dd>
 <dt><a href="https://kudos.dfo.no">Kudos</a> (DFØ)</dt>
 <dd>Kunnskapsdatabasen for offentlige utredninger, der statlige virksomheter publiserer årsrapportene sine.
 Fra den standardiserte «Oppstilling av artskontorapportering» bruker vi
@@ -411,7 +462,8 @@ ikke leses.</li>
 
 <h2>Åpen kildekode</h2>
 <p>Innsamling, kobling og denne nettsiden er laget med åpen kode. Tallene bak forsiden kan lastes ned som
-<a href="data/virksomheter.csv">CSV</a> eller <a href="data/virksomheter.json">JSON</a>.</p>
+<a href="data/virksomheter.csv">CSV</a> eller <a href="data/virksomheter.json">JSON</a>, og alle kontraktene
+med leverandører som <a href="data/kontrakter.csv">kontrakter.csv</a>.</p>
 </div>
 """
     return page("Om dataene", body, active="om")
@@ -443,6 +495,32 @@ def export_rows(ds: Dataset) -> list[dict[str, object]]:
     return rows
 
 
+def contract_rows(ds: Dataset) -> list[dict[str, object]]:
+    rows = []
+    for a in ds.agencies:
+        for c in a.contracts:
+            rows.append({
+                "virksomhet": a.name, "virksomhet_orgnr": a.orgnr, "kontrakt_id": c.id, "tittel": c.title,
+                "leverandorer": "; ".join(w.name for w in c.suppliers),
+                "leverandor_orgnr": "; ".join(w.orgnr or "" for w in c.suppliers),
+                "publisert": c.published or "", "rammeavtale": int(c.is_framework),
+                "verdi_kr": round(c.value) if c.value is not None else "",
+                "verditype": c.value_type or "",
+                f"andel_{ds.year}_kr": round(c.year_value) if c.year_value is not None else "",
+                "lenke": c.url or "",
+            })
+    return rows
+
+
+def _write_csv(path: Path, rows: list[dict[str, object]]) -> None:
+    buf = io.StringIO()
+    if rows:
+        w = csv.DictWriter(buf, fieldnames=list(rows[0]), delimiter=";")
+        w.writeheader()
+        w.writerows(rows)
+    path.write_text("\ufeff" + buf.getvalue(), encoding="utf-8")
+
+
 def build_site(ds: Dataset, out: Path) -> int:
     """Skriver hele nettstedet til `out`. Returnerer antall HTML-sider."""
     if (out / "virksomhet").exists():
@@ -458,12 +536,8 @@ def build_site(ds: Dataset, out: Path) -> int:
         (out / "virksomhet" / f"{a.slug}.html").write_text(agency_page(ds, a), encoding="utf-8")
 
     rows = export_rows(ds)
-    buf = io.StringIO()
-    if rows:
-        w = csv.DictWriter(buf, fieldnames=list(rows[0]), delimiter=";")
-        w.writeheader()
-        w.writerows(rows)
-    (out / "data" / "virksomheter.csv").write_text("﻿" + buf.getvalue(), encoding="utf-8")
+    _write_csv(out / "data" / "virksomheter.csv", rows)
+    _write_csv(out / "data" / "kontrakter.csv", contract_rows(ds))
     meta = {"år": ds.year, "årsfordelt": ds.annualized, "terskel": ds.threshold,
             "lisens": "NLOD 2.0", "kilder": ["Doffin (Digdir)", "Kudos (DFØ)"], "virksomheter": rows}
     (out / "data" / "virksomheter.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1), encoding="utf-8")

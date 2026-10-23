@@ -499,6 +499,52 @@ def collect(
     return contracts
 
 
+# --- Leverandører (vinnere) ---------------------------------------------------
+
+_ORG_SECTION_LABELS = ("virksomheter", "organisations")
+_NAME_LABELS = ("offisielt navn", "official name")
+_ORGNR_LABELS = ("registreringsnummer", "registration number", "national registration number")
+_WINNER_ROLE_LABELS = ("vinner av disse delkontraktene", "winner of these lots")
+
+
+@dataclass
+class Winner:
+    name: str
+    orgnr: str | None
+
+
+def _label(node: dict[str, Any]) -> str:
+    return str(node.get("label") or "").strip().lower()
+
+
+def winners(notice: dict[str, Any]) -> list[Winner]:
+    """Leverandørene som vant kontrakten, med orgnr når kunngjøringen har det.
+
+    eForms (og TED-varianten med engelske etiketter) har en liste over
+    virksomheter der vinnerne har rollen «Vinner av disse delkontraktene».
+    Finnes ikke den, brukes `awardedNames` fra detaljvisningen (bare navn).
+    """
+    found: dict[str, Winner] = {}
+    for section in notice.get("eform") or []:
+        if _label(section) not in _ORG_SECTION_LABELS:
+            continue
+        for org in section.get("sections") or []:
+            nodes = list(_walk_eform(org.get("sections")))
+            if not any(_label(n).startswith(_WINNER_ROLE_LABELS) for n in nodes):
+                continue
+            name = next((str(n.get("value")).strip() for n in nodes
+                         if _label(n) in _NAME_LABELS and n.get("value")), None)
+            orgnr = next((_clean_orgnr(n.get("value")) for n in nodes
+                          if _label(n) in _ORGNR_LABELS and n.get("value")), None)
+            if name:
+                found.setdefault((orgnr or name).lower(), Winner(name=name, orgnr=orgnr))
+    if not found:
+        for name in notice.get("awardedNames") or []:
+            if name and str(name).strip():
+                found.setdefault(str(name).strip().lower(), Winner(name=str(name).strip(), orgnr=None))
+    return list(found.values())
+
+
 # ---------------------------------------------------------------------------
 # SQLite
 # ---------------------------------------------------------------------------
@@ -523,6 +569,15 @@ CREATE TABLE IF NOT EXISTS doffin_contracts (
     duration_source  TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_doffin_buyer_year ON doffin_contracts (buyer_orgnr, year);
+
+CREATE TABLE IF NOT EXISTS doffin_winners (
+    contract_id  TEXT,
+    position     INTEGER,  -- rekkefølgen i kunngjøringen
+    name         TEXT,
+    orgnr        TEXT,     -- NULL når kunngjøringen bare har navn
+    PRIMARY KEY (contract_id, position)
+);
+CREATE INDEX IF NOT EXISTS idx_doffin_winners_orgnr ON doffin_winners (orgnr);
 """
 # Kolonner lagt til etter fase 1; eldre databaser får dem med ALTER TABLE.
 _ADDED_COLUMNS = {
@@ -554,6 +609,59 @@ def save_contracts(conn: sqlite3.Connection, contracts: Iterable[DoffinContract]
     conn.executemany(sql, rows)
     conn.commit()
     return len(rows)
+
+
+def save_winners(conn: sqlite3.Connection, contract_id: str, found: Iterable[Winner]) -> int:
+    conn.execute("DELETE FROM doffin_winners WHERE contract_id = ?", (contract_id,))
+    rows = [(contract_id, i, w.name, w.orgnr) for i, w in enumerate(found)]
+    conn.executemany("INSERT INTO doffin_winners (contract_id, position, name, orgnr) VALUES (?, ?, ?, ?)", rows)
+    return len(rows)
+
+
+def collect_winners(
+    conn: sqlite3.Connection,
+    client: DoffinClient | None = None,
+    buyers: set[str] | None = None,
+    year_from: int | None = None,
+    running_in: int | None = None,
+    refresh: bool = False,
+) -> tuple[int, int]:
+    """Hent vinnerne for kontraktene i databasen (ett detaljkall per kunngjøring, med cache).
+
+    buyers/year_from begrenser hvilke kontrakter som hentes; running_in tar bare
+    kontrakter som løper i det året (krever doffin_contract_years). Uten refresh hoppes
+    kontrakter som allerede har vinnere over, så kjøringen kan avbrytes og fortsettes.
+    Returnerer (antall kunngjøringer behandlet, antall vinnere lagret).
+    """
+    client = client or DoffinClient()
+    sql = "SELECT id FROM doffin_contracts c WHERE 1 = 1"
+    params: list[Any] = []
+    if buyers is not None:
+        sql += f" AND buyer_orgnr IN ({', '.join('?' for _ in buyers)})"
+        params += sorted(buyers)
+    if year_from is not None:
+        sql += " AND year >= ?"
+        params.append(year_from)
+    if running_in is not None:
+        sql += " AND id IN (SELECT contract_id FROM doffin_contract_years WHERE year = ?)"
+        params.append(running_in)
+    if not refresh:
+        sql += " AND NOT EXISTS (SELECT 1 FROM doffin_winners w WHERE w.contract_id = c.id)"
+    ids = [r[0] for r in conn.execute(sql + " ORDER BY id", params)]
+    done = saved = 0
+    for i, notice_id in enumerate(ids, 1):
+        try:
+            detail = client.notice(notice_id)
+        except DoffinError as e:
+            log.warning("Hopper over vinnere for %s: %s", notice_id, e)
+            continue
+        saved += save_winners(conn, notice_id, winners(detail))
+        done += 1
+        if i % 100 == 0:
+            conn.commit()
+            log.info("Vinnere: %d/%d", i, len(ids))
+    conn.commit()
+    return done, saved
 
 
 def main() -> None:

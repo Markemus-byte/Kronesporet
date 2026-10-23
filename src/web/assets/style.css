@@ -115,3 +115,5 @@ td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: now
 
 .site-footer { border-top: 1px solid var(--line); color: var(--muted); font-size: .88rem; padding: 1.2rem 0 2rem; }
 .site-footer p { margin: .3rem 0; }
+td.suppliers { font-size: .88rem; min-width: 10rem; }
+.orgnr { font-size: .8rem; color: var(--muted); margin-left: 4px; }
