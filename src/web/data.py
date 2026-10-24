@@ -41,6 +41,8 @@ class Contract:
     value_type: str | None       # 'awarded' | 'estimated'
     suppliers: list[Supplier] = field(default_factory=list)  # vinnerne, når doffin_winners finnes
     buyer_unit: str | None = None  # underenheten som står som kjøper i Doffin (f.eks. et politidistrikt)
+    lead_buyer: str | None = None  # første kjøper, for felles anskaffelser der virksomheten ikke står først
+    n_buyers: int = 1              # antall kjøpere i kunngjøringen
 
 
 @dataclass
@@ -74,6 +76,7 @@ class Agency:
     awarded_in_year_count: int = 0
     coverage: Coverage | None = None   # fylles når doffin_coverage finnes
     contracts: list[Contract] = field(default_factory=list)
+    joint: list[Contract] = field(default_factory=list)  # felles anskaffelser der virksomheten ikke står først
 
     @property
     def slug(self) -> str:
@@ -90,7 +93,8 @@ class Unmatched:
     orgnr: str
     name: str
     spend_sum: float
-    notices: int = 0                 # kunngjøringer i Doffin alle år
+    notices: int = 0                 # kunngjøringer i Doffin alle år, som første kjøper
+    joint: int = 0                   # felles anskaffelser der virksomheten er med, men ikke står først
     last_notice: int | None = None   # siste tildelingsår
     note: str = ""
 
@@ -179,6 +183,7 @@ class Breadth:
     ledger_years: list[int] = field(default_factory=list)
     report_rows: int = 0                                       # tall hentet fra årsrapporter i Kudos
     agencies: int = 0                                          # virksomheter med både regnskap og Doffin
+    joint: int = 0                                             # kunngjøringer med flere statlige kjøpere
     ledger_agencies: int = 0                                   # virksomheter i regnskapet
 
     @property
@@ -195,7 +200,12 @@ def load_breadth(db_path: str | Path) -> Breadth:
             b.contracts_by_year = {y: n for y, n in conn.execute(
                 "SELECT year, COUNT(*) FROM doffin_contracts WHERE year IS NOT NULL GROUP BY year")}
             b.contracts = sum(b.contracts_by_year.values())
-            b.buyers = one("SELECT COUNT(DISTINCT buyer_orgnr) FROM doffin_contracts")
+            state = "SELECT orgnr FROM statsregnskap" + (
+                " UNION SELECT child FROM orgnr_parent" if _has_table(conn, "orgnr_parent") else "")
+            b.buyers = one(f"SELECT COUNT(DISTINCT buyer_orgnr) FROM doffin_contracts WHERE buyer_orgnr IN ({state})")
+            if _has_table(conn, "doffin_buyers"):
+                b.joint = one(f"SELECT COUNT(*) FROM (SELECT contract_id FROM doffin_buyers WHERE orgnr IN ({state}) "
+                              "GROUP BY contract_id HAVING COUNT(DISTINCT orgnr) > 1)")
         if _has_table(conn, "doffin_winners"):
             b.winners = one("SELECT COUNT(*) FROM doffin_winners")
             b.suppliers = one("SELECT COUNT(DISTINCT orgnr) FROM doffin_winners WHERE orgnr IS NOT NULL AND orgnr != ''")
@@ -245,6 +255,7 @@ def load_dataset(db_path: str | Path, year: int | None = None, threshold: float 
         cov_cols = {r[1] for r in conn.execute("PRAGMA table_info(doffin_coverage)")} if has_coverage else set()
         extra = ", ".join(c if c in cov_cols else f"NULL AS {c}" for c in ("outlier", "years_outlier", "category"))
         has_parents = _has_table(conn, "orgnr_parent")
+        has_buyers = _has_table(conn, "doffin_buyers")
         for a in agencies:
             if has_coverage:
                 c = conn.execute(
@@ -279,6 +290,8 @@ def load_dataset(db_path: str | Path, year: int | None = None, threshold: float 
                 (a.orgnr, a.orgnr, year)).fetchone()
             a.awarded_in_year_count, a.awarded_in_year_sum = awarded[0], awarded[1]
             a.contracts = _contracts(conn, a.orgnr, year, annualized)
+            if has_buyers:
+                a.joint = _joint(conn, a.orgnr, has_parents)
 
         agencies.sort(key=lambda a: a.name.lower())
         has_suppliers = False
@@ -290,7 +303,7 @@ def load_dataset(db_path: str | Path, year: int | None = None, threshold: float 
                 for c in a.contracts:
                     c.suppliers = by_contract.get(c.id, [])
                     has_suppliers = has_suppliers or bool(c.suppliers)
-        unmatched = _unmatched(conn, year, {a.orgnr for a in agencies}, has_parents)
+        unmatched = _unmatched(conn, year, {a.orgnr for a in agencies}, has_parents, has_buyers)
         fetched = conn.execute("SELECT MAX(fetched_at) FROM doffin_contracts").fetchone()[0]
         data_date = f"{fetched[8:10]}.{fetched[5:7]}.{fetched[:4]}" if fetched and len(fetched) >= 10 else ""
         months = [m for a in agencies if (m := source_month(a.spend_source))]
@@ -301,7 +314,31 @@ def load_dataset(db_path: str | Path, year: int | None = None, threshold: float 
         conn.close()
 
 
-def _unmatched(conn: sqlite3.Connection, year: int, matched: set[str], has_parents: bool) -> list[Unmatched]:
+def _units(has_parents: bool, column: str = "buyer_orgnr") -> str:
+    """WHERE-uttrykk for virksomheten (?) og underenhetene (?), med to parametere."""
+    return (f"({column} = ? OR {column} IN (SELECT child FROM orgnr_parent WHERE parent = ?))" if has_parents
+            else f"({column} = ? OR {column} = ?)")
+
+
+def _joint(conn: sqlite3.Connection, orgnr: str, has_parents: bool) -> list[Contract]:
+    """Felles anskaffelser der virksomheten (eller en underenhet) er med, men ikke står som første kjøper.
+    Nyeste først."""
+    rows = conn.execute(
+        f"""SELECT c.id, c.title, c.url, c.value, c.value_type, c.publication_date, c.is_framework,
+                   (SELECT name FROM doffin_buyers WHERE contract_id = c.id AND position = 0) AS lead,
+                   (SELECT COUNT(*) FROM doffin_buyers WHERE contract_id = c.id) AS n
+            FROM doffin_contracts c
+            WHERE c.id IN (SELECT contract_id FROM doffin_buyers WHERE position > 0 AND {_units(has_parents, "orgnr")})
+              AND NOT {_units(has_parents, "c.buyer_orgnr")}
+            ORDER BY c.publication_date DESC, c.id""", (orgnr, orgnr, orgnr, orgnr)).fetchall()
+    return [Contract(id=r[0], title=r[1] or "(uten tittel)", url=r[2], value=r[3], year_value=None, share=None,
+                     published=r[5], start_date=None, end_date=None, duration_months=None, period_source=None,
+                     first_year=None, last_year=None, is_framework=bool(r[6]), value_type=r[4],
+                     lead_buyer=display_name(r[7] or ""), n_buyers=r[8]) for r in rows]
+
+
+def _unmatched(conn: sqlite3.Connection, year: int, matched: set[str], has_parents: bool,
+               has_buyers: bool = False) -> list[Unmatched]:
     """Virksomheter med kjøp i regnskapet for året som ikke er i sammenligningen fordi Doffin ikke har
     kontrakter for dem som løper i året. Størst kjøp først."""
     out = []
@@ -316,7 +353,9 @@ def _unmatched(conn: sqlite3.Connection, year: int, matched: set[str], has_paren
                                (orgnr, orgnr)).fetchone()
         name = display_name(name or orgnr)
         note = UNMATCHED_NOTES.get(orgnr) or (STATSFORVALTER_NOTE if name.lower().startswith(("statsforvalter", "statsforvaltar")) else "")
-        out.append(Unmatched(orgnr=orgnr, name=name, spend_sum=spend, notices=n, last_notice=last, note=note))
+        joint = len(_joint(conn, orgnr, has_parents)) if has_buyers else 0
+        out.append(Unmatched(orgnr=orgnr, name=name, spend_sum=spend, notices=n, last_notice=last, note=note,
+                             joint=joint))
     return sorted(out, key=lambda u: -u.spend_sum)
 
 

@@ -413,6 +413,12 @@ def _first_buyer_orgnr(hit: dict[str, Any]) -> str | None:
     return _clean_orgnr(buyers[0].get("organizationId")) if buyers else None
 
 
+def buyer_list(notice: dict[str, Any]) -> list[tuple[str | None, str]]:
+    """(orgnr, navn) for alle kjøperne i et søketreff eller en detaljvisning, i rekkefølge."""
+    return [(_clean_orgnr(b.get("organizationId") or b.get("id")), re.sub(r"\s+", " ", str(b.get("name") or "")).strip())
+            for b in notice.get("buyer") or []]
+
+
 def normalize(hit: dict[str, Any], detail: dict[str, Any] | None = None) -> DoffinContract:
     """Gjør et søketreff (+ ev. detaljvisning) om til én rad.
 
@@ -595,6 +601,17 @@ CREATE TABLE IF NOT EXISTS doffin_winners (
     PRIMARY KEY (contract_id, position)
 );
 CREATE INDEX IF NOT EXISTS idx_doffin_winners_orgnr ON doffin_winners (orgnr);
+
+-- Alle kjøperne i kunngjøringen. doffin_contracts.buyer_orgnr er den første; ved felles
+-- anskaffelser (f.eks. Politiets fellestjenester med Tolletaten og Kriminalomsorgen) står resten her.
+CREATE TABLE IF NOT EXISTS doffin_buyers (
+    contract_id  TEXT,
+    position     INTEGER,  -- 0 = første kjøper
+    orgnr        TEXT,
+    name         TEXT,
+    PRIMARY KEY (contract_id, position)
+);
+CREATE INDEX IF NOT EXISTS idx_doffin_buyers_orgnr ON doffin_buyers (orgnr);
 """
 # Kolonner lagt til etter fase 1; eldre databaser får dem med ALTER TABLE.
 _ADDED_COLUMNS = {
@@ -633,6 +650,13 @@ def save_winners(conn: sqlite3.Connection, contract_id: str, found: Iterable[Win
     rows = [(contract_id, i, w.name, w.orgnr) for i, w in enumerate(found)]
     conn.executemany("INSERT INTO doffin_winners (contract_id, position, name, orgnr) VALUES (?, ?, ?, ?)", rows)
     return len(rows)
+
+
+def save_buyers(conn: sqlite3.Connection, contract_id: str, found: list[tuple[str | None, str]]) -> int:
+    conn.execute("DELETE FROM doffin_buyers WHERE contract_id = ?", (contract_id,))
+    conn.executemany("INSERT INTO doffin_buyers (contract_id, position, orgnr, name) VALUES (?, ?, ?, ?)",
+                     [(contract_id, i, o, n) for i, (o, n) in enumerate(found)])
+    return len(found)
 
 
 def collect_winners(
@@ -680,6 +704,7 @@ def collect_winners(
             log.warning("Hopper over vinnere for %s: %s", notice_id, e)
             continue
         saved += save_winners(conn, notice_id, winners(detail))
+        save_buyers(conn, notice_id, buyer_list(detail))
         done += 1
         if i % 100 == 0:
             conn.commit()

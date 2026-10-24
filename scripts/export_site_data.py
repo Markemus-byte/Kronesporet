@@ -32,6 +32,7 @@ TABLES: list[tuple[str, str]] = [
     ("doffin_contracts", "{contracts}"),
     ("doffin_contract_years", f"buyer_orgnr IN ({BUYERS})"),
     ("doffin_winners", "contract_id IN (SELECT id FROM doffin_contracts WHERE {contracts})"),
+    ("doffin_buyers", "contract_id IN (SELECT id FROM doffin_contracts WHERE {contracts})"),
 ]
 
 
@@ -40,6 +41,8 @@ def _contracts_filter(present: set[str]) -> str:
     where = f"buyer_orgnr IN ({buyers})"
     if "doffin_contract_years" in present:
         where += f" OR id IN (SELECT contract_id FROM doffin_contract_years WHERE buyer_orgnr IN ({BUYERS}))"
+    if "doffin_buyers" in present:  # felles anskaffelser der virksomheten ikke står som første kjøper
+        where += f" OR id IN (SELECT contract_id FROM doffin_buyers WHERE orgnr IN ({buyers}))"
     return where
 
 

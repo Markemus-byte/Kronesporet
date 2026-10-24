@@ -37,8 +37,8 @@ from src.analysis.annualize import annualize_contracts  # noqa: E402
 from src.analysis.coverage import flag_coverage_outliers  # noqa: E402
 from src.analysis.join_and_flag import THRESHOLD, flag_deviations  # noqa: E402
 from src.collectors.doffin import (  # noqa: E402
-    DoffinClient, DoffinError, _first_buyer_orgnr, init_db, iter_search_hits, month_ranges, normalize,
-    save_contracts, save_winners, winners,
+    DoffinClient, DoffinError, buyer_list, init_db, iter_search_hits, month_ranges, normalize,
+    save_buyers, save_contracts, save_winners, winners,
 )
 from src.collectors.brreg import main_units  # noqa: E402
 from src.collectors.statsregnskap import load_raadata_xlsx, raadata_orgnrs  # noqa: E402
@@ -68,7 +68,12 @@ def ledger_period(conn: sqlite3.Connection) -> dict[int, int]:
 
 def fetch_new_contracts(conn: sqlite3.Connection, years: list[int], client: DoffinClient,
                         max_new: int | None = None) -> int:
-    """Hent tildelinger publisert i `years` som ikke ligger i databasen, med detaljer og vinnere."""
+    """Hent tildelinger publisert i `years` som ikke ligger i databasen, med detaljer og vinnere.
+
+    En kunngjøring tas med når en av virksomhetene (eller underenhetene) er blant kjøperne, også
+    når den ikke står først (felles anskaffelser). Alle kjøperne lagres i doffin_buyers, også for
+    kunngjøringer som allerede ligger i databasen.
+    """
     wanted = buyers(conn)
     known = {r[0] for r in conn.execute("SELECT id FROM doffin_contracts")}
     today = date.today()
@@ -77,8 +82,14 @@ def fetch_new_contracts(conn: sqlite3.Connection, years: list[int], client: Doff
         to_month = today.month if year == today.year else 12
         for start, end in month_ranges(year, to_month):
             for hit in iter_search_hits(client, start, end):
-                if hit["id"] not in known and _first_buyer_orgnr(hit) in wanted:
+                found = buyer_list(hit)
+                if not any(o in wanted for o, _ in found):
+                    continue
+                if hit["id"] in known:
+                    save_buyers(conn, hit["id"], found)
+                else:
                     new.setdefault(hit["id"], hit)
+        conn.commit()
         log.info("Doffin %s: %d nye kunngjøringer så langt", year, len(new))
     ids = sorted(new)[:max_new] if max_new else sorted(new)
     saved = 0
@@ -90,6 +101,7 @@ def fetch_new_contracts(conn: sqlite3.Connection, years: list[int], client: Doff
             continue
         saved += save_contracts(conn, [normalize(new[notice_id], detail)])
         save_winners(conn, notice_id, winners(detail))
+        save_buyers(conn, notice_id, buyer_list(new[notice_id]) or buyer_list(detail))
         if i % 50 == 0:
             conn.commit()
             log.info("Detaljer: %d/%d", i, len(ids))
@@ -137,7 +149,8 @@ def main() -> int:
     ap.add_argument("--fetch-raadata", action="store_true",
                     help="Prøv å laste ned nyeste rådata fra statsregnskapet.dfo.no (scripts/fetch_raadata.py)")
     ap.add_argument("--years", type=int, nargs="*",
-                    help="Publiseringsår som sjekkes i Doffin (standard: i fjor og i år)")
+                    help="Publiseringsår som sjekkes i Doffin (standard: i fjor og i år). Eldre år fyller også inn "
+                         "kjøperne (doffin_buyers) for kunngjøringer som allerede er lagret")
     ap.add_argument("--max-new", type=int, help="Hent høyst så mange nye kunngjøringer (prøvekjøring)")
     ap.add_argument("--cache-dir", type=Path, default=ROOT / "data" / "doffin_cache")
     ap.add_argument("--dry-run", action="store_true", help="Regn ut alt, men ikke skriv site-data/")
