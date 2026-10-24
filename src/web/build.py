@@ -295,7 +295,8 @@ def _source_cards(b: Breadth, root: str) -> str:
          f"{_group(b.winners)} vinnerplasser gir {_group(b.suppliers)} leverandører med organisasjonsnummer."),
         ("S", "Statsregnskapet", "DFØ", "https://statsregnskapet.dfo.no",
          f"Månedlige rådata fra bevilgningsregnskapet: {_group(b.ledger_rows)} linjer fordelt på "
-         f"{b.ledger_accounts} artskontoer, {_span(b.ledger_years)}. Viser hva virksomhetene faktisk betalte."),
+         f"{b.ledger_accounts} artskontoer" + (f" for {b.ledger_agencies} virksomheter" if b.ledger_agencies else "")
+         + f", {_span(b.ledger_years)}. Viser hva virksomhetene faktisk betalte."),
         ("E", "Enhetsregisteret", "Brønnøysundregistrene", "https://www.brreg.no",
          f"{_group(b.units)} enheter, hvorav {_group(b.subunits)} underenheter som politidistrikter og "
          "Forsvarets avdelinger. Kontraktene deres regnes til riktig virksomhet."),
@@ -374,7 +375,8 @@ def index_page(ds: Dataset, root: str = "", years: list[int] | None = None,
     n = len(ds.agencies)
     n_flag = sum(a.flagged for a in ds.agencies)
     stats = [
-        (str(n), "statlige virksomheter med tall"),
+        (f"{n} av {n + len(ds.unmatched)}", '<a href="#uten-doffin">virksomheter i regnskapet</a> har Doffin-kontrakter i året')
+        if ds.unmatched else (str(n), "statlige virksomheter med tall"),
         (pct(statistics.median(a.deviation for a in ds.agencies), signed=True) if n else "–",
          "median avvik, Doffin mot kjøp"),
         (f"{n_flag} av {n}", f"flagget for avvik over {pct(ds.threshold, decimals=0)}"),
@@ -483,11 +485,57 @@ def index_page(ds: Dataset, root: str = "", years: list[int] | None = None,
   </div>
   <p class="muted small">Klikk på en kolonne for å sortere. Beløp i kortform; hold pekeren over for nøyaktig tall.</p>
 </section>
+{_unmatched_section(ds, root)}
 """
     title = SITE_NAME if ds.year == front else f"Statlige virksomheter {year_text(ds.year, short=True)}"
     path = "index.html" if ds.year == front else f"ar/{ds.year}.html"
     return page(title, body, root=root, active="index", path=path,
                 description=f"Doffin-kontrakter mot kjøp for {n} statlige virksomheter i {ds.year}.")
+
+
+def _unmatched_section(ds: Dataset, root: str) -> str:
+    """Virksomhetene i regnskapet som ikke har kontrakter i Doffin i året, så oversikten er komplett."""
+    if not ds.unmatched:
+        return ""
+    n = len(ds.unmatched)
+    total = sum(u.spend_sum for u in ds.unmatched)
+    rows = []
+    for u in ds.unmatched:
+        last = (f'<td class="num" data-sort="{u.last_notice}">{u.last_notice}</td>' if u.last_notice
+                else '<td class="num" data-sort="">–</td>')
+        rows.append(
+            f'<tr data-name="{escape(u.name.lower())} {u.orgnr}">'
+            f'<td>{escape(u.name)} <span class="orgnr">{u.orgnr}</span></td>'
+            f'<td class="num" data-sort="{_num(u.spend_sum)}" title="{kr_full(u.spend_sum)}">{kr(u.spend_sum)}</td>'
+            f'<td class="num" data-sort="{u.notices}">{u.notices}</td>{last}'
+            f'<td class="small">{escape(u.note)}</td></tr>'
+        )
+    head = "".join(
+        f'<th scope="col" data-type="{t}"><button type="button">{label}</button></th>'
+        for label, t in (("Virksomhet", "text"), (f"Kjøp {year_text(ds.year, short=True)}", "num"),
+                         ("Kunngjøringer, alle år", "num"), ("Siste", "num"), ("Merknad", "text"))
+    )
+    return f"""
+<section aria-labelledby="uten-doffin">
+  <h2 id="uten-doffin">{n} virksomheter med kjøp, men uten Doffin-kontrakter i {year_text(ds.year)}</h2>
+  <p>Disse virksomhetene kjøpte varer og tjenester for til sammen {kr(total)} i {year_text(ds.year)} ifølge
+  statsregnskapet, men Doffin har ingen kontrakter med verdi for dem som løper i året, verken på eget
+  organisasjonsnummer eller på underenhetene. Det betyr ikke at noe er galt. Kjøp under terskelverdiene
+  kunngjøres ikke, mange bruker avtaler andre har inngått, som statlige fellesavtaler fra DFØ, og noen kjøper
+  gjennom en annen virksomhet. De er med her så oversikten over statens kjøp er komplett. Kunngjøringer der
+  virksomheten er med i en felles anskaffelse, men ikke står som første kjøper, er ikke telt.</p>
+  <div class="table-scroll">
+  <table class="sortable" id="uten-doffin-tabell">
+    <caption class="visually-hidden">Virksomheter med kjøp i {ds.year}, uten kontrakter i Doffin</caption>
+    <thead><tr>{head}</tr></thead>
+    <tbody>{''.join(rows)}</tbody>
+  </table>
+  </div>
+  <p class="muted small">Med kjøp over 1 mill. kr. «Kunngjøringer, alle år» teller alle kontraktstildelinger i
+  Doffin som Kronesporet har hentet for virksomheten og underenhetene, og «Siste» er året for den siste.
+  <a href="{root}om.html#kobling">Slik kobles kildene</a>.</p>
+</section>
+"""
 
 
 # --- virksomhetsside ----------------------------------------------------------
@@ -1020,7 +1068,14 @@ organisasjonsnummer i kunngjøringen (ofte utenlandske) vises ved kontrakten, me
         units = """
 <p>Noen virksomheter kunngjør gjennom underenheter med eget organisasjonsnummer, for eksempel
 politidistriktene og Politiets fellestjenester for Politiet, eller avdelinger i Forsvaret. Slike kontrakter
-regnes til virksomheten som fører regnskapet, og underenheten vises ved kontrakten.</p>"""
+regnes til virksomheten som fører regnskapet, og underenheten vises ved kontrakten. Har et overordnet ledd
+samme navn som virksomheten, slik Tolletaten har i Enhetsregisteret, regnes også det leddet til virksomheten.</p>"""
+    if ds.unmatched:
+        units += f"""
+<p>Virksomheter i regnskapet som ikke har kontrakter i Doffin i et år, tas ikke med i sammenligningen, men står
+i en egen liste nederst på årssiden med kjøpene og hvor mange kunngjøringer de har hatt. For
+{year_text(ds.year)} gjelder det {len(ds.unmatched)} virksomheter. Slik er alle virksomhetene i regnskapet med
+i oversikten, også de som ikke kunngjør selv.</p>"""
     coverage_caveat = (
         "Kommuner, fylker, helseforetak og statlige selskaper er ikke en del av statsregnskapet og er ikke med."
         if _SITE["statsregnskap"] else

@@ -2,6 +2,11 @@
 
 ## Ikke utgitt
 
+- **Hele regnskapet er med:** årssidene har en ny liste over virksomhetene som har kjøp i statsregnskapet, men
+  ingen Doffin-kontrakter som løper i året (49 virksomheter og 59,4 mrd. kr i 2025, hvorav SDØE 57 mrd. kr).
+  Listen viser kjøpene, hvor mange kunngjøringer virksomheten har hatt totalt, og når den siste var, med
+  merknad der forklaringen er kjent. Nøkkeltallet øverst viser nå «129 av 178 virksomheter i regnskapet har
+  Doffin-kontrakter i året». `site-data/` tar med regnskapet og kontraktene for alle virksomhetene i regnskapet.
 - **Nasjonalbiblioteket** har nå regnskapstall fra statsregnskapet for alle år, også 2026. Rådata fører
   biblioteket på en avdeling (979530730), mens Doffin og årsrapportene bruker hovedenheten (976029100).
   Siden brukte derfor årsrapporttall, og for 2025 var det feil: 34,8 mill. kr mot 443,5 mill. kr i

@@ -3,7 +3,8 @@
 Nettsiden bygges automatisk av GitHub Actions (.github/workflows/nettside.yml)
 fra site-data/kronesporet.sql. Tekstformatet gir små, lesbare differ i git,
 i motsetning til en binær .db-fil. Bare tabellene og radene siden bruker tas med:
-virksomhetene i contract_spend_comparison og kontraktene der de (eller underenhetene) er kjøper.
+virksomhetene i regnskapet (statsregnskap og contract_spend_comparison) og kontraktene der de
+(eller underenhetene) er kjøper. Virksomheter uten kontrakter i et år vises også på siden.
 
 Eksempel (fra repo-roten), etter run_phase1.py og fetch_winners.py:
   python scripts/export_site_data.py --db data/offentlig_forbruk.db
@@ -19,7 +20,8 @@ ROOT = Path(__file__).resolve().parents[1]
 # (tabell, WHERE-filter). Filteret begrenser til virksomhetene som er med på nettsiden.
 # Kontraktene hentes via doffin_contract_years når den finnes, fordi kjøperen der er
 # regnskapsvirksomheten også når en underenhet (orgnr_parent) står som kjøper i Doffin.
-BUYERS = "SELECT orgnr FROM contract_spend_comparison"
+BUYERS = ("SELECT orgnr FROM contract_spend_comparison UNION "
+          "SELECT orgnr FROM statsregnskap WHERE orgnr IS NOT NULL")
 UNITS = f"{BUYERS} UNION SELECT child FROM orgnr_parent WHERE parent IN ({BUYERS})"
 TABLES: list[tuple[str, str]] = [
     ("contract_spend_comparison", ""),
