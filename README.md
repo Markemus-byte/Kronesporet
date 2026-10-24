@@ -254,6 +254,28 @@ python scripts/export_site_data.py --db data/offentlig_forbruk.db   # skriver si
 git add site-data/kronesporet.sql && git commit -m "Nye tall" && git push
 ```
 
+### Månedlig oppdatering
+
+`.github/workflows/oppdatering.yml` kjører den 20. hver måned (og når du trykker «Run workflow» under
+Actions → Oppdatering). Den tar utgangspunkt i `site-data/kronesporet.sql` og gjør dette
+(`scripts/update_site_data.py`):
+
+1. Henter nye kontraktstildelinger i Doffin for virksomhetene og underenhetene deres, med
+   kontraktsperiode og vinnere. Kunngjøringer som allerede er lagret, hentes ikke på nytt.
+2. Prøver å laste ned nyere rådata fra statsregnskapet (`scripts/fetch_raadata.py`). En nyere måned
+   erstatter den forrige for samme år. Stenger nettstedet for automatiske kall, fortsetter jobben med
+   Doffin og skriver det i oppsummeringen.
+3. Regner ut årsfordeling, avvik og Doffin-dekning på nytt, bygger `docs/` og committer begge deler.
+
+Oppdateringen holder seg til virksomhetene som allerede er på nettsiden. Nye virksomheter trenger
+Doffin-historikk og underenheter fra Enhetsregisteret, og legges til med `scripts/run_phase1.py`.
+
+Rådata kan også gis inn for hånd:
+
+```bash
+python scripts/update_site_data.py --raadata data/raadata_september_2026_bevilgningsregnskap.xlsx
+```
+
 ## Publisering
 
 `docs/` er en ferdig bygget statisk nettside, så det trengs ingen byggekommando.
