@@ -2,9 +2,9 @@
 
 ## Ikke utgitt
 
-- **Månedlig oppdatering:** GitHub Actions henter nye Doffin-kontrakter og nyere rådata fra
-  statsregnskapet den 20. hver måned, regner ut tallene på nytt og publiserer siden
-  (`scripts/update_site_data.py`, `scripts/fetch_raadata.py`). En nyere rådatamåned erstatter den forrige
+- **Månedlig oppdatering:** GitHub Actions henter nye Doffin-kontrakter den 20. hver måned, tar inn
+  rådatafiler fra statsregnskapet som er lastet opp i `site-data/raadata/`, regner ut tallene på nytt og
+  publiserer siden (`scripts/update_site_data.py`). En nyere rådatamåned erstatter den forrige
   for samme år, og tilskuddstallene følger med i `site-data/` så dekningskategoriene beholdes.
 - **GitHub Actions:** `actions/checkout@v6`, `actions/setup-python@v6` og `actions/cache@v5` (Node 24), og
   byggene kjører på `ubuntu-24.04` i stedet for `ubuntu-latest`.

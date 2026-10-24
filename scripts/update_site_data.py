@@ -3,8 +3,10 @@
 Tar utgangspunkt i dataene som allerede ligger i repoet og legger til det som er nytt:
   1. Nye kontraktstildelinger i Doffin for virksomhetene på nettsiden (og underenhetene deres),
      med kontraktsperiode og vinnere. Kunngjøringer som allerede er lagret, hentes ikke på nytt.
-  2. Nyere rådata fra statsregnskapet: xlsx-filer gitt med --raadata, eller lastet ned med
-     --fetch-raadata (scripts/fetch_raadata.py). En nyere måned erstatter den forrige for samme år.
+  2. Nyere rådata fra statsregnskapet: xlsx-filer i site-data/raadata/ (lastes opp der via GitHub),
+     gitt med --raadata eller lastet ned med --fetch-raadata (scripts/fetch_raadata.py; nettstedet
+     stenger for kall fra skyen, også fra GitHub Actions). En nyere måned erstatter den forrige for
+     samme år, og filer som allerede er lastet inn, hoppes over.
   3. Årsfordeling, avvik og Doffin-dekning regnes ut på nytt, og tallene eksporteres.
 
 Oppdateringen holder seg til virksomhetene som allerede er på nettsiden. Nye virksomheter trenger
@@ -129,7 +131,8 @@ def summary_line(conn: sqlite3.Connection) -> str:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--data", type=Path, default=ROOT / "site-data" / "kronesporet.sql")
-    ap.add_argument("--raadata", type=Path, nargs="*", default=[], help="Nye rådatafiler (xlsx) fra statsregnskapet")
+    ap.add_argument("--raadata", type=Path, nargs="*", default=[],
+                    help="Rådatafiler (xlsx) fra statsregnskapet, i tillegg til dem i site-data/raadata/")
     ap.add_argument("--fetch-raadata", action="store_true",
                     help="Prøv å laste ned nyeste rådata fra statsregnskapet.dfo.no (scripts/fetch_raadata.py)")
     ap.add_argument("--years", type=int, nargs="*",
@@ -138,6 +141,7 @@ def main() -> int:
     ap.add_argument("--cache-dir", type=Path, default=ROOT / "data" / "doffin_cache")
     ap.add_argument("--dry-run", action="store_true", help="Regn ut alt, men ikke skriv site-data/")
     a = ap.parse_args()
+    a.cache_dir.mkdir(parents=True, exist_ok=True)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
     today = date.today()
@@ -149,7 +153,7 @@ def main() -> int:
         before = summary_line(conn)
         roots_before = agencies(conn)
 
-        files = list(a.raadata)
+        files = sorted((ROOT / "site-data" / "raadata").glob("*.xlsx")) + list(a.raadata)
         if a.fetch_raadata:
             from scripts.fetch_raadata import fetch_latest
             try:

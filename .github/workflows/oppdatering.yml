@@ -1,7 +1,9 @@
 # Månedlig oppdatering av dataene bak nettsiden.
-# - Hver måned (og manuelt fra Actions-fanen): henter nye Doffin-kontrakter og nyere rådata fra
-#   statsregnskapet, regner ut tallene på nytt, bygger nettsiden og committer site-data/ og docs/
-#   til main. (En push fra GITHUB_TOKEN starter ikke Nettside-arbeidsflyten, så siden bygges her.)
+# - Hver måned (og manuelt fra Actions-fanen): henter nye Doffin-kontrakter, tar inn nye
+#   rådatafiler fra statsregnskapet som er lastet opp i site-data/raadata/, regner ut tallene på
+#   nytt, bygger nettsiden og committer site-data/ og docs/ til main. (En push fra GITHUB_TOKEN
+#   starter ikke Nettside-arbeidsflyten, så siden bygges her.)
+# - En ny fil i site-data/raadata/ på main starter jobben med en gang.
 # - Pull requests som endrer innsamlingen: prøvekjøring med noen få kunngjøringer, uten commit.
 name: Oppdatering
 
@@ -10,6 +12,10 @@ on:
     # Den 20. hver måned kl. 05:00 UTC. DFØ publiserer rådata for forrige måned rundt midten av måneden.
     - cron: "0 5 20 * *"
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "site-data/raadata/**"
   pull_request:
     paths:
       - "scripts/update_site_data.py"
@@ -48,11 +54,11 @@ jobs:
 
       - name: Prøvekjøring
         if: github.event_name == 'pull_request'
-        run: python scripts/update_site_data.py --fetch-raadata --max-new 5 --dry-run
+        run: python scripts/update_site_data.py --max-new 5 --dry-run
 
       - name: Oppdater site-data/
         if: github.event_name != 'pull_request'
-        run: python scripts/update_site_data.py --fetch-raadata
+        run: python scripts/update_site_data.py
 
       - name: Bygg nettsiden
         if: github.event_name != 'pull_request'
