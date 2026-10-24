@@ -2,6 +2,11 @@
 
 ## Ikke utgitt
 
+- **Varsler (planlagt):** ny side `varsler.html` i menyen beskriver de planlagte e-postvarslene (nye tildelinger,
+  avtaler som løper ut, fullt uttrekk) med interessepåmelding, og viser de 20 største av avtalene som kan løpe ut
+  de neste 12 månedene (156 per 23.10.2026, bare der Doffin har sluttdato eller varighet). Påmeldingen bruker
+  `CONTACT_EMAIL` i `src/web/build.py` og står som «åpner snart» til adressen er satt. Menyen brytes nå pent på
+  smale skjermer.
 - **Rettinger av kjente feil i Doffin:** `site-data/rettinger.csv` (kontrakt, felt, verdi, begrunnelse) brukes av
   den månedlige oppdateringen. Første retting gjelder en kunngjøring fra Sykehusinnkjøp HF (315 mill. kr) som står med
   orgnr til Indre og Østre Finnmark tingrett og derfor ble regnet til Domstolene. Domstolenes Doffin-sum for 2025 går

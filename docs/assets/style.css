@@ -52,7 +52,8 @@ h3 { font-size: 1.1rem; margin: 1.6rem 0 .4rem; }
 .site-header .wrap { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 60px; flex-wrap: wrap; }
 .brand { font-weight: 700; font-size: 1.15rem; color: var(--text); text-decoration: none; display: inline-flex; align-items: center; gap: .5rem; }
 .mark { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: var(--accent); color: var(--surface); font-size: .8rem; font-weight: 800; }
-.site-header nav { display: flex; gap: 1.2rem; }
+.site-header nav { display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; }
+@media (max-width: 420px) { .site-header nav { gap: .4rem .9rem; font-size: .95rem; } }
 .site-header nav a { color: var(--muted); text-decoration: none; font-weight: 500; }
 .site-header nav a[aria-current="page"], .site-header nav a:hover { color: var(--text); }
 

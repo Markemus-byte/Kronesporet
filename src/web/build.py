@@ -4,6 +4,7 @@ Sider:
   index.html                 forside med alle virksomhetene
   virksomhet/<orgnr>.html    én side per virksomhet med Doffin-kontraktene
   om.html                    om dataene og metoden
+  varsler.html               planlagte varsler, avtaler som løper ut og interessepåmelding
   vilkar.html                vilkår, forbehold og personvern
   404.html                   «fant ikke siden» (GitHub Pages viser den for ukjente adresser)
   data/virksomheter.csv|json nedlastbare tall (NLOD)
@@ -20,8 +21,9 @@ from collections import Counter
 from dataclasses import dataclass, field
 from html import escape
 from pathlib import Path
+from urllib.parse import quote
 
-from src.web.data import MONTHS, Agency, Breadth, Contract, Dataset, source_month
+from src.web.data import MONTHS, Agency, Breadth, Contract, Dataset, Expiring, source_month
 
 ASSETS = Path(__file__).parent / "assets"
 SITE_NAME = "Kronesporet"
@@ -123,7 +125,7 @@ def _num(x: float | None) -> str:
 def page(title: str, body: str, root: str = "", active: str = "", description: str = "", path: str = "",
          head: str = "") -> str:
     nav = [("index.html", "Virksomheter", "index"), ("leverandorer.html", "Leverandører", "leverandorer"),
-           ("om.html", "Om dataene", "om")]
+           ("varsler.html", "Varsler", "varsler"), ("om.html", "Om dataene", "om")]
     links = "".join(
         f'<a href="{root}{href}"{CURRENT if key == active else ""}>{label}</a>'
         for href, label, key in nav
@@ -1223,6 +1225,71 @@ underlagt NLOD 2.0; oppgi kildene ved gjenbruk.</p>
 
 # --- nedlastbare data ---------------------------------------------------------
 
+EXPIRING_SHOWN = 20
+
+
+def alerts_page(ref_date: str, expiring: list[Expiring]) -> str:
+    """Planlagte varsler (første betalte tilbud), avtaler som løper ut, og interessepåmelding."""
+    if CONTACT_EMAIL:
+        mail = (f"mailto:{CONTACT_EMAIL}?subject=" + quote("Interesse for varsler fra Kronesporet")
+                + "&body=" + quote("Virksomhet:\nHva vil dere følge (kjøpere, leverandører eller kategorier):\n"))
+        signup = (f'<p><a class="button" href="{escape(mail)}">Meld interesse på e-post</a></p>'
+                  '<p class="muted small">Det er gratis og forplikter ikke. Vi bruker adressen bare til å si fra når '
+                  'varslene er klare, og sletter den hvis du ber om det. Se <a href="vilkar.html#personvern">'
+                  "personvern</a>.</p>")
+    else:
+        signup = '<p class="muted">Påmeldingen åpner snart.</p>'
+    ref = f"{ref_date[8:10]}.{ref_date[5:7]}.{ref_date[:4]}" if ref_date else ""
+    rows = "".join(
+        f'<tr><td>{_contract_link(e)}' + ('<span class="tag">rammeavtale</span>' if e.is_framework else "")
+        + f'</td><td>{escape(e.buyer)}</td>'
+        f'<td class="num" data-sort="{e.end}">{e.end[8:10]}.{e.end[5:7]}.{e.end[:4]}</td>'
+        f'<td class="num" data-sort="{_num(e.value)}" title="{kr_full(e.value)}">{kr(e.value)}</td>'
+        f'<td>{"sluttdato" if e.source == "datoer" else "varighet"}</td></tr>'
+        for e in expiring[:EXPIRING_SHOWN])
+    n_fw = sum(e.is_framework for e in expiring)
+    table = f"""
+<section aria-labelledby="utlop">
+  <h2 id="utlop">{len(expiring)} avtaler kan løpe ut de neste 12 månedene</h2>
+  <p>Så mange kontrakter hos statlige kjøpere har en grunnperiode som slutter innen ett år etter {ref}, ifølge
+  sluttdatoen eller varigheten i Doffin. {n_fw} av dem er rammeavtaler. Her er de {min(EXPIRING_SHOWN, len(expiring))}
+  største. Mange avtaler har opsjoner på forlengelse, så en avtale kan løpe lenger. Avtaler der Doffin ikke oppgir
+  sluttdato eller varighet, er ikke med.</p>
+  <div class="table-scroll"><table class="sortable" id="utlop-tabell">
+  <caption class="visually-hidden">Avtaler som kan løpe ut de neste 12 månedene</caption>
+  <thead><tr><th scope="col" data-type="text"><button type="button">Avtale</button></th>
+  <th scope="col" data-type="text"><button type="button">Kjøper</button></th>
+  <th scope="col" data-type="num"><button type="button">Slutter</button></th>
+  <th scope="col" data-type="num"><button type="button">Verdi</button></th>
+  <th scope="col" data-type="text"><button type="button">Ut fra</button></th></tr></thead>
+  <tbody>{rows}</tbody></table></div>
+</section>""" if expiring else ""
+    body = f"""<section class="hero">
+  <p class="eyebrow eyebrow-dark">Planlagt</p>
+  <h1>Varsler om statens avtaler</h1>
+  <p class="lede">Kronesporet planlegger e-postvarsler for leverandører og rådgivere som følger statens innkjøp.
+  Nettsiden og tallene her forblir gratis. Varslene sparer deg for å lete selv.</p>
+</section>
+<div class="prose">
+<h2>Dette får du</h2>
+<ul>
+<li><strong>Nye tildelinger</strong> hos kjøperne, leverandørene eller kategoriene du følger, med vinner, verdi og
+løpetid.</li>
+<li><strong>Avtaler som løper ut</strong> om 3, 6 eller 12 måneder, så du kan forberede deg før neste
+konkurranse.</li>
+<li><strong>Fullt uttrekk</strong> av kontraktene med leverandører og historikk fra 2017 som CSV.</li>
+</ul>
+<p>Redaksjoner, forskere og offentlige virksomheter får varslene gratis.</p>
+<h2 id="meld-interesse">Meld interesse</h2>
+<p>Vi bygger varslene når nok har meldt interesse. Fortell oss hvem du vil følge.</p>
+{signup}
+</div>
+{table}
+"""
+    return page("Varsler", body, active="varsler", path="varsler.html",
+                description="Planlagte e-postvarsler om nye tildelinger og avtaler som løper ut hos statlige kjøpere.")
+
+
 def terms_page() -> str:
     """Vilkår for bruk, forbehold, retting og personvern."""
     issue = f"{REPO_URL}/issues/new"
@@ -1230,6 +1297,9 @@ def terms_page() -> str:
                if CONTACT_EMAIL else
                f'Opprett en <a href="{issue}">sak på GitHub</a> og be om kontakt. Ikke skriv personopplysninger i '
                "saken, for den er offentlig.")
+    signup = ("<li><strong>Påmelding til varsler.</strong> Melder du interesse for varsler på e-post, bruker vi "
+              "adressen bare til å si fra når varslene er klare. Vi deler den ikke og sletter den når du ber om det.</li>"
+              if CONTACT_EMAIL else "")
     body = f"""<section class="hero">
   <h1>Vilkår og personvern</h1>
   <p class="lede">Kronesporet er gratis å bruke. Tallene kommer fra åpne offentlige kilder og er satt sammen av
@@ -1272,7 +1342,7 @@ kontrakter.</li>
 <li><strong>Du kan be om å bli skjult.</strong> Har du et enkeltpersonforetak og vil ikke vises med navn, viser
 vi foretaket som «Enkeltpersonforetak (skjult)» uten organisasjonsnummer, og leverandørsiden fjernes. Kontraktene
 står fortsatt i Doffin. {contact}</li>
-<li><strong>Klage.</strong> Du kan klage til <a href="https://www.datatilsynet.no">Datatilsynet</a>.</li>
+{signup}<li><strong>Klage.</strong> Du kan klage til <a href="https://www.datatilsynet.no">Datatilsynet</a>.</li>
 </ul>
 </div>
 """
@@ -1387,7 +1457,7 @@ def _write_csv(path: Path, rows: list[dict[str, object]]) -> None:
 
 
 def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "",
-               breadth: Breadth | None = None) -> int:
+               breadth: Breadth | None = None, expiring: tuple[str, list[Expiring]] | None = None) -> int:
     """Skriver hele nettstedet til `out`. Returnerer antall HTML-sider.
 
     Med flere år blir index.html siste år og ar/<år>.html de andre årene. Hver
@@ -1423,7 +1493,8 @@ def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "",
     (out / "om.html").write_text(about_page(latest), encoding="utf-8")
     (out / "404.html").write_text(not_found_page(), encoding="utf-8")
     (out / "vilkar.html").write_text(terms_page(), encoding="utf-8")
-    pages += 1
+    (out / "varsler.html").write_text(alerts_page(*(expiring or ("", []))), encoding="utf-8")
+    pages += 2
     if len(datasets) > 1:
         (out / "ar").mkdir()
         for ds in (d for d in datasets if d is not latest):

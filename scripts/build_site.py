@@ -19,7 +19,7 @@ sys.path.insert(0, str(ROOT))
 
 from src.analysis.join_and_flag import THRESHOLD  # noqa: E402
 from src.web.build import build_site  # noqa: E402
-from src.web.data import available_years, load_breadth, load_dataset  # noqa: E402
+from src.web.data import available_years, load_breadth, load_dataset, load_expiring  # noqa: E402
 
 
 def sql_to_db(sql_path: Path, tmp_dir: str) -> Path:
@@ -60,7 +60,8 @@ def build(args: argparse.Namespace, db: Path) -> None:
     datasets = [load_dataset(db, year=y, threshold=args.threshold) for y in sorted(years)]
     ds = next((d for d in reversed(datasets) if not d.partial), datasets[-1])  # forsiden
     base_url = f"https://{args.cname.strip()}/" if args.cname else args.base_url
-    pages = build_site(datasets, args.out, base_url=base_url, breadth=load_breadth(db))
+    pages = build_site(datasets, args.out, base_url=base_url, breadth=load_breadth(db),
+                       expiring=load_expiring(db))
     if args.cname:
         (args.out / "CNAME").write_text(args.cname.strip() + "\n")
     flagged = sum(a.flagged for a in ds.agencies)
