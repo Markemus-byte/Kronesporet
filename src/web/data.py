@@ -143,6 +143,56 @@ def available_years(db_path: str | Path) -> list[int]:
         conn.close()
 
 
+@dataclass
+class Breadth:
+    """Hvor mye som er hentet inn, på tvers av alle år: tallene forsiden viser om datagrunnlaget."""
+    contracts: int = 0                                         # Doffin-kontrakter (kunngjøringer med tildeling)
+    contracts_by_year: dict[int, int] = field(default_factory=dict)  # etter tildelingsår
+    buyers: int = 0                                            # statlige kjøpere (orgnr) i Doffin
+    suppliers: int = 0                                         # leverandører med orgnr blant vinnerne
+    winners: int = 0                                           # vinnerposisjoner (en kontrakt kan ha flere)
+    units: int = 0                                             # enheter og underenheter fra Enhetsregisteret
+    subunits: int = 0
+    ledger_rows: int = 0                                       # linjer fra statsregnskapet (virksomhet × artskonto × år)
+    ledger_accounts: int = 0                                   # ulike artskontoer
+    ledger_years: list[int] = field(default_factory=list)
+    report_rows: int = 0                                       # tall hentet fra årsrapporter i Kudos
+    agencies: int = 0                                          # virksomheter med både regnskap og Doffin
+
+    @property
+    def contract_years(self) -> list[int]:
+        return sorted(self.contracts_by_year)
+
+
+def load_breadth(db_path: str | Path) -> Breadth:
+    conn = sqlite3.connect(db_path)
+    try:
+        b = Breadth()
+        one = lambda sql: conn.execute(sql).fetchone()[0] or 0  # noqa: E731
+        if _has_table(conn, "doffin_contracts"):
+            b.contracts_by_year = {y: n for y, n in conn.execute(
+                "SELECT year, COUNT(*) FROM doffin_contracts WHERE year IS NOT NULL GROUP BY year")}
+            b.contracts = sum(b.contracts_by_year.values())
+            b.buyers = one("SELECT COUNT(DISTINCT buyer_orgnr) FROM doffin_contracts")
+        if _has_table(conn, "doffin_winners"):
+            b.winners = one("SELECT COUNT(*) FROM doffin_winners")
+            b.suppliers = one("SELECT COUNT(DISTINCT orgnr) FROM doffin_winners WHERE orgnr IS NOT NULL AND orgnr != ''")
+        if _has_table(conn, "orgnr_parent"):
+            b.units = one("SELECT COUNT(*) FROM orgnr_parent")
+            b.subunits = one("SELECT COUNT(*) FROM orgnr_parent WHERE kind = 'underenhet'")
+        if _has_table(conn, "statsregnskap"):
+            ledger = "source_file IS NULL OR source_file NOT LIKE 'kudos:%'"
+            b.ledger_rows = one(f"SELECT COUNT(*) FROM statsregnskap WHERE {ledger}")
+            b.ledger_accounts = one(f"SELECT COUNT(DISTINCT artskonto) FROM statsregnskap WHERE {ledger}")
+            b.ledger_years = [r[0] for r in conn.execute(
+                f"SELECT DISTINCT year FROM statsregnskap WHERE {ledger} ORDER BY year")]
+            b.report_rows = one("SELECT COUNT(*) FROM statsregnskap WHERE source_file LIKE 'kudos:%'")
+        b.agencies = one("SELECT COUNT(DISTINCT orgnr) FROM contract_spend_comparison")
+        return b
+    finally:
+        conn.close()
+
+
 def load_dataset(db_path: str | Path, year: int | None = None, threshold: float = 0.05) -> Dataset:
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row

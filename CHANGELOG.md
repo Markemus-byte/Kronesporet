@@ -2,6 +2,11 @@
 
 ## Ikke utgitt
 
+- **Ny forside:** toppfelt med nøkkeltall for hele datagrunnlaget, kort for de fire kildene (Doffin,
+  statsregnskapet, Enhetsregisteret, Kudos) og en tidslinje over kontrakter 2017–2026 med årene
+  statsregnskapet dekker. Tallene regnes ut fra databasen ved hver bygging.
+- **Leverandører på tvers av år:** årsandel for hvert år i leverandørlisten, og hver leverandørside viser
+  år, kjøpere og alle kontrakter.
 - **Nettside:** egen «Fant ikke siden»-side (404) med lenker videre, og strukturerte data
   (schema.org/Dataset) på siden om dataene, så søkemotorene finner de nedlastbare tallene.
 - **Regnskapstall fra statsregnskapet:** 128 statlige virksomheter (mot 40) for 2023, 2024, 2025 og

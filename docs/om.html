@@ -34,7 +34,9 @@
  },
  "isBasedOn": [
   "https://doffin.no",
-  "https://kudos.dfo.no"
+  "https://kudos.dfo.no",
+  "https://statsregnskapet.dfo.no",
+  "https://www.brreg.no"
  ],
  "license": "https://data.norge.no/nlod/no/2.0",
  "temporalCoverage": "2023/2026",
@@ -74,7 +76,7 @@
 <p class="lede">Kronesporet er et åpenhetsverktøy for offentlig pengebruk. Første versjon sammenligner
 kunngjorte kontrakter i Doffin med det statlige virksomheter selv rapporterer at de kjøpte for.</p></section>
 <div class="prose">
-<h2>Kilder</h2>
+<h2 id="kilder">Kilder</h2>
 <dl class="sources">
 <dt><a href="https://doffin.no">Doffin</a></dt>
 <dd>Den nasjonale kunngjøringsdatabasen for offentlige anskaffelser, drevet av Digdir. Vi henter
@@ -91,13 +93,15 @@ Desembertallene gir hele året. Kjøp av varer og tjenester er summen av artskon
 (varer, fremmedytelser, investeringer og driftskostnader), uten lønn, avskrivninger, reiser og tilskudd.
 Når en virksomhet har tall både her og i årsrapporten, brukes statsregnskapet, og årsrapporten lenkes til
 når den finnes.</dd>
+<dt><a href="https://www.brreg.no/om-oss/registrene-vare/om-enhetsregisteret/">Enhetsregisteret</a> (Brønnøysundregistrene)</dt>
+<dd>Registeret over norske virksomheter og underenhetene deres. Vi henter underenhetene til de statlige virksomhetene, slik at en kontrakt kunngjort av for eksempel et politidistrikt regnes til Politiet.</dd>
 </dl>
 <p>Kildene er lisensiert under <a href="https://data.norge.no/nlod/no/2.0">Norsk lisens for offentlige data
 (NLOD 2.0)</a>, som tillater gjenbruk, også kommersielt, med kildehenvisning. Inneholder data under NLOD
 tilgjengeliggjort av Digitaliseringsdirektoratet (Doffin) og Direktoratet for forvaltning og økonomistyring
-(statsregnskapet og Kudos).</p>
+(statsregnskapet og Kudos) og Brønnøysundregistrene (Enhetsregisteret).</p>
 
-<h2>Slik kobles tallene</h2>
+<h2 id="kobling">Slik kobles tallene</h2>
 <p>Regnskapet har ikke leverandører, så koblingen går på <em>kjøper</em>: organisasjonsnummeret til kjøperen i
 Doffin mot virksomheten som har levert årsrapporten. Avviket er (Doffin − kjøp) / kjøp, og virksomheter
 der avviket er større enn 5 % i den ene eller andre retningen, blir flagget.</p>
@@ -153,9 +157,9 @@ underlagt NLOD 2.0; oppgi kildene ved gjenbruk.</p>
 <footer class="site-footer">
   <div class="wrap">
     <p>Data: <a href="https://doffin.no">Doffin</a> (Digdir), <a href="https://statsregnskapet.dfo.no">statsregnskapet</a> og årsrapporter i
-    <a href="https://kudos.dfo.no">Kudos</a> (DFØ), lisensiert under
+    <a href="https://kudos.dfo.no">Kudos</a> (DFØ), <a href="https://www.brreg.no">Enhetsregisteret</a> (Brønnøysundregistrene), lisensiert under
     <a href="https://data.norge.no/nlod/no/2.0">Norsk lisens for offentlige data (NLOD 2.0)</a>.
-    Kronesporet er ikke tilknyttet DFØ eller Digdir.</p>
+    Kronesporet er ikke tilknyttet DFØ, Digdir eller Brønnøysundregistrene.</p>
     <p>Data hentet 23.10.2026. <a href="om.html">Om dataene og metoden</a>.</p>
     <p>© 2026 Markemus-byte / Kronesporet. Alle rettigheter forbeholdt.</p>
   </div>
