@@ -978,7 +978,9 @@ summen av årsandelene til alle kontrakter som løper det året, også de som bl
 Perioden leses fra kunngjøringen (start- og sluttdato, oppgitt varighet eller fritekst som «2+1+1 år»).
 Står det ingenting, antas 48 måneder for rammeavtaler og 24 måneder for andre kontrakter; slike
 kontrakter er merket «antatt varighet».</p>
-"""
+""" + ("""<p>For et år som ikke er ferdig (som 2026, der regnskapet går til og med august), tas bare
+kontraktsdagene i de samme månedene med, så Doffin og regnskapet dekker samme periode.</p>
+""" if _PARTIAL else "")
     statsregnskap = ""
     if _SITE["statsregnskap"]:
         groups = ", ".join(sorted(ARTSKONTO_GROUPS))
@@ -989,6 +991,13 @@ Desembertallene gir hele året. Kjøp av varer og tjenester er summen av artskon
 (varer, fremmedytelser, investeringer og driftskostnader), uten lønn, avskrivninger, reiser og tilskudd.
 Når en virksomhet har tall både her og i årsrapporten, brukes statsregnskapet, og årsrapporten lenkes til
 når den finnes.</dd>"""
+    suppliers = ""
+    if ds.has_suppliers:
+        suppliers = """
+<h3>Leverandører</h3>
+<p>Leverandørene er vinnerne slik de står i kunngjøringen. Er det flere vinnere på samme kontrakt, typisk en
+rammeavtale, deles verdien likt mellom dem, fordi Doffin sjelden viser fordelingen. Leverandører uten
+organisasjonsnummer i kunngjøringen (ofte utenlandske) vises ved kontrakten, men får ikke egen side.</p>"""
     units = ""
     if any(c.buyer_unit for a in ds.agencies for c in a.contracts):
         units = """
@@ -1005,11 +1014,42 @@ regnes til virksomheten som fører regnskapet, og underenheten vises ved kontrak
         "(Brønnøysundregistrene)</dt>\n<dd>Registeret over norske virksomheter og underenhetene deres. Vi henter "
         "underenhetene til de statlige virksomhetene, slik at en kontrakt kunngjort av for eksempel et "
         "politidistrikt regnes til Politiet.</dd>" if _SITE["units"] else "")
+    ledger = "Statsregnskapet" if _SITE["statsregnskap"] else "Årsrapportene"
+    compare_rows = [
+        ("Kunngjorte kontrakter med verdi og vinnere", "Ja", "Nei", "Nei"),
+        ("Hva virksomheten faktisk betalte for varer og tjenester", "Nei", "Ja", "Nei"),
+        ("Underenheter regnet til virksomheten som betaler", "Nei", "Nei",
+         "Bare registeret" if _SITE["units"] else "Nei"),
+        ("Kontraktsverdi fordelt på årene kontrakten løper", "Nei", "Nei", "Nei"),
+        ("Hvor stor del av kjøpene som er kunngjort", "Nei", "Nei", "Nei"),
+        ("Sammenligning med lignende virksomheter, flere år på rad", "Nei", "Nei", "Nei"),
+        ("Hver leverandørs andel hos alle statlige kjøpere, år for år", "Nei", "Nei", "Nei"),
+    ]
+    cell = lambda v: f'<td class="cmp cmp-{"ja" if v == "Ja" else "nei" if v == "Nei" else "delvis"}">{v}</td>'  # noqa: E731
+    compare = "".join(f'<tr><th scope="row">{escape(r)}</th><td class="cmp cmp-ja cmp-us">Ja</td>'
+                      f'{"".join(cell(v) for v in vals)}</tr>' for r, *vals in compare_rows)
     body = f"""
 <section class="hero"><h1>Om dataene og metoden</h1>
-<p class="lede">Kronesporet er et åpenhetsverktøy for offentlig pengebruk. Første versjon sammenligner
-kunngjorte kontrakter i Doffin med det statlige virksomheter selv rapporterer at de kjøpte for.</p></section>
+<p class="lede">Kronesporet er et åpenhetsverktøy for offentlig pengebruk. Vi henter inn kunngjorte kontrakter
+fra Doffin, regnskapstall fra {"statsregnskapet" if _SITE["statsregnskap"] else "årsrapportene"}{" og virksomhetsstrukturen fra Enhetsregisteret" if _SITE["units"] else ""},
+kobler dem på organisasjonsnummer og viser resultatet virksomhet for virksomhet og leverandør for leverandør.</p></section>
 <div class="prose">
+<h2 id="hvorfor">Hvorfor Kronesporet</h2>
+<p>Hver kilde svarer på sitt spørsmål. Doffin viser hva som er kunngjort, men ikke hva som ble betalt.
+{ledger} viser hva som ble betalt, men ikke til hvem eller gjennom hvilke kontrakter. Først når de kobles,
+kan du se hvor mye av statens innkjøp som faktisk er synlig, og hvem som vinner kontraktene.</p>
+</div>
+<div class="table-scroll compare-wrap">
+<table class="compare">
+<caption class="visually-hidden">Hva du finner i hver kilde og i Kronesporet</caption>
+<thead><tr><th scope="col"></th><th scope="col" class="cmp-us">Kronesporet</th><th scope="col">Doffin</th>
+<th scope="col">{ledger}</th><th scope="col">Enhetsregisteret</th></tr></thead>
+<tbody>{compare}</tbody>
+</table>
+</div>
+<div class="prose">
+<p class="muted small">Kildene har egne søk og rådata. Tabellen gjelder hva de viser hver for seg, ikke hva som
+er mulig å regne ut fra dem.</p>
 <h2 id="kilder">Kilder</h2>
 <dl class="sources">
 <dt><a href="https://doffin.no">Doffin</a></dt>
@@ -1029,10 +1069,11 @@ tilgjengeliggjort av Digitaliseringsdirektoratet (Doffin) og Direktoratet for fo
 
 <h2 id="kobling">Slik kobles tallene</h2>
 <p>Regnskapet har ikke leverandører, så koblingen går på <em>kjøper</em>: organisasjonsnummeret til kjøperen i
-Doffin mot virksomheten som har levert årsrapporten. Avviket er (Doffin − kjøp) / kjøp, og virksomheter
+Doffin mot virksomheten i regnskapet. Avviket er (Doffin − kjøp) / kjøp, og virksomheter
 der avviket er større enn {pct(ds.threshold, decimals=0)} i den ene eller andre retningen, blir flagget.</p>{units}
 {annual}
 {coverage}
+{suppliers}
 <h2 id="forbehold">Forbehold</h2>
 <ul>
 <li><strong>Doffin dekker bare en del av kjøpene.</strong> Kjøp under terskelverdiene, avrop på eksisterende
@@ -1043,18 +1084,20 @@ selv tyder på feil.</li>
 <li><strong>Kontraktverdier er anslag.</strong> For rammeavtaler er verdien ofte et tak, ikke det som faktisk
 blir kjøpt.</li>
 <li><strong>Ikke alle virksomheter er med.</strong> {coverage_caveat}</li>
-<li><strong>Feil i kildene følger med.</strong> Navn og tall vises slik de står i Doffin og årsrapportene.</li>
+<li><strong>Feil i kildene følger med.</strong> Navn og tall vises slik de står i kildene. Åpenbare feil i
+kontraktsperioden, som en startdato i 1900 eller en varighet over 20 år, erstattes med standard varighet.</li>
 </ul>
 
 <h2>Last ned dataene</h2>
 <p>Tallene bak forsiden kan lastes ned som
 <a href="data/virksomheter.csv">CSV</a> eller <a href="data/virksomheter.json">JSON</a>, og alle kontraktene
-med leverandører som <a href="data/kontrakter.csv">kontrakter.csv</a>. Dataene fra Doffin og Kudos er fortsatt
+med leverandører som <a href="data/kontrakter.csv">kontrakter.csv</a>. Dataene fra kildene er fortsatt
 underlagt NLOD 2.0; oppgi kildene ved gjenbruk.</p>
 </div>
 """
     return page("Om dataene", body, active="om", path="om.html",
-                description="Kilder, metode og forbehold bak Kronesporet: Doffin, Kudos og statsregnskapet.",
+                description="Hvorfor Kronesporet, kildene, metoden og forbeholdene: Doffin, statsregnskapet, "
+                            "Enhetsregisteret og Kudos.",
                 head=_dataset_jsonld())
 
 

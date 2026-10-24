@@ -31,6 +31,7 @@ DEFAULT_FRAMEWORK_MONTHS = 48.0
 DEFAULT_CONTRACT_MONTHS = 24.0
 # Varigheter over dette er nesten alltid feil (dager tolket som måneder o.l.)
 MAX_MONTHS = 240.0
+PLAUSIBLE_YEARS_BEFORE = 10  # eldre startdato enn dette før kunngjøringen regnes som feil
 DAYS_PER_MONTH = 365.25 / 12
 
 SCHEMA = """
@@ -67,11 +68,15 @@ def contract_period(
     default_contract_months: float = DEFAULT_CONTRACT_MONTHS,
 ) -> tuple[date, date, str] | None:
     """(start, slutt, kilde) for én kontrakt, eller None uten noen dato å gå ut fra."""
-    start = _parse_date(start_date) or _parse_date(publication_date)
+    published = _parse_date(publication_date)
+    start = _parse_date(start_date)
+    if start and published and start.year < published.year - PLAUSIBLE_YEARS_BEFORE:
+        start = None  # feilregistrert startdato i Doffin (f.eks. 1900-01-01)
+    start = start or published
     if start is None:
         return None
     end = _parse_date(end_date)
-    if end and end > start and duration_source == "datoer":
+    if end and end > start and duration_source == "datoer" and (end - start).days <= MAX_MONTHS * DAYS_PER_MONTH:
         return start, end, "datoer"
     months, source = duration_months, duration_source
     if not months or months <= 0 or months > MAX_MONTHS or source not in ("varighet", "tekst", "datoer"):

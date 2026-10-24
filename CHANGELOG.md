@@ -2,6 +2,11 @@
 
 ## Ikke utgitt
 
+- **Metodesiden:** ny del «Hvorfor Kronesporet» med en tabell over hva hver kilde viser alene og hva
+  koblingen gir. Teksten er oppdatert til statsregnskapet og Enhetsregisteret, med egne avsnitt om
+  leverandører og delår.
+- **Datakvalitet:** startdatoer mer enn ti år før kunngjøringen (som 1900-01-01) og perioder over 20 år
+  regnes som feil i Doffin og erstattes med standard varighet.
 - **Ny forside:** toppfelt med nøkkeltall for hele datagrunnlaget, kort for de fire kildene (Doffin,
   statsregnskapet, Enhetsregisteret, Kudos) og en tidslinje over kontrakter 2017–2026 med årene
   statsregnskapet dekker. Tallene regnes ut fra databasen ved hver bygging.

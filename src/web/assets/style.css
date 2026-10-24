@@ -177,3 +177,17 @@ a:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visibl
 @media (max-width: 600px) { .tl-value, .tl-detail { display: none; } .tl-col { height: 160px; padding-top: 6px; } .tl-chart { gap: 0 4px; } .tl-year { font-size: .68rem; } }
 .year-head { padding-top: .2rem; }
 .year-head .years { margin-bottom: .4rem; }
+
+/* Metodesiden: sammenligning av kildene */
+.compare-wrap { max-width: 60rem; margin: 1rem 0 .6rem; }
+.compare th[scope="row"] { font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--text); font-size: .95rem; white-space: normal; position: static; }
+.compare thead th { text-align: center; }
+.compare td.cmp { text-align: center; font-weight: 600; white-space: nowrap; }
+.cmp-ja { color: var(--accent); }
+.cmp-nei { color: var(--muted); font-weight: 400 !important; }
+.cmp-delvis { color: var(--under); }
+.compare .cmp-us { background: var(--accent-soft); }
+.compare thead th.cmp-us { color: var(--accent); }
+.compare tbody tr:last-child th { border-bottom: 0; }
+.compare th[scope="row"] { min-width: 14rem; }
+@media (max-width: 600px) { .compare th[scope="row"] { min-width: 9.5rem; font-size: .88rem; } .compare th, .compare td { padding: 8px 8px; } }
