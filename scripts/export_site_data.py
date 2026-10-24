@@ -24,6 +24,7 @@ UNITS = f"{BUYERS} UNION SELECT child FROM orgnr_parent WHERE parent IN ({BUYERS
 TABLES: list[tuple[str, str]] = [
     ("contract_spend_comparison", ""),
     ("statsregnskap", f"orgnr IN ({BUYERS})"),
+    ("statsregnskap_tilskudd", f"orgnr IN ({BUYERS})"),  # skiller «tilskudd» fra «avtaler for andre» i dekningen
     ("doffin_coverage", ""),
     ("orgnr_parent", f"parent IN ({BUYERS})"),
     ("doffin_contracts", "{contracts}"),

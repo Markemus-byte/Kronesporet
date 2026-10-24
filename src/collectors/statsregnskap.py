@@ -223,8 +223,10 @@ def load_utgifter_xlsx(
     orgnr = resolve_orgnr(conn, {r.kapittel: r.kapittel_navn for r in rows}, use_brreg)
 
     conn.executescript(ANALYSIS_SCHEMA + TILSKUDD_SCHEMA)
-    conn.execute("DELETE FROM statsregnskap WHERE source_file = ?", (path.name,))
-    conn.execute("DELETE FROM statsregnskap_tilskudd WHERE source_file = ?", (path.name,))
+    # Rådata er akkumulert hittil i år: en nyere måned for samme år erstatter den forrige filen.
+    for table in ("statsregnskap", "statsregnskap_tilskudd"):
+        conn.execute(f"DELETE FROM {table} WHERE source_file = ? OR (year = ? AND (lower(source_file) LIKE "
+                     "'raadata%' OR lower(source_file) LIKE 'rådata%'))", (path.name, year))
     conn.executemany("INSERT INTO statsregnskap_tilskudd VALUES (?, ?, ?, ?)",
                      [(year, org, amount, path.name) for org, amount in tilskudd.items()])
     conn.executemany(
@@ -348,8 +350,10 @@ def load_raadata_xlsx(conn: sqlite3.Connection, path: str | Path) -> tuple[int, 
             names[orgnr] = org_names[orgnr] or names.get(orgnr, "")
 
     conn.executescript(ANALYSIS_SCHEMA + TILSKUDD_SCHEMA)
-    conn.execute("DELETE FROM statsregnskap WHERE source_file = ?", (path.name,))
-    conn.execute("DELETE FROM statsregnskap_tilskudd WHERE source_file = ?", (path.name,))
+    # Rådata er akkumulert hittil i år: en nyere måned for samme år erstatter den forrige filen.
+    for table in ("statsregnskap", "statsregnskap_tilskudd"):
+        conn.execute(f"DELETE FROM {table} WHERE source_file = ? OR (year = ? AND (lower(source_file) LIKE "
+                     "'raadata%' OR lower(source_file) LIKE 'rådata%'))", (path.name, year))
     conn.executemany("INSERT INTO statsregnskap_tilskudd VALUES (?, ?, ?, ?)",
                      [(year, org, amount, path.name) for org, amount in tilskudd.items()])
     # Rådata er regnskapet selv: erstatter tall lest fra årsrapporter (Kudos) for de samme virksomhetene.

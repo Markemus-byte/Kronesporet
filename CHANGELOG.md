@@ -2,6 +2,12 @@
 
 ## Ikke utgitt
 
+- **Månedlig oppdatering:** GitHub Actions henter nye Doffin-kontrakter den 20. hver måned, tar inn
+  rådatafiler fra statsregnskapet som er lastet opp i `site-data/raadata/`, regner ut tallene på nytt og
+  publiserer siden (`scripts/update_site_data.py`). En nyere rådatamåned erstatter den forrige
+  for samme år, og tilskuddstallene følger med i `site-data/` så dekningskategoriene beholdes.
+- **GitHub Actions:** `actions/checkout@v6`, `actions/setup-python@v6` og `actions/cache@v5` (Node 24), og
+  byggene kjører på `ubuntu-24.04` i stedet for `ubuntu-latest`.
 - **Ytelse:** leverandørlisten laster de 100 største i HTML-en (49 kB mot 1,3 MB) og henter resten som
   `data/leverandorer.json` først når noen søker, sorterer eller trykker «Vis alle». På en treg mobil går
   innlastingen fra 5,5 til 0,35 sekunder. Sorteringen leser hver verdi én gang, og sorteringsverdiene er

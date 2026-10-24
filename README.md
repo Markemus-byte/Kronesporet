@@ -254,6 +254,33 @@ python scripts/export_site_data.py --db data/offentlig_forbruk.db   # skriver si
 git add site-data/kronesporet.sql && git commit -m "Nye tall" && git push
 ```
 
+### Månedlig oppdatering
+
+`.github/workflows/oppdatering.yml` kjører den 20. hver måned (og når du trykker «Run workflow» under
+Actions → Oppdatering). Den tar utgangspunkt i `site-data/kronesporet.sql` og gjør dette
+(`scripts/update_site_data.py`):
+
+1. Henter nye kontraktstildelinger i Doffin for virksomhetene og underenhetene deres, med
+   kontraktsperiode og vinnere. Kunngjøringer som allerede er lagret, hentes ikke på nytt.
+2. Tar inn nye rådatafiler fra statsregnskapet som ligger i `site-data/raadata/`. En nyere måned
+   erstatter den forrige for samme år, og filer som allerede er lastet inn, hoppes over.
+3. Regner ut årsfordeling, avvik og Doffin-dekning på nytt, bygger `docs/` og committer begge deler.
+
+Oppdateringen holder seg til virksomhetene som allerede er på nettsiden. Nye virksomheter trenger
+Doffin-historikk og underenheter fra Enhetsregisteret, og legges til med `scripts/run_phase1.py`.
+
+statsregnskapet.dfo.no stenger for kall fra skyen, også fra GitHub Actions, så rådata må lastes ned i
+en vanlig nettleser fra https://statsregnskapet.dfo.no/last-ned («Rådata <måned> <år>
+(bevilgningsregnskap)»). Last filen opp på GitHub under `site-data/raadata/` (Add file → Upload files).
+Da starter oppdateringen med en gang. Desemberfilen gir hele året, og det holder å laste opp den.
+Månedsfilene gir ferskere tall for året som går.
+
+Lokalt går det også an å gi inn filen direkte:
+
+```bash
+python scripts/update_site_data.py --raadata ~/Nedlastinger/raadata_september_2026_bevilgningsregnskap.xlsx
+```
+
 ## Publisering
 
 `docs/` er en ferdig bygget statisk nettside, så det trengs ingen byggekommando.

@@ -1,0 +1,80 @@
+# Månedlig oppdatering av dataene bak nettsiden.
+# - Hver måned (og manuelt fra Actions-fanen): henter nye Doffin-kontrakter, tar inn nye
+#   rådatafiler fra statsregnskapet som er lastet opp i site-data/raadata/, regner ut tallene på
+#   nytt, bygger nettsiden og committer site-data/ og docs/ til main. (En push fra GITHUB_TOKEN
+#   starter ikke Nettside-arbeidsflyten, så siden bygges her.)
+# - En ny fil i site-data/raadata/ på main starter jobben med en gang.
+# - Pull requests som endrer innsamlingen: prøvekjøring med noen få kunngjøringer, uten commit.
+name: Oppdatering
+
+on:
+  schedule:
+    # Den 20. hver måned kl. 05:00 UTC. DFØ publiserer rådata for forrige måned rundt midten av måneden.
+    - cron: "0 5 20 * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "site-data/raadata/**"
+  pull_request:
+    paths:
+      - "scripts/update_site_data.py"
+      - "scripts/fetch_raadata.py"
+      - "src/collectors/**"
+      - "src/analysis/**"
+      - ".github/workflows/oppdatering.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: oppdatering-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  oppdater:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Installer avhengigheter
+        run: pip install -r requirements.txt
+
+      # Rå Doffin-kunngjøringer gjenbrukes mellom kjøringene, så bare nye hentes.
+      - uses: actions/cache@v5
+        with:
+          path: data/doffin_cache
+          key: doffin-cache-${{ github.run_id }}
+          restore-keys: doffin-cache-
+
+      - name: Prøvekjøring
+        if: github.event_name == 'pull_request'
+        run: python scripts/update_site_data.py --max-new 5 --dry-run
+
+      - name: Oppdater site-data/
+        if: github.event_name != 'pull_request'
+        run: python scripts/update_site_data.py
+
+      - name: Bygg nettsiden
+        if: github.event_name != 'pull_request'
+        run: |
+          python scripts/build_site.py --db site-data/kronesporet.sql --out docs --cname kronesporet.no
+          python scripts/check_site.py docs
+
+      - name: Commit oppdaterte data og nettside
+        if: github.event_name != 'pull_request'
+        run: |
+          if [ -z "$(git status --porcelain site-data docs)" ]; then
+            echo "Ingen nye data"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site-data docs
+          git commit -m "Månedlig oppdatering av dataene ($(date -u +%Y-%m-%d))"
+          git push
