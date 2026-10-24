@@ -3,7 +3,8 @@
 #   rådatafiler fra statsregnskapet som er lastet opp i site-data/raadata/, regner ut tallene på
 #   nytt, bygger nettsiden og committer site-data/ og docs/ til main. (En push fra GITHUB_TOKEN
 #   starter ikke Nettside-arbeidsflyten, så siden bygges her.)
-# - En ny fil i site-data/raadata/ på main starter jobben med en gang.
+# - En ny fil i site-data/raadata/ eller en endring i site-data/rettinger.csv på main starter jobben
+#   med en gang.
 # - Pull requests som endrer innsamlingen: prøvekjøring med noen få kunngjøringer, uten commit.
 name: Oppdatering
 
@@ -16,6 +17,7 @@ on:
     branches: [main]
     paths:
       - "site-data/raadata/*.xlsx"
+      - "site-data/rettinger.csv"
   pull_request:
     paths:
       - "scripts/update_site_data.py"

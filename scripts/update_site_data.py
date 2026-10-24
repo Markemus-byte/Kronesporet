@@ -7,7 +7,8 @@ Tar utgangspunkt i dataene som allerede ligger i repoet og legger til det som er
      gitt med --raadata eller lastet ned med --fetch-raadata (scripts/fetch_raadata.py; nettstedet
      stenger for kall fra skyen, også fra GitHub Actions). En nyere måned erstatter den forrige for
      samme år, og filer som allerede er lastet inn, hoppes over.
-  3. Årsfordeling, avvik og Doffin-dekning regnes ut på nytt, og tallene eksporteres.
+  3. Kjente feil i Doffin rettes etter site-data/rettinger.csv (f.eks. feil orgnr på kjøperen).
+  4. Årsfordeling, avvik og Doffin-dekning regnes ut på nytt, og tallene eksporteres.
 
 Oppdateringen holder seg til virksomhetene som allerede er på nettsiden. Nye virksomheter trenger
 Doffin-historikk og underenheter fra Enhetsregisteret og legges til med scripts/run_phase1.py.
@@ -20,6 +21,7 @@ Eksempel (fra repo-roten):
 from __future__ import annotations
 
 import argparse
+import csv
 import logging
 import os
 import sqlite3
@@ -45,6 +47,8 @@ from src.collectors.statsregnskap import load_raadata_xlsx, raadata_orgnrs  # no
 from src.web.data import source_month  # noqa: E402
 
 log = logging.getLogger("oppdatering")
+CORRECTIONS = ROOT / "site-data" / "rettinger.csv"
+CORRECTABLE = {"buyer_orgnr", "buyer_name", "value", "start_date", "end_date", "duration_months"}
 
 
 def agencies(conn: sqlite3.Connection) -> set[str]:
@@ -107,6 +111,28 @@ def fetch_new_contracts(conn: sqlite3.Connection, years: list[int], client: Doff
             log.info("Detaljer: %d/%d", i, len(ids))
     conn.commit()
     return saved
+
+
+def apply_corrections(conn: sqlite3.Connection, path: Path = CORRECTIONS) -> int:
+    """Rett kjente feil i Doffin-kunngjøringene (kontrakt, felt, verdi, begrunnelse). Returnerer antall rettet.
+
+    Rettingene ligger i repoet, så de gjelder også når en kunngjøring hentes på nytt.
+    """
+    if not path.exists():
+        return 0
+    n = 0
+    with path.open(encoding="utf-8", newline="") as f:
+        for row in csv.DictReader(f):
+            field_, value = row["felt"].strip(), row["verdi"].strip()
+            if field_ not in CORRECTABLE:
+                raise SystemExit(f"{path.name}: feltet {field_!r} kan ikke rettes")
+            n += conn.execute(f"UPDATE doffin_contracts SET {field_} = ? WHERE id = ?",
+                              (value or None, row["kontrakt"].strip())).rowcount
+            if field_ == "buyer_orgnr":
+                conn.execute("UPDATE doffin_buyers SET orgnr = ? WHERE contract_id = ? AND position = 0",
+                             (value, row["kontrakt"].strip()))
+    conn.commit()
+    return n
 
 
 def keep_only(conn: sqlite3.Connection, orgnrs: set[str]) -> int:
@@ -184,6 +210,10 @@ def main() -> int:
 
         n_new = fetch_new_contracts(conn, years, DoffinClient(cache_dir=a.cache_dir), a.max_new)
         report.append(f"Doffin: {n_new} nye kontrakter ({', '.join(map(str, years))}).")
+
+        n_fixed = apply_corrections(conn)
+        if n_fixed:
+            report.append(f"Rettet {n_fixed} kjente feil i Doffin ({CORRECTIONS.name}).")
 
         periods = ledger_period(conn)
         latest = max(periods) if periods else today.year
