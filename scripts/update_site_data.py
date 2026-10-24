@@ -9,8 +9,10 @@ Tar utgangspunkt i dataene som allerede ligger i repoet og legger til det som er
      samme år, og filer som allerede er lastet inn, hoppes over.
   3. Helseforetakene i site-data/helseforetak.csv: underenheter fra Enhetsregisteret for nye
      foretak og årsregnskapene fra Regnskapsregisteret (src/collectors/foretak.py).
-  4. Kjente feil i Doffin rettes etter site-data/rettinger.csv (f.eks. feil orgnr på kjøperen).
-  5. Årsfordeling, avvik og Doffin-dekning regnes ut på nytt, og tallene eksporteres.
+  4. Kommunene og fylkeskommunene: kjøp fra KOSTRA (SSB) og kjøperne i Doffin som hører til dem
+     (etater, bydeler og kommunale foretak, slått opp oppover i Enhetsregisteret, src/collectors/kostra.py).
+  5. Kjente feil i Doffin rettes etter site-data/rettinger.csv (f.eks. feil orgnr på kjøperen).
+  6. Årsfordeling, avvik og Doffin-dekning regnes ut på nytt, og tallene eksporteres.
 
 Oppdateringen holder seg til virksomhetene som allerede er på nettsiden. Nye virksomheter trenger
 Doffin-historikk og underenheter fra Enhetsregisteret og legges til med scripts/run_phase1.py.
@@ -44,8 +46,8 @@ from src.collectors.doffin import (  # noqa: E402
     DoffinClient, DoffinError, buyer_list, init_db, iter_search_hits, month_ranges, normalize,
     save_buyers, save_contracts, save_winners, winners,
 )
-from src.collectors import foretak  # noqa: E402
-from src.collectors.brreg import load_subunits, main_units  # noqa: E402
+from src.collectors import foretak, kostra  # noqa: E402
+from src.collectors.brreg import load_subunits, main_units, resolve_upward  # noqa: E402
 from src.collectors.statsregnskap import load_raadata_xlsx, raadata_orgnrs  # noqa: E402
 from src.web.data import source_month  # noqa: E402
 
@@ -60,8 +62,29 @@ def agencies(conn: sqlite3.Connection) -> set[str]:
 
 
 def buyers(conn: sqlite3.Connection) -> set[str]:
-    """Orgnr som kan stå som kjøper i Doffin: virksomhetene, helseforetakene og underenhetene deres."""
-    return agencies(conn) | foretak.orgnrs(conn) | {r[0] for r in conn.execute("SELECT child FROM orgnr_parent")}
+    """Orgnr som kan stå som kjøper i Doffin: virksomhetene, helseforetakene, kommunene og underenhetene deres."""
+    return (agencies(conn) | foretak.orgnrs(conn) | kostra.orgnrs(conn)
+            | {r[0] for r in conn.execute("SELECT child FROM orgnr_parent")})
+
+
+CHECKED_SCHEMA = "CREATE TABLE IF NOT EXISTS orgnr_checked (orgnr TEXT PRIMARY KEY)  -- kjøpere slått opp uten treff"
+
+
+def resolve_municipal(conn: sqlite3.Connection, orgnrs: set[str]) -> int:
+    """Slå opp ukjente kjøpere i Enhetsregisteret og før dem som ligger under en kommune eller et fylke,
+    på kommunen (orgnr_parent). Kjøpere som er slått opp, huskes i orgnr_checked. Returnerer antall nye."""
+    roots = kostra.orgnrs(conn)
+    conn.execute(CHECKED_SCHEMA)
+    checked = {r[0] for r in conn.execute("SELECT orgnr FROM orgnr_checked")}
+    todo = {o for o in orgnrs if o} - buyers(conn) - checked
+    if not roots or not todo:
+        return 0
+    found = resolve_upward(todo, roots)
+    conn.executemany("INSERT OR IGNORE INTO orgnr_parent VALUES (?, ?, ?, ?)",
+                     [(child, root, name, kind) for child, (root, name, kind) in found.items()])
+    conn.executemany("INSERT OR IGNORE INTO orgnr_checked VALUES (?)", [(o,) for o in todo - set(found)])
+    conn.commit()
+    return len(found)
 
 
 def load_health(conn: sqlite3.Connection, path: Path = HEALTH) -> list[str]:
@@ -98,23 +121,29 @@ def fetch_new_contracts(conn: sqlite3.Connection, years: list[int], client: Doff
     når den ikke står først (felles anskaffelser). Alle kjøperne lagres i doffin_buyers, også for
     kunngjøringer som allerede ligger i databasen.
     """
-    wanted = buyers(conn)
     known = {r[0] for r in conn.execute("SELECT id FROM doffin_contracts")}
     today = date.today()
-    new: dict[str, dict] = {}
+    hits: list[dict] = []
     for year in years:
         to_month = today.month if year == today.year else 12
         for start, end in month_ranges(year, to_month):
-            for hit in iter_search_hits(client, start, end):
-                found = buyer_list(hit)
-                if not any(o in wanted for o, _ in found):
-                    continue
-                if hit["id"] in known:
-                    save_buyers(conn, hit["id"], found)
-                else:
-                    new.setdefault(hit["id"], hit)
-        conn.commit()
-        log.info("Doffin %s: %d nye kunngjøringer så langt", year, len(new))
+            hits += iter_search_hits(client, start, end)
+        log.info("Doffin %s: %d tildelinger så langt", year, len(hits))
+    n_units = resolve_municipal(conn, {o for hit in hits for o, _ in buyer_list(hit)})
+    if n_units:
+        log.info("%d nye kjøpere under kommuner og fylker", n_units)
+    wanted = buyers(conn)
+    new: dict[str, dict] = {}
+    for hit in hits:
+        found = buyer_list(hit)
+        if not any(o in wanted for o, _ in found):
+            continue
+        if hit["id"] in known:
+            save_buyers(conn, hit["id"], found)
+        else:
+            new.setdefault(hit["id"], hit)
+    conn.commit()
+    log.info("Doffin: %d nye kunngjøringer", len(new))
     ids = sorted(new)[:max_new] if max_new else sorted(new)
     saved = 0
     for i, notice_id in enumerate(ids, 1):
@@ -229,6 +258,12 @@ def main() -> int:
             log.info("%d virksomheter i rådata er ikke på nettsiden og er holdt utenfor", dropped)
 
         report += load_health(conn)
+        try:
+            n_units, n_rows = kostra.load(conn)
+            report.append(f"Kommuner og fylker: {n_units} med {n_rows} regnskapstall fra KOSTRA (SSB).")
+        except Exception as e:  # SSB nede: behold tallene fra forrige kjøring
+            log.warning("Kunne ikke hente KOSTRA fra SSB: %s", e)
+            report.append(f"KOSTRA: kunne ikke hentes ({e}), tallene fra forrige kjøring er beholdt.")
         n_new = fetch_new_contracts(conn, years, DoffinClient(cache_dir=a.cache_dir), a.max_new)
         report.append(f"Doffin: {n_new} nye kontrakter ({', '.join(map(str, years))}).")
 

@@ -20,14 +20,17 @@ ROOT = Path(__file__).resolve().parents[1]
 # (tabell, WHERE-filter). Filteret begrenser til virksomhetene som er med på nettsiden.
 # Kontraktene hentes via doffin_contract_years når den finnes, fordi kjøperen der er
 # regnskapsvirksomheten også når en underenhet (orgnr_parent) står som kjøper i Doffin.
-# Helseforetakene (tabellen foretak) er med når den finnes; {buyers} byttes ut i export().
+# Helseforetakene (foretak) og kommunene (kommuner) er med når tabellene finnes; {buyers} byttes ut i export().
 BUYERS = ("SELECT orgnr FROM contract_spend_comparison UNION "
           "SELECT orgnr FROM statsregnskap WHERE orgnr IS NOT NULL")
-HEALTH = " UNION SELECT orgnr FROM foretak"
+EXTRA_BUYERS = {"foretak": " UNION SELECT orgnr FROM foretak", "kommuner": " UNION SELECT orgnr FROM kommuner"}
 TABLES: list[tuple[str, str]] = [
     ("contract_spend_comparison", ""),
     ("foretak", ""),
     ("foretak_regnskap", ""),
+    ("kommuner", ""),
+    ("kommune_regnskap", ""),
+    ("orgnr_checked", ""),  # kjøpere i Doffin som er slått opp uten treff, så de ikke slås opp hver måned
     ("statsregnskap", "orgnr IN ({buyers})"),
     ("statsregnskap_tilskudd", "orgnr IN ({buyers})"),  # skiller «tilskudd» fra «avtaler for andre» i dekningen
     ("doffin_coverage", ""),
@@ -51,7 +54,7 @@ def hidden_suppliers(path: Path = HIDDEN) -> set[str]:
 
 
 def _buyers(present: set[str]) -> str:
-    return BUYERS + (HEALTH if "foretak" in present else "")
+    return BUYERS + "".join(sql for table, sql in EXTRA_BUYERS.items() if table in present)
 
 
 def _contracts_filter(present: set[str]) -> str:

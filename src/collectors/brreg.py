@@ -159,6 +159,47 @@ def main_units(orgnrs: Iterable[str], session: requests.Session | None = None) -
     return out
 
 
+def resolve_upward(orgnrs: Iterable[str], roots: set[str], session: requests.Session | None = None,
+                   max_depth: int = 6) -> dict[str, tuple[str, str, str]]:
+    """orgnr -> (rot, navn, kind) for orgnr som ligger under en av `roots` i Enhetsregisteret.
+
+    Går oppover fra hvert orgnr (underenhet -> hovedenhet -> overordnet enhet ...) i stedet for
+    nedover fra røttene. Det er mye billigere når røttene har tusenvis av underenheter, som
+    kommunene med skoler og barnehager, men bare noen få av dem kunngjør i Doffin.
+    """
+    import requests
+
+    session = session or requests.Session()
+    known: dict[str, tuple[str | None, str, str]] = {}  # orgnr -> (overordnet, navn, kind)
+
+    def lookup(orgnr: str) -> tuple[str | None, str, str] | None:
+        if orgnr in known:
+            return known[orgnr]
+        for path, kind in (("enheter", "enhet"), ("underenheter", "underenhet")):
+            try:
+                resp = session.get(f"{API}/{path}/{orgnr}", timeout=30)
+            except requests.RequestException as e:
+                log.warning("Enhetsregisteret svarte ikke for %s: %s", orgnr, e)
+                return None
+            time.sleep(PAUSE_S / 2)
+            if resp.status_code == 200:
+                data = resp.json()
+                known[orgnr] = (data.get("overordnetEnhet"), data.get("navn", ""), kind)
+                return known[orgnr]
+        return None
+
+    out: dict[str, tuple[str, str, str]] = {}
+    for orgnr in sorted(set(orgnrs) - roots):
+        first = lookup(orgnr)
+        node, depth = first[0] if first else None, 0
+        while node and node not in roots and depth < max_depth:
+            up = lookup(node)
+            node, depth = (up[0] if up else None), depth + 1
+        if node in roots and first:
+            out[orgnr] = (node, first[1], first[2])
+    return out
+
+
 def parent_map(conn: sqlite3.Connection) -> dict[str, str]:
     """barn -> regnskapsvirksomhet, tom hvis `load_subunits` ikke er kjørt."""
     try:

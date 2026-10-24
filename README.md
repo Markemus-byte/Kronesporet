@@ -100,6 +100,14 @@ kontraktene fra Doffin og årsregnskapene for de siste tre årene fra Regnskapsr
 med driftskostnader utenom lønn som sammenligningstall. De flagges ikke, fordi tallet ikke er det samme som
 kjøp av varer og tjenester i statsregnskapet.
 
+Kommunene og fylkeskommunene hentes også av `scripts/update_site_data.py` (`src/collectors/kostra.py`):
+kjøpene fra KOSTRA (SSB-tabell 13551, 13552, 13547 og 13548, konserntall: kjøp av varer og tjenester, kjøp
+som erstatter egen produksjon og investeringer) fra 2024, med dagens kommuneinndeling, og orgnr fra
+Enhetsregisteret. Kjøpere i Doffin som ikke er kjent, slås opp oppover i Enhetsregisteret
+(`brreg.resolve_upward`), og etater, bydeler og kommunale foretak føres på kommunen. Orgnr som er slått opp
+uten treff, huskes i tabellen `orgnr_checked`. Nettsiden viser dem på `kommuner.html` og
+`docs/kommune/<orgnr>.html`, med dekningen sammenlignet med kommuner av lignende størrelse.
+
 Med leverandører i databasen får nettsiden også en leverandøroversikt (`leverandorer.html`) og én
 side per leverandør med organisasjonsnummer (`docs/leverandor/<orgnr>.html`) med kontraktene på
 tvers av statlige kjøpere.
@@ -191,9 +199,9 @@ leverandørene.
   5 %-terskelen flagger nesten alle. Et flagg betyr «verdt å se nærmere på», ikke at noe er galt.
 - **Kontraktverdier er anslag.** For rammeavtaler er verdien ofte et tak, ikke det som faktisk
   blir kjøpt. Kontrakter uten oppgitt periode får en antatt varighet.
-- **Ikke alle virksomheter er med.** Kommuner, fylker og selskaper er verken i
-  statsregnskapet eller har årsrapport i Kudos. Helseforetakene er heller ikke i statsregnskapet, men har
-  egne sider med årsregnskapet fra Regnskapsregisteret (se under). Statens direkte økonomiske engasjement (SDØE)
+- **Ikke alle virksomheter er med.** Statlige selskaper er verken i statsregnskapet eller har
+  årsrapport i Kudos. Helseforetakene og kommunene er heller ikke i statsregnskapet, men har egne sider
+  med tall fra Regnskapsregisteret og KOSTRA (se under). Statens direkte økonomiske engasjement (SDØE)
   står i regnskapet, men kunngjør ikke i Doffin.
 - **Feil i kildene følger med.** Navn og tall vises slik de står i Doffin og årsrapportene.
 

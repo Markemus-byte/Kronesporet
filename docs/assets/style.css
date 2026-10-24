@@ -148,6 +148,7 @@ a:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visibl
 .figure + .figure { padding-left: 18px; border-left: 1px solid var(--band-line); }
 .figure-value { font-size: clamp(1.7rem, 4.5vw, 2.4rem); font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1.1; }
 .figure-label { color: var(--band-muted); font-size: .9rem; margin-top: 4px; }
+.figure-label a { color: inherit; }
 @media (max-width: 560px) { .figure + .figure { padding-left: 0; border-left: 0; } .figure { border-bottom: 1px solid var(--band-line); padding-bottom: 12px; } }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .button-light { background: var(--band-text); color: var(--band); }
