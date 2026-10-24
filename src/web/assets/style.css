@@ -132,3 +132,48 @@ tr[aria-current="true"] td { font-weight: 600; }
 main:focus { outline: none; }
 a:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
 .badge-note { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+
+/* Forsiden: toppfelt, kilder og tidslinje */
+:root { --band: #0c3b32; --band-text: #f4f1ea; --band-muted: #b8d2ca; --band-line: rgba(255, 255, 255, .16); --ledger: #33506e; --ledger-soft: #e4ebf3; }
+@media (prefers-color-scheme: dark) { :root { --band: #0f2b26; --band-text: #eef0ec; --band-muted: #9fc3b8; --ledger: #a9c2de; --ledger-soft: #1f2c3a; } }
+.eyebrow { margin: 0 0 .5rem; font-size: .78rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--band-muted); }
+.eyebrow-dark { color: var(--accent); margin-top: 3rem; }
+.section-title { font-size: clamp(1.35rem, 3vw, 1.7rem); margin: 0 0 .6rem; }
+.hero-band { background: var(--band); color: var(--band-text); box-shadow: 0 0 0 100vmax var(--band); clip-path: inset(0 -100vmax); padding: 3rem 0 2.6rem; }
+.hero-band h1 { font-size: clamp(2rem, 6vw, 3.2rem); letter-spacing: -0.02em; margin-bottom: .8rem; }
+.hero-band .lede { color: var(--band-muted); font-size: clamp(1.05rem, 2.2vw, 1.22rem); max-width: 44rem; }
+.figures { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(170px, 100%), 1fr)); gap: 0; margin: 2.2rem 0 2rem; border-top: 1px solid var(--band-line); }
+.figure { padding: 16px 18px 0 0; }
+.figure + .figure { padding-left: 18px; border-left: 1px solid var(--band-line); }
+.figure-value { font-size: clamp(1.7rem, 4.5vw, 2.4rem); font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.figure-label { color: var(--band-muted); font-size: .9rem; margin-top: 4px; }
+@media (max-width: 560px) { .figure + .figure { padding-left: 0; border-left: 0; } .figure { border-bottom: 1px solid var(--band-line); padding-bottom: 12px; } }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.button-light { background: var(--band-text); color: var(--band); }
+.button-outline { background: transparent; color: var(--band-text); border: 1px solid var(--band-line); }
+.hero-band a:focus-visible { outline-color: var(--band-text); }
+
+.source-cards { list-style: none; padding: 0; margin: 1rem 0 .6rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); gap: 12px; }
+.source-card { display: flex; gap: 14px; align-items: flex-start; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
+.source-card h3 { margin: 0 0 .3rem; font-size: 1.05rem; }
+.source-card p { margin: 0; color: var(--muted); font-size: .93rem; }
+.source-owner { font-weight: 500; font-size: .85rem; color: var(--muted); }
+.source-mark { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; background: var(--accent-soft); color: var(--accent); font-weight: 800; font-size: 1.1rem; }
+
+.timeline { margin: 1rem 0 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 16px 14px; }
+.tl-chart, .tl-tracks { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: 0 8px; }
+.tl-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 210px; padding-top: 22px; }
+.tl-bar { width: 100%; max-width: 48px; background: var(--accent); border-radius: 4px 4px 0 0; }
+.tl-col:hover .tl-bar { opacity: .8; }
+.tl-value { font-size: .75rem; color: var(--muted); font-variant-numeric: tabular-nums; margin-bottom: 4px; white-space: nowrap; }
+.tl-year { display: block; width: 100%; margin-top: 0; padding-top: 6px; border-top: 1px solid var(--line); text-align: center; font-size: .82rem; font-variant-numeric: tabular-nums; }
+.tl-col { position: relative; }
+.tl-col .tl-year { position: absolute; bottom: -28px; }
+.tl-chart { margin-bottom: 36px; }
+.tl-tracks { gap: 6px 8px; }
+.tl-track { font-size: .8rem; font-weight: 600; padding: 4px 8px; border-radius: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tl-track-doffin { background: var(--accent-soft); color: var(--accent); }
+.tl-track-ledger { background: var(--ledger-soft); color: var(--ledger); }
+@media (max-width: 600px) { .tl-value, .tl-detail { display: none; } .tl-col { height: 160px; padding-top: 6px; } .tl-chart { gap: 0 4px; } .tl-year { font-size: .68rem; } }
+.year-head { padding-top: .2rem; }
+.year-head .years { margin-bottom: .4rem; }

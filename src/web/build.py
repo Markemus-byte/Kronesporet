@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 from html import escape
 from pathlib import Path
 
-from src.web.data import MONTHS, Agency, Contract, Dataset, source_month
+from src.web.data import MONTHS, Agency, Breadth, Contract, Dataset, source_month
 
 ASSETS = Path(__file__).parent / "assets"
 SITE_NAME = "Kronesporet"
@@ -33,7 +33,7 @@ ROW_CURRENT = ' aria-current="true"'
 
 # Settes av build_site() for hele byggingen: offentlig adresse (for canonical, Open Graph
 # og sidekart) og datoen dataene sist ble hentet (vises i bunnteksten).
-_SITE: dict[str, str] = {"base_url": "", "data_date": "", "years": "", "statsregnskap": ""}
+_SITE: dict[str, str] = {"base_url": "", "data_date": "", "years": "", "statsregnskap": "", "units": ""}
 COPYRIGHT = "© 2026 Markemus-byte / Kronesporet. Alle rettigheter forbeholdt."
 
 PERIOD_SOURCES = {
@@ -136,7 +136,9 @@ def page(title: str, body: str, root: str = "", active: str = "", description: s
     data_date = f"Data hentet {_SITE['data_date']}. " if _SITE["data_date"] else ""
     sources = ('<a href="https://doffin.no">Doffin</a> (Digdir), '
                '<a href="https://statsregnskapet.dfo.no">statsregnskapet</a> og årsrapporter i\n    '
-               '<a href="https://kudos.dfo.no">Kudos</a> (DFØ)' if _SITE["statsregnskap"] else
+               '<a href="https://kudos.dfo.no">Kudos</a> (DFØ)'
+               + (', <a href="https://www.brreg.no">Enhetsregisteret</a> (Brønnøysundregistrene)'
+                  if _SITE["units"] else "") if _SITE["statsregnskap"] else
                '<a href="https://doffin.no">Doffin</a> (Digdir) og årsrapporter i\n    '
                '<a href="https://kudos.dfo.no">Kudos</a> (DFØ)')
     return f"""<!doctype html>
@@ -171,7 +173,7 @@ def page(title: str, body: str, root: str = "", active: str = "", description: s
   <div class="wrap">
     <p>Data: {sources}, lisensiert under
     <a href="https://data.norge.no/nlod/no/2.0">Norsk lisens for offentlige data (NLOD 2.0)</a>.
-    Kronesporet er ikke tilknyttet DFØ eller Digdir.</p>
+    Kronesporet er ikke tilknyttet DFØ, Digdir eller Brønnøysundregistrene.</p>
     <p>{data_date}<a href="{root}om.html">Om dataene og metoden</a>.</p>
     <p>{COPYRIGHT}</p>
   </div>
@@ -253,7 +255,120 @@ def _year_nav(years: list[int], current: int, root: str) -> str:
     return f'<nav class="years" aria-label="Regnskapsår"><span class="muted">År:</span> {"".join(links)}</nav>'
 
 
-def index_page(ds: Dataset, root: str = "", years: list[int] | None = None) -> str:
+def _span(years: list[int]) -> str:
+    return "" if not years else str(years[0]) if len(years) == 1 else f"{years[0]}–{years[-1]}"
+
+
+def _front_hero(b: Breadth, ds: Dataset, root: str) -> str:
+    """Forsidens toppfelt: hva Kronesporet kobler sammen, og hvor mye som er hentet inn."""
+    figures = [
+        (_group(b.contracts), f"kontrakter fra Doffin, {_span(b.contract_years)}"),
+        (_group(b.suppliers), "leverandører med organisasjonsnummer"),
+        (_group(b.buyers), "statlige kjøpere i Doffin"),
+        (_group(b.ledger_rows), f"regnskapslinjer fra statsregnskapet, {_span(b.ledger_years)}"),
+        (_group(b.units), "enheter og underenheter koblet via Enhetsregisteret"),
+    ]
+    figs = "".join(f'<div class="figure"><div class="figure-value">{v}</div><div class="figure-label">{l}</div></div>'
+                   for v, l in figures if v != "0")
+    return f"""
+<section class="hero-band" aria-labelledby="tittel">
+  <p class="eyebrow">Statlige innkjøp · {_span(sorted(set(b.contract_years) | set(b.ledger_years)))}</p>
+  <h1 id="tittel">Hvor går statens penger?</h1>
+  <p class="lede">Kronesporet kobler hver kunngjorte kontrakt i Doffin med statsregnskapet og Enhetsregisteret,
+  virksomhet for virksomhet og år for år. Da ser du hva staten kjøper, fra hvem, og hvor mye som aldri blir
+  kunngjort. Ingen av kildene viser dette alene.</p>
+  <div class="figures">{figs}</div>
+  <div class="hero-actions">
+    <a class="button button-light" href="#virksomheter">Se virksomhetene {year_text(ds.year, short=True)}</a>
+    <a class="button button-outline" href="{root}leverandorer.html">Søk blant leverandørene</a>
+  </div>
+</section>
+"""
+
+
+def _source_cards(b: Breadth, root: str) -> str:
+    cards = [
+        ("D", "Doffin", "Digdir", "https://doffin.no",
+         f"{_group(b.contracts)} kunngjorte kontrakter med verdi, løpetid og vinnere, {_span(b.contract_years)}. "
+         f"{_group(b.winners)} vinnerplasser gir {_group(b.suppliers)} leverandører med organisasjonsnummer."),
+        ("S", "Statsregnskapet", "DFØ", "https://statsregnskapet.dfo.no",
+         f"Månedlige rådata fra bevilgningsregnskapet: {_group(b.ledger_rows)} linjer fordelt på "
+         f"{b.ledger_accounts} artskontoer, {_span(b.ledger_years)}. Viser hva virksomhetene faktisk betalte."),
+        ("E", "Enhetsregisteret", "Brønnøysundregistrene", "https://www.brreg.no",
+         f"{_group(b.units)} enheter, hvorav {_group(b.subunits)} underenheter som politidistrikter og "
+         "Forsvarets avdelinger. Kontraktene deres regnes til riktig virksomhet."),
+        ("K", "Kudos", "DFØ", "https://kudos.dfo.no",
+         f"Årsrapporter fra statlige virksomheter. {_group(b.report_rows)} tall fyller hull der regnskapet "
+         "mangler, og hver virksomhetsside lenker til rapporten."),
+    ]
+    items = "".join(
+        f'<li class="source-card"><span class="source-mark" aria-hidden="true">{m}</span>'
+        f'<div><h3><a href="{url}">{name}</a> <span class="source-owner">{owner}</span></h3>'
+        f"<p>{text}</p></div></li>"
+        for m, name, owner, url, text in cards if not (m == "K" and not b.report_rows)
+        and not (m == "E" and not b.units)
+    )
+    n = items.count("<li")
+    count = {2: "To", 3: "Tre", 4: "Fire", 5: "Fem"}.get(n, str(n))
+    return f"""
+<section aria-labelledby="kilder">
+  <p class="eyebrow eyebrow-dark">Datagrunnlaget</p>
+  <h2 id="kilder" class="section-title">{count} offentlige kilder, koblet sammen</h2>
+  <ul class="source-cards">{items}</ul>
+  <p class="muted small">Alle kildene er åpne data under NLOD 2.0. <a href="{root}om.html#kobling">Slik kobles de</a>.</p>
+</section>
+"""
+
+
+def _timeline(b: Breadth, years_with_pages: list[int], root: str) -> str:
+    """Tidslinje: Doffin-kontrakter per tildelingsår, med årene statsregnskapet dekker markert under."""
+    years = b.contract_years
+    if len(years) < 2:
+        return ""
+    top = max(b.contracts_by_year.values())
+    front = _FRONT["year"]
+    cols = []
+    for y in years:
+        n = b.contracts_by_year[y]
+        label = year_text(y, short=True) if y in _PARTIAL else str(y)
+        href = (f"{root}index.html#virksomheter" if y == front else f"{root}ar/{y}.html"
+                if y in years_with_pages else "")
+        year = f'<a href="{href}">{y}</a>' if href else str(y)
+        cols.append(f'<div class="tl-col" title="{label}: {_group(n)} kontrakter">'
+                    f'<span class="tl-value">{_group(n)}</span>'
+                    f'<span class="tl-bar" style="height:{max(n / top * 100, 2):.1f}%"></span>'
+                    f'<span class="tl-year">{year}</span></div>')
+    tracks = [("Doffin", years[0], years[-1], "tl-track-doffin")]
+    if b.ledger_years:
+        last = b.ledger_years[-1]
+        partial = f", {last}: jan–{MONTHS[_PARTIAL[last] - 1][:3]}" if last in _PARTIAL else ""
+        tracks.append(("Statsregnskapet", b.ledger_years[0], last, "tl-track-ledger",
+                       f"{_span(b.ledger_years)}{partial}"))
+    tracks[0] += (f"{_span(years)}, {_group(b.buyers)} kjøpere",)
+    track_html = "".join(
+        f'<div class="tl-track {cls}" style="grid-column:{years.index(a) + 1} / {years.index(z) + 2}">'
+        f'{escape(t)}<span class="tl-detail"> {escape(detail)}</span></div>'
+        for t, a, z, cls, detail in tracks if a in years and z in years
+    )
+    rows = "".join(f"<tr><th scope=\"row\">{y}</th><td>{_group(b.contracts_by_year[y])}</td></tr>" for y in years)
+    return f"""
+<section aria-labelledby="tidslinje">
+  <p class="eyebrow eyebrow-dark">Tidslinje</p>
+  <h2 id="tidslinje" class="section-title">{len(years)} år med kontrakter</h2>
+  <p class="muted">Doffin-kontrakter med tildeling per år, for {_group(b.buyers)} statlige kjøpere. Der statsregnskapet
+  også finnes, sammenligner Kronesporet kontraktene med det virksomhetene faktisk betalte.</p>
+  <figure class="timeline" style="--cols:{len(years)}">
+    <div class="tl-chart" aria-hidden="true">{''.join(cols)}</div>
+    <div class="tl-tracks" aria-hidden="true">{track_html}</div>
+    <table class="visually-hidden"><caption>Doffin-kontrakter per tildelingsår</caption>
+      <thead><tr><th scope="col">År</th><th scope="col">Kontrakter</th></tr></thead><tbody>{rows}</tbody></table>
+  </figure>
+</section>
+"""
+
+
+def index_page(ds: Dataset, root: str = "", years: list[int] | None = None,
+               breadth: Breadth | None = None) -> str:
     n = len(ds.agencies)
     n_flag = sum(a.flagged for a in ds.agencies)
     stats = [
@@ -327,12 +442,24 @@ def index_page(ds: Dataset, root: str = "", years: list[int] | None = None) -> s
         f"kunngjorte kontrakter for {n} statlige virksomheter ved siden av hva de selv rapporterer at de "
         f"kjøpte varer og tjenester for i {year_text(ds.year)}.</p>"
     )
-    body = f"""
-<section class="hero">
+    front = _FRONT["year"] or max(years or [ds.year])
+    if breadth and breadth.contracts and ds.year == front:
+        top = (_front_hero(breadth, ds, root) + _source_cards(breadth, root)
+               + _timeline(breadth, years or [ds.year], root)
+               + f'''<section id="virksomheter" class="year-head" aria-labelledby="aaret">
+  <p class="eyebrow eyebrow-dark">Regnskapsåret {year_text(ds.year)}</p>
+  <h2 id="aaret" class="section-title">Kunngjort mot betalt, virksomhet for virksomhet</h2>
+  {intro}
+  {_year_nav(years or [ds.year], ds.year, root)}
+</section>''')
+    else:
+        top = f'''<section class="hero">
   <h1>Hvor går statens penger?</h1>
   {intro}
   {_year_nav(years or [ds.year], ds.year, root)}
-</section>
+</section>'''
+    body = f"""
+{top}
 <div class="stats">{stat_html}</div>
 {_caveat(ds, root)}
 {_partial_caveat(ds)}
@@ -355,7 +482,6 @@ def index_page(ds: Dataset, root: str = "", years: list[int] | None = None) -> s
   <p class="muted small">Klikk på en kolonne for å sortere. Beløp i kortform; hold pekeren over for nøyaktig tall.</p>
 </section>
 """
-    front = _FRONT["year"] or max(years or [ds.year])
     title = SITE_NAME if ds.year == front else f"Statlige virksomheter {year_text(ds.year, short=True)}"
     path = "index.html" if ds.year == front else f"ar/{ds.year}.html"
     return page(title, body, root=root, active="index", path=path,
@@ -874,12 +1000,17 @@ regnes til virksomheten som fører regnskapet, og underenheten vises ved kontrak
         if _SITE["statsregnskap"] else
         "Kommuner, fylker, helseforetak og selskaper har ikke årsrapport i Kudos. Forvaltningsbedrifter som "
         "Statsbygg og universitetene bruker et annet oppsett som foreløpig ikke leses.")
+    enhetsregisteret = (
+        '\n<dt><a href="https://www.brreg.no/om-oss/registrene-vare/om-enhetsregisteret/">Enhetsregisteret</a> '
+        "(Brønnøysundregistrene)</dt>\n<dd>Registeret over norske virksomheter og underenhetene deres. Vi henter "
+        "underenhetene til de statlige virksomhetene, slik at en kontrakt kunngjort av for eksempel et "
+        "politidistrikt regnes til Politiet.</dd>" if _SITE["units"] else "")
     body = f"""
 <section class="hero"><h1>Om dataene og metoden</h1>
 <p class="lede">Kronesporet er et åpenhetsverktøy for offentlig pengebruk. Første versjon sammenligner
 kunngjorte kontrakter i Doffin med det statlige virksomheter selv rapporterer at de kjøpte for.</p></section>
 <div class="prose">
-<h2>Kilder</h2>
+<h2 id="kilder">Kilder</h2>
 <dl class="sources">
 <dt><a href="https://doffin.no">Doffin</a></dt>
 <dd>Den nasjonale kunngjøringsdatabasen for offentlige anskaffelser, drevet av Digdir. Vi henter
@@ -889,14 +1020,14 @@ Mangler tildelt verdi, brukes anslått verdi (merket «anslått verdi»).{" Leve
 <dd>Kunnskapsdatabasen for offentlige utredninger, der statlige virksomheter publiserer årsrapportene sine.
 Fra den standardiserte «Oppstilling av artskontorapportering» bruker vi
 <em>Andre utbetalinger til drift</em> + <em>Utbetaling til investeringer</em> som «kjøp av varer og tjenester».
-Lønn, tilskudd og finansposter er holdt utenfor.</dd>{statsregnskap}
+Lønn, tilskudd og finansposter er holdt utenfor.</dd>{statsregnskap}{enhetsregisteret}
 </dl>
 <p>{"Kildene" if _SITE["statsregnskap"] else "Begge kildene"} er lisensiert under <a href="https://data.norge.no/nlod/no/2.0">Norsk lisens for offentlige data
 (NLOD 2.0)</a>, som tillater gjenbruk, også kommersielt, med kildehenvisning. Inneholder data under NLOD
 tilgjengeliggjort av Digitaliseringsdirektoratet (Doffin) og Direktoratet for forvaltning og økonomistyring
-({"statsregnskapet og Kudos" if _SITE["statsregnskap"] else "Kudos"}).</p>
+({"statsregnskapet og Kudos" if _SITE["statsregnskap"] else "Kudos"}){" og Brønnøysundregistrene (Enhetsregisteret)" if _SITE["units"] else ""}.</p>
 
-<h2>Slik kobles tallene</h2>
+<h2 id="kobling">Slik kobles tallene</h2>
 <p>Regnskapet har ikke leverandører, så koblingen går på <em>kjøper</em>: organisasjonsnummeret til kjøperen i
 Doffin mot virksomheten som har levert årsrapporten. Avviket er (Doffin − kjøp) / kjøp, og virksomheter
 der avviket er større enn {pct(ds.threshold, decimals=0)} i den ene eller andre retningen, blir flagget.</p>{units}
@@ -959,7 +1090,9 @@ def _dataset_jsonld() -> str:
         "inLanguage": "nb",
         "isAccessibleForFree": True,
         "creator": {"@type": "Organization", "name": SITE_NAME, "url": base},
-        "isBasedOn": ["https://doffin.no", "https://kudos.dfo.no"],
+        "isBasedOn": ["https://doffin.no", "https://kudos.dfo.no"]
+        + (["https://statsregnskapet.dfo.no"] if _SITE["statsregnskap"] else [])
+        + (["https://www.brreg.no"] if _SITE["units"] else []),
         "license": "https://data.norge.no/nlod/no/2.0",
         "temporalCoverage": _SITE["years"],
         "spatialCoverage": "Norge",
@@ -1033,7 +1166,8 @@ def _write_csv(path: Path, rows: list[dict[str, object]]) -> None:
     path.write_text("\ufeff" + buf.getvalue(), encoding="utf-8")
 
 
-def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "") -> int:
+def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "",
+               breadth: Breadth | None = None) -> int:
     """Skriver hele nettstedet til `out`. Returnerer antall HTML-sider.
 
     Med flere år blir index.html siste år og ar/<år>.html de andre årene. Hver
@@ -1053,6 +1187,7 @@ def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "")
     _SITE["data_date"] = max((d.data_date for d in datasets if d.data_date), default="",
                              key=lambda d: d.split(".")[::-1])
     _SITE["statsregnskap"] = "1" if any(a.spend_source for d in datasets for a in d.agencies) else ""
+    _SITE["units"] = "1" if breadth and breadth.units else ""
     _SITE["years"] = str(years[0]) if len(years) == 1 else f"{years[0]}/{years[-1]}"
 
     for sub in ("virksomhet", "ar", "leverandor"):
@@ -1064,7 +1199,7 @@ def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "")
     (out / ".nojekyll").write_text("")
 
     pages = 2
-    (out / "index.html").write_text(index_page(latest, years=years), encoding="utf-8")
+    (out / "index.html").write_text(index_page(latest, years=years, breadth=breadth), encoding="utf-8")
     (out / "om.html").write_text(about_page(latest), encoding="utf-8")
     (out / "404.html").write_text(not_found_page(), encoding="utf-8")
     if len(datasets) > 1:
@@ -1097,7 +1232,8 @@ def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "")
     _write_csv(out / "data" / "virksomheter.csv", rows)
     _write_csv(out / "data" / "kontrakter.csv", [r for ds in datasets for r in contract_rows(ds)])
     meta = {"år": years, "årsfordelt": latest.annualized, "terskel": latest.threshold,
-            "lisens": "NLOD 2.0", "kilder": ["Doffin (Digdir)", "Kudos (DFØ)", "Statsregnskapet (DFØ)"],
+            "lisens": "NLOD 2.0", "kilder": ["Doffin (Digdir)", "Kudos (DFØ)", "Statsregnskapet (DFØ)"]
+            + (["Enhetsregisteret (Brønnøysundregistrene)"] if _SITE["units"] else []),
             "virksomheter": rows}
     (out / "data" / "virksomheter.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1), encoding="utf-8")
     write_sitemap(out)
