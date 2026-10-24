@@ -20,17 +20,20 @@ ROOT = Path(__file__).resolve().parents[1]
 # (tabell, WHERE-filter). Filteret begrenser til virksomhetene som er med på nettsiden.
 # Kontraktene hentes via doffin_contract_years når den finnes, fordi kjøperen der er
 # regnskapsvirksomheten også når en underenhet (orgnr_parent) står som kjøper i Doffin.
+# Helseforetakene (tabellen foretak) er med når den finnes; {buyers} byttes ut i export().
 BUYERS = ("SELECT orgnr FROM contract_spend_comparison UNION "
           "SELECT orgnr FROM statsregnskap WHERE orgnr IS NOT NULL")
-UNITS = f"{BUYERS} UNION SELECT child FROM orgnr_parent WHERE parent IN ({BUYERS})"
+HEALTH = " UNION SELECT orgnr FROM foretak"
 TABLES: list[tuple[str, str]] = [
     ("contract_spend_comparison", ""),
-    ("statsregnskap", f"orgnr IN ({BUYERS})"),
-    ("statsregnskap_tilskudd", f"orgnr IN ({BUYERS})"),  # skiller «tilskudd» fra «avtaler for andre» i dekningen
+    ("foretak", ""),
+    ("foretak_regnskap", ""),
+    ("statsregnskap", "orgnr IN ({buyers})"),
+    ("statsregnskap_tilskudd", "orgnr IN ({buyers})"),  # skiller «tilskudd» fra «avtaler for andre» i dekningen
     ("doffin_coverage", ""),
-    ("orgnr_parent", f"parent IN ({BUYERS})"),
+    ("orgnr_parent", "parent IN ({buyers})"),
     ("doffin_contracts", "{contracts}"),
-    ("doffin_contract_years", f"buyer_orgnr IN ({BUYERS})"),
+    ("doffin_contract_years", "buyer_orgnr IN ({buyers})"),
     ("doffin_winners", "contract_id IN (SELECT id FROM doffin_contracts WHERE {contracts})"),
     ("doffin_buyers", "contract_id IN (SELECT id FROM doffin_contracts WHERE {contracts})"),
 ]
@@ -47,11 +50,16 @@ def hidden_suppliers(path: Path = HIDDEN) -> set[str]:
     return {line.split("#")[0].strip() for line in path.read_text(encoding="utf-8").splitlines()} - {""}
 
 
+def _buyers(present: set[str]) -> str:
+    return BUYERS + (HEALTH if "foretak" in present else "")
+
+
 def _contracts_filter(present: set[str]) -> str:
-    buyers = UNITS if "orgnr_parent" in present else BUYERS
+    roots = _buyers(present)
+    buyers = f"{roots} UNION SELECT child FROM orgnr_parent WHERE parent IN ({roots})" if "orgnr_parent" in present else roots
     where = f"buyer_orgnr IN ({buyers})"
     if "doffin_contract_years" in present:
-        where += f" OR id IN (SELECT contract_id FROM doffin_contract_years WHERE buyer_orgnr IN ({BUYERS}))"
+        where += f" OR id IN (SELECT contract_id FROM doffin_contract_years WHERE buyer_orgnr IN ({roots}))"
     if "doffin_buyers" in present:  # felles anskaffelser der virksomheten ikke står som første kjøper
         where += f" OR id IN (SELECT contract_id FROM doffin_buyers WHERE orgnr IN ({buyers}))"
     return where
@@ -67,7 +75,7 @@ def export(src: Path, dest: Path) -> dict[str, int]:
         for table, where in TABLES:
             if table not in present:
                 continue
-            where = where.replace("{contracts}", contracts)
+            where = where.replace("{contracts}", contracts).replace("{buyers}", _buyers(present))
             schema = conn.execute("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?",
                                   (table,)).fetchone()[0]
             out.execute(schema)

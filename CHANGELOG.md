@@ -2,6 +2,13 @@
 
 ## Ikke utgitt
 
+- **Helseforetakene:** de fire regionale helseforetakene og 32 helseforetak (`site-data/helseforetak.csv`) er
+  med. De er statlige, men ikke i statsregnskapet. 1 221 sykehus og avdelinger fra Enhetsregisteret regnes til
+  foretaket sitt, og 2 158 nye Doffin-kontrakter for 2017–2026 er hentet (12 480 i alt). Årsregnskapene for
+  2023–2025 hentes fra Regnskapsregisteret, og driftskostnader utenom lønn brukes som sammenligningstall, uten
+  flagg. Ny side `helseforetak.html` i menyen og én side per foretak. Kontraktene er også med på
+  leverandørsidene, i `kontrakter.csv` og i den nye `helseforetak.csv`. Helse Nord-Trøndelag HF har 2023-tallene
+  i feil enhet i Regnskapsregisteret, og slike år deles nå på 1000.
 - **Varsler (planlagt):** ny side `varsler.html` i menyen beskriver de planlagte e-postvarslene (nye tildelinger,
   avtaler som løper ut, fullt uttrekk) med interessepåmelding, og viser de 20 største av avtalene som kan løpe ut
   de neste 12 månedene (156 per 23.10.2026, bare der Doffin har sluttdato eller varighet). Påmeldingen bruker

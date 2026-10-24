@@ -89,16 +89,25 @@ def namesake_parents(session: requests.Session, roots: Iterable[str]) -> dict[st
     return out
 
 
-def load_subunits(conn: sqlite3.Connection, orgnrs: Iterable[str], session: requests.Session | None = None) -> int:
-    """Fyll `orgnr_parent` for regnskapsvirksomhetene i orgnrs. Returnerer antall barn."""
+def load_subunits(conn: sqlite3.Connection, orgnrs: Iterable[str], session: requests.Session | None = None,
+                  replace: bool = True) -> int:
+    """Fyll `orgnr_parent` for regnskapsvirksomhetene i orgnrs. Returnerer antall barn.
+
+    replace=False legger til trærne for orgnrs og beholder dem som allerede er lagret
+    (brukes for helseforetakene, se src/collectors/foretak.py).
+    """
     import requests
 
     roots = set(orgnrs)
     session = session or requests.Session()
     conn.executescript(SCHEMA)
-    conn.execute("DELETE FROM orgnr_parent")
-    namesakes = {r: up for r, up in namesake_parents(session, roots).items() if up[0] not in roots}
-    stop = roots | {up for up, _ in namesakes.values()}
+    known: set[str] = set()
+    if replace:
+        conn.execute("DELETE FROM orgnr_parent")
+    else:
+        known = {o for row in conn.execute("SELECT child, parent FROM orgnr_parent") for o in row}
+    namesakes = {r: up for r, up in namesake_parents(session, roots).items() if up[0] not in roots | known}
+    stop = roots | known | {up for up, _ in namesakes.values()}
     rows: list[tuple[str, str, str, str]] = []
     for root, (up, name) in sorted(namesakes.items()):
         log.info("%s føres på %s (overordnet ledd med samme navn)", up, root)
@@ -120,7 +129,7 @@ def load_subunits(conn: sqlite3.Connection, orgnrs: Iterable[str], session: requ
                 rows.append((child, root, name, kind))
                 if kind == "enhet":
                     queue.append(child)
-    conn.executemany("INSERT OR REPLACE INTO orgnr_parent VALUES (?, ?, ?, ?)", rows)
+    conn.executemany(f"INSERT OR {'REPLACE' if replace else 'IGNORE'} INTO orgnr_parent VALUES (?, ?, ?, ?)", rows)
     conn.commit()
     return len(rows)
 

@@ -3,6 +3,7 @@
 Sider:
   index.html                 forside med alle virksomhetene
   virksomhet/<orgnr>.html    én side per virksomhet med Doffin-kontraktene
+  helseforetak.html          helseforetakene (utenfor statsregnskapet), med helseforetak/<orgnr>.html
   om.html                    om dataene og metoden
   varsler.html               planlagte varsler, avtaler som løper ut og interessepåmelding
   vilkar.html                vilkår, forbehold og personvern
@@ -36,7 +37,8 @@ ROW_CURRENT = ' aria-current="true"'
 
 # Settes av build_site() for hele byggingen: offentlig adresse (for canonical, Open Graph
 # og sidekart) og datoen dataene sist ble hentet (vises i bunnteksten).
-_SITE: dict[str, str] = {"base_url": "", "data_date": "", "years": "", "statsregnskap": "", "units": ""}
+_SITE: dict[str, str] = {"base_url": "", "data_date": "", "years": "", "statsregnskap": "", "units": "",
+                         "health": ""}
 COPYRIGHT = "© 2026 Markemus-byte / Kronesporet. Alle rettigheter forbeholdt."
 REPO_URL = "https://github.com/Markemus-byte/Kronesporet"
 CONTACT_EMAIL = ""  # e-postadresse for personvernhenvendelser; tom = henvendelser via GitHub
@@ -124,8 +126,11 @@ def _num(x: float | None) -> str:
 
 def page(title: str, body: str, root: str = "", active: str = "", description: str = "", path: str = "",
          head: str = "") -> str:
-    nav = [("index.html", "Virksomheter", "index"), ("leverandorer.html", "Leverandører", "leverandorer"),
-           ("varsler.html", "Varsler", "varsler"), ("om.html", "Om dataene", "om")]
+    nav = [("index.html", "Virksomheter", "index")]
+    if _SITE["health"]:
+        nav.append(("helseforetak.html", "Helseforetak", "helseforetak"))
+    nav += [("leverandorer.html", "Leverandører", "leverandorer"), ("varsler.html", "Varsler", "varsler"),
+            ("om.html", "Om dataene", "om")]
     links = "".join(
         f'<a href="{root}{href}"{CURRENT if key == active else ""}>{label}</a>'
         for href, label, key in nav
@@ -144,7 +149,8 @@ def page(title: str, body: str, root: str = "", active: str = "", description: s
     sources = ('<a href="https://doffin.no">Doffin</a> (Digdir), '
                '<a href="https://statsregnskapet.dfo.no">statsregnskapet</a> og årsrapporter i\n    '
                '<a href="https://kudos.dfo.no">Kudos</a> (DFØ)'
-               + (', <a href="https://www.brreg.no">Enhetsregisteret</a> (Brønnøysundregistrene)'
+               + (', <a href="https://www.brreg.no">Enhetsregisteret</a>'
+                  + (" og Regnskapsregisteret" if _SITE["health"] else "") + " (Brønnøysundregistrene)"
                   if _SITE["units"] else "") if _SITE["statsregnskap"] else
                '<a href="https://doffin.no">Doffin</a> (Digdir) og årsrapporter i\n    '
                '<a href="https://kudos.dfo.no">Kudos</a> (DFØ)')
@@ -275,6 +281,7 @@ def _front_hero(b: Breadth, ds: Dataset, root: str) -> str:
         (_group(b.buyers), "statlige kjøpere i Doffin"),
         (_group(b.ledger_rows), f"regnskapslinjer fra statsregnskapet, {_span(b.ledger_years)}"),
         (_group(b.units), "enheter og underenheter koblet via Enhetsregisteret"),
+        (_group(b.health), f'<a href="{root}helseforetak.html">helseforetak</a> med kontrakter og årsregnskap'),
     ]
     figs = "".join(f'<div class="figure"><div class="figure-value">{v}</div><div class="figure-label">{l}</div></div>'
                    for v, l in figures if v != "0")
@@ -308,6 +315,9 @@ def _source_cards(b: Breadth, root: str) -> str:
         ("E", "Enhetsregisteret", "Brønnøysundregistrene", "https://www.brreg.no",
          f"{_group(b.units)} enheter, hvorav {_group(b.subunits)} underenheter som politidistrikter og "
          "Forsvarets avdelinger. Kontraktene deres regnes til riktig virksomhet."),
+        ("R", "Regnskapsregisteret", "Brønnøysundregistrene", "https://www.brreg.no",
+         f"Årsregnskapene til {b.health} helseforetak, {_span(b.health_years)}. Sykehusene står ikke i "
+         f'statsregnskapet, men er med på <a href="{root}helseforetak.html">egne sider</a>.'),
         ("K", "Kudos", "DFØ", "https://kudos.dfo.no",
          f"Årsrapporter fra statlige virksomheter. {_group(b.report_rows)} tall fyller hull der regnskapet "
          "mangler, og hver virksomhetsside lenker til rapporten."),
@@ -317,10 +327,10 @@ def _source_cards(b: Breadth, root: str) -> str:
         f'<div><h3><a href="{url}">{name}</a> <span class="source-owner">{owner}</span></h3>'
         f"<p>{text}</p></div></li>"
         for m, name, owner, url, text in cards if not (m == "K" and not b.report_rows)
-        and not (m == "E" and not b.units)
+        and not (m == "E" and not b.units) and not (m == "R" and not b.health)
     )
     n = items.count("<li")
-    count = {2: "To", 3: "Tre", 4: "Fire", 5: "Fem"}.get(n, str(n))
+    count = {2: "To", 3: "Tre", 4: "Fire", 5: "Fem", 6: "Seks"}.get(n, str(n))
     return f"""
 <section aria-labelledby="kilder">
   <p class="eyebrow eyebrow-dark">Datagrunnlaget</p>
@@ -656,77 +666,8 @@ def _history_table(history: list[tuple[int, Agency]], current: int) -> str:
             f'<thead><tr>{thead}</tr></thead><tbody>{"".join(rows)}</tbody></table></div></section>')
 
 
-def agency_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]] | None = None,
-                linked: set[str] = frozenset()) -> str:
-    facts = [
-        ("Organisasjonsnummer", f'<a href="https://data.brreg.no/enhetsregisteret/oppslag/enheter/{escape(a.orgnr)}">'
-                                f'{escape(a.orgnr)}</a>'),
-        (f"Kjøp av varer og tjenester {year_text(ds.year)}", kr_full(a.spend_sum)),
-    ]
-    parts = [(f"\u2003{escape(_spend_label(k))}", kr_full(v))
-             for k, v in sorted(a.spend_parts.items(), key=lambda kv: (not kv[0].isdigit(), kv[0].zfill(4)))]
-    if len(parts) <= 3:
-        facts += parts
-    if a.spend_source:
-        facts.append(("\u2003Kilde", f'<a href="https://statsregnskapet.dfo.no">'
-                                      f'{escape(_spend_source_label(a.spend_source))}</a>'))
-    if ds.annualized:
-        facts.append((f"Doffin-kontrakter som løper i {ds.year}", f"{a.contract_count}"))
-        facts.append((f"Årsandel av kontraktsverdien {ds.year}", kr_full(a.contract_sum)))
-        facts.append((f"Tildelt i {ds.year} (hele verdien, {a.awarded_in_year_count} stk.)",
-                      kr_full(a.awarded_in_year_sum)))
-    else:
-        facts.append((f"Doffin-kontrakter tildelt i {ds.year}", f"{a.contract_count}"))
-        facts.append(("Sum tildelt kontraktsverdi", kr_full(a.contract_sum)))
-    facts.append(("Avvik, Doffin mot kjøp", pct(a.deviation, signed=True)))
-    if a.coverage:
-        c = a.coverage
-        facts.append(("Doffin-dekning", f"{pct(c.ratio)} (lignende virksomheter, {escape(c.peer_group)}: "
-                                         f"median {pct(c.peer_median)})"))
-    facts_html = "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in facts)
-    parts_html = ""
-    if len(parts) > 3:
-        parts_html = ('<details class="parts"><summary>Kjøpene fordelt på artskonto</summary><dl class="facts">'
-                      + "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in parts) + "</dl></details>")
-
-    notes = []
-    if a.coverage and a.coverage.flagged:
-        c = a.coverage
-        side = "høyere" if c.z > 0 else "lavere"
-        notes.append(
-            f"<li><strong>Uvanlig {'høy' if c.z > 0 else 'lav'} Doffin-dekning.</strong> Doffin dekker {pct(c.ratio)} "
-            f"av kjøpene, tydelig {side} enn de {c.peer_count} {escape(c.peer_group)} virksomhetene i samme "
-            f"størrelsesgruppe (median {pct(c.peer_median)}, z\u00a0=\u00a0{_z(c.z)})"
-            + (f", og dekningen har avveket {c.years_outlier} av de siste tre årene" if c.years_outlier > 1 else "")
-            + ".</li>")
-    elif a.coverage and a.coverage.category == "observasjon":
-        c = a.coverage
-        side = "høyere" if c.z > 0 else "lavere"
-        notes.append(
-            f"<li><strong>Avvik i dekning i år.</strong> Doffin dekker {pct(c.ratio)} av kjøpene, {side} enn de "
-            f"{c.peer_count} {escape(c.peer_group)} virksomhetene i samme størrelsesgruppe (median "
-            f"{pct(c.peer_median)}, z\u00a0=\u00a0{_z(c.z)}). Avviket gjelder bare dette året, så det er ikke "
-            f"flagget; én stor rammeavtale kan være nok.</li>")
-    elif a.coverage and a.coverage.category in ("tilskudd", "avtaler_for_andre"):
-        c = a.coverage
-        why = ("Tilskuddene ut av staten er minst like store som Doffin-andelen, så kontraktene betales trolig "
-               "som tilskudd, for eksempel kjøp av fly- og togruter." if c.category == "tilskudd" else
-               "Typisk inngår virksomheten avtaler som andre statlige virksomheter bruker, eller kjøpene føres "
-               "utenfor kjøp av varer og tjenester.")
-        notes.append(
-            f"<li><strong>Dekning over 100 %.</strong> Doffin-andelen ({pct(c.ratio)} av kjøpene) er større enn "
-            f"virksomhetens egne kjøp. {why} Det gir ikke flagg.</li>")
-    if a.flagged:
-        word = "høyere" if a.deviation > 0 else "lavere"
-        notes.append(
-            f"<li><strong>Avvik over {pct(ds.threshold, decimals=0)}.</strong> Doffin-summen er "
-            f"{pct(abs(a.deviation))} {word} enn kjøpene i regnskapet. Det gjelder nesten alle virksomhetene, "
-            f"se <a href=\"../om.html#forbehold\">forbeholdene</a>.</li>")
-    notes_html = f'<ul class="notes">{"".join(notes)}</ul>' if notes else ""
-
-    report = (f'<a class="button" href="{escape(a.report_url)}">Årsrapport {ds.year} i Kudos (PDF)</a>'
-              if a.report_url else "")
-
+def _contract_parts(ds: Dataset, a: Agency, linked: set[str]) -> tuple[str, str, str]:
+    """(største leverandører, Doffin-kontraktene, felles anskaffelser) for en virksomhets- eller foretaksside."""
     cols = [("Kontrakt", "text")]
     if ds.has_suppliers:
         cols.append(("Leverandør", "text"))
@@ -820,6 +761,86 @@ def agency_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]] | None
   <tbody>{jrows}</tbody></table></div>
 </section>"""
 
+    contracts_html = f"""<section>
+  <h2>Doffin-kontrakter ({len(a.contracts)})</h2>
+  <p class="muted">{explain}</p>
+  {table}
+</section>"""
+    return suppliers_html, contracts_html, joint_html
+
+
+def agency_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]] | None = None,
+                linked: set[str] = frozenset()) -> str:
+    facts = [
+        ("Organisasjonsnummer", f'<a href="https://data.brreg.no/enhetsregisteret/oppslag/enheter/{escape(a.orgnr)}">'
+                                f'{escape(a.orgnr)}</a>'),
+        (f"Kjøp av varer og tjenester {year_text(ds.year)}", kr_full(a.spend_sum)),
+    ]
+    parts = [(f"\u2003{escape(_spend_label(k))}", kr_full(v))
+             for k, v in sorted(a.spend_parts.items(), key=lambda kv: (not kv[0].isdigit(), kv[0].zfill(4)))]
+    if len(parts) <= 3:
+        facts += parts
+    if a.spend_source:
+        facts.append(("\u2003Kilde", f'<a href="https://statsregnskapet.dfo.no">'
+                                      f'{escape(_spend_source_label(a.spend_source))}</a>'))
+    if ds.annualized:
+        facts.append((f"Doffin-kontrakter som løper i {ds.year}", f"{a.contract_count}"))
+        facts.append((f"Årsandel av kontraktsverdien {ds.year}", kr_full(a.contract_sum)))
+        facts.append((f"Tildelt i {ds.year} (hele verdien, {a.awarded_in_year_count} stk.)",
+                      kr_full(a.awarded_in_year_sum)))
+    else:
+        facts.append((f"Doffin-kontrakter tildelt i {ds.year}", f"{a.contract_count}"))
+        facts.append(("Sum tildelt kontraktsverdi", kr_full(a.contract_sum)))
+    facts.append(("Avvik, Doffin mot kjøp", pct(a.deviation, signed=True)))
+    if a.coverage:
+        c = a.coverage
+        facts.append(("Doffin-dekning", f"{pct(c.ratio)} (lignende virksomheter, {escape(c.peer_group)}: "
+                                         f"median {pct(c.peer_median)})"))
+    facts_html = "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in facts)
+    parts_html = ""
+    if len(parts) > 3:
+        parts_html = ('<details class="parts"><summary>Kjøpene fordelt på artskonto</summary><dl class="facts">'
+                      + "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in parts) + "</dl></details>")
+
+    notes = []
+    if a.coverage and a.coverage.flagged:
+        c = a.coverage
+        side = "høyere" if c.z > 0 else "lavere"
+        notes.append(
+            f"<li><strong>Uvanlig {'høy' if c.z > 0 else 'lav'} Doffin-dekning.</strong> Doffin dekker {pct(c.ratio)} "
+            f"av kjøpene, tydelig {side} enn de {c.peer_count} {escape(c.peer_group)} virksomhetene i samme "
+            f"størrelsesgruppe (median {pct(c.peer_median)}, z\u00a0=\u00a0{_z(c.z)})"
+            + (f", og dekningen har avveket {c.years_outlier} av de siste tre årene" if c.years_outlier > 1 else "")
+            + ".</li>")
+    elif a.coverage and a.coverage.category == "observasjon":
+        c = a.coverage
+        side = "høyere" if c.z > 0 else "lavere"
+        notes.append(
+            f"<li><strong>Avvik i dekning i år.</strong> Doffin dekker {pct(c.ratio)} av kjøpene, {side} enn de "
+            f"{c.peer_count} {escape(c.peer_group)} virksomhetene i samme størrelsesgruppe (median "
+            f"{pct(c.peer_median)}, z\u00a0=\u00a0{_z(c.z)}). Avviket gjelder bare dette året, så det er ikke "
+            f"flagget; én stor rammeavtale kan være nok.</li>")
+    elif a.coverage and a.coverage.category in ("tilskudd", "avtaler_for_andre"):
+        c = a.coverage
+        why = ("Tilskuddene ut av staten er minst like store som Doffin-andelen, så kontraktene betales trolig "
+               "som tilskudd, for eksempel kjøp av fly- og togruter." if c.category == "tilskudd" else
+               "Typisk inngår virksomheten avtaler som andre statlige virksomheter bruker, eller kjøpene føres "
+               "utenfor kjøp av varer og tjenester.")
+        notes.append(
+            f"<li><strong>Dekning over 100 %.</strong> Doffin-andelen ({pct(c.ratio)} av kjøpene) er større enn "
+            f"virksomhetens egne kjøp. {why} Det gir ikke flagg.</li>")
+    if a.flagged:
+        word = "høyere" if a.deviation > 0 else "lavere"
+        notes.append(
+            f"<li><strong>Avvik over {pct(ds.threshold, decimals=0)}.</strong> Doffin-summen er "
+            f"{pct(abs(a.deviation))} {word} enn kjøpene i regnskapet. Det gjelder nesten alle virksomhetene, "
+            f"se <a href=\"../om.html#forbehold\">forbeholdene</a>.</li>")
+    notes_html = f'<ul class="notes">{"".join(notes)}</ul>' if notes else ""
+
+    report = (f'<a class="button" href="{escape(a.report_url)}">Årsrapport {ds.year} i Kudos (PDF)</a>'
+              if a.report_url else "")
+
+    suppliers_html, contracts_html, joint_html = _contract_parts(ds, a, linked)
     body = f"""
 <p class="crumbs"><a href="../index.html">Alle virksomheter</a></p>
 <section class="hero">
@@ -835,15 +856,153 @@ def agency_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]] | None
 </div>
 {_history_table(history, ds.year) if history and len(history) > 1 else ""}
 {suppliers_html}
-<section>
-  <h2>Doffin-kontrakter ({len(a.contracts)})</h2>
-  <p class="muted">{explain}</p>
-  {table}
-</section>
+{contracts_html}
 {joint_html}
 """
     return page(a.name, body, root="../", description=f"Doffin-kontrakter og kjøp for {a.name} i {ds.year}.",
                 path=f"virksomhet/{a.slug}.html")
+
+
+# --- helseforetak -------------------------------------------------------------
+
+HEALTH_ACCOUNTS_URL = "https://virksomhet.brreg.no/nb/oppslag/enheter/{}"
+HEALTH_COSTS = "Driftskostnader utenom lønn"
+HEALTH_NOTES = {
+    "916879067": "Sykehusinnkjøp inngår nasjonale avtaler som helseforetakene bruker. Doffin-andelen blir derfor "
+                 "høy her og lavere hos foretakene som handler på avtalene.",
+}
+
+
+def _is_rhf(a: Agency) -> bool:
+    return a.name.endswith(" RHF")
+
+
+def _health_share(a: Agency) -> float | None:
+    return a.contract_sum / a.spend_sum if a.spend_sum else None
+
+
+def _health_caveat(root: str = "") -> str:
+    return (
+        '<aside class="caveat"><strong>Ikke samme mål som for virksomhetene.</strong> Helseforetakene står ikke i '
+        "statsregnskapet. Årsregnskapet viser ikke kjøp av varer og tjenester for seg, så Kronesporet bruker "
+        f"driftskostnadene utenom lønn. De tar også med avskrivninger, gjestepasienter og kjøp fra private "
+        "sykehus. Doffin-andelen er derfor lavere enn den ville vært mot rene kjøp, og foretakene flagges ikke. "
+        f'<a href="{root}om.html#helseforetak">Mer om helseforetakene</a>.</aside>')
+
+
+def health_index_page(datasets: list[Dataset], front: Dataset) -> str:
+    year = front.year
+    totals = []
+    for d in sorted(datasets, key=lambda d: -d.year):
+        if not d.health:
+            continue
+        doffin = sum(a.contract_sum for a in d.health)
+        costs = sum(a.spend_sum for a in d.health if not _is_rhf(a))  # RHF-ene betaler mest foretakene sine
+        n = sum(a.contract_count for a in d.health)
+        totals.append(
+            f'<tr{ROW_CURRENT if d is front else ""}><td>{year_text(d.year, short=True)}</td><td class="num">{_group(n)}</td>'
+            f'<td class="num" title="{kr_full(doffin)}">{kr(doffin)}</td>'
+            f'<td class="num" title="{kr_full(costs)}">{kr(costs) if costs else "–"}</td>'
+            f'<td class="num">{pct(doffin / costs) if costs else "–"}</td></tr>')
+    rows = []
+    for a in sorted(front.health, key=lambda a: -a.spend_sum):
+        share = _health_share(a)
+        rows.append(
+            f'<tr data-name="{escape(a.name.lower())} {a.orgnr} {escape(a.owner.lower())}">'
+            f'<td><a href="{a.path}">{escape(a.name)}</a></td><td>{escape(a.owner)}</td>'
+            f'<td class="num" data-sort="{a.contract_count}">{a.contract_count}</td>'
+            f'<td class="num" data-sort="{_num(a.contract_sum)}" title="{kr_full(a.contract_sum)}">{kr(a.contract_sum)}</td>'
+            f'<td class="num" data-sort="{_num(a.spend_sum)}" title="{kr_full(a.spend_sum)}">'
+            f'{kr(a.spend_sum) if a.spend_sum else "–"}</td>'
+            f'<td class="num" data-sort="{_num(share)}">{pct(share) if share is not None else "–"}</td></tr>')
+    n_contracts = len({c.id for d in datasets for a in d.health for c in a.contracts})
+    lead = max(front.health, key=lambda a: a.contract_count, default=None)
+    total = sum(a.contract_count for a in front.health)
+    missing = [d.year for d in sorted(datasets, key=lambda d: d.year)
+               if d.health and not any(a.spend_source for a in d.health)]
+    body = f"""
+<section class="hero">
+  <h1>Helseforetakene</h1>
+  <p class="lede">Sykehusene kjøper for milliarder hvert år, men står ikke i statsregnskapet. Kronesporet henter
+  kontraktene til {len(front.health)} helseforetak, de fire regionale og foretakene de eier, i Doffin, og
+  driftskostnadene fra årsregnskapene i Regnskapsregisteret. {_group(n_contracts)} kontrakter løper i årene i
+  oversikten.</p>
+</section>
+{f'<p>De fleste innkjøpene kunngjøres av {escape(lead.name)} på vegne av foretakene: {lead.contract_count} av '
+ f'{total} kontrakter som løper i {year}. Derfor har mange sykehus få eller ingen kontrakter i eget navn.</p>'
+ if lead and total and lead.contract_count * 2 > total else ""}
+{_health_caveat()}
+<section>
+  <h2>Utvikling, alle foretakene</h2>
+  <div class="table-scroll"><table class="history"><thead><tr><th scope="col">År</th>
+  <th scope="col" data-type="num">Kontrakter</th><th scope="col" data-type="num">Doffin, årsandel</th>
+  <th scope="col" data-type="num">{HEALTH_COSTS}</th><th scope="col" data-type="num">Doffin-andel</th></tr></thead>
+  <tbody>{"".join(totals)}</tbody></table></div>
+  <p class="muted small">Driftskostnadene i totalen gjelder helseforetakene. De fire RHF-enes kostnader er holdt
+  utenfor, fordi de for det meste er betaling til foretakene de eier, og ville blitt telt to ganger.</p>
+  {f'<p class="muted small">Årsregnskapet for {" og ".join(map(str, missing))} er ikke levert ennå, så '
+     f'{"året" if len(missing) == 1 else "årene"} har bare Doffin-tall.</p>' if missing else ""}
+</section>
+<section>
+  <h2>Foretakene i {year}</h2>
+  <div class="table-tools"><label for="filter">Søk etter foretak</label>
+  <input id="filter" data-filter="health" type="search" placeholder="Navn, orgnr eller eier" autocomplete="off">
+  <span class="muted small" data-count-for="health" aria-live="polite"></span></div>
+  <div class="table-scroll"><table class="sortable" id="health">
+  <caption class="visually-hidden">Helseforetakene i {year}: Doffin-kontrakter og driftskostnader</caption>
+  <thead><tr><th scope="col" data-type="text"><button type="button">Foretak</button></th>
+  <th scope="col" data-type="text"><button type="button">Eier</button></th>
+  <th scope="col" data-type="num"><button type="button">Kontrakter</button></th>
+  <th scope="col" data-type="num"><button type="button">Doffin, andel {year}</button></th>
+  <th scope="col" data-type="num"><button type="button">{HEALTH_COSTS}</button></th>
+  <th scope="col" data-type="num"><button type="button">Doffin-andel</button></th></tr></thead>
+  <tbody>{"".join(rows)}</tbody></table></div>
+</section>
+"""
+    return page("Helseforetakene", body, active="helseforetak", path="helseforetak.html",
+                description=f"Doffin-kontraktene og driftskostnadene til de {len(front.health)} helseforetakene.")
+
+
+def health_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]], linked: set[str] = frozenset()) -> str:
+    share = _health_share(a)
+    accounts = (f'<a href="{HEALTH_ACCOUNTS_URL.format(escape(a.orgnr))}">{kr_full(a.spend_sum)}</a>'
+                if a.spend_source else f'<span class="muted">Årsregnskapet for {ds.year} er ikke levert ennå</span>')
+    facts = [
+        ("Organisasjonsnummer", f'<a href="https://data.brreg.no/enhetsregisteret/oppslag/enheter/{escape(a.orgnr)}">'
+                                f'{escape(a.orgnr)}</a>'),
+        ("Eier", escape(a.owner) or "–"),
+        (f"{HEALTH_COSTS} {year_text(ds.year)}", accounts),
+        (f"Doffin-kontrakter som løper i {ds.year}", str(a.contract_count)),
+        (f"Årsandel av kontraktsverdien {ds.year}", kr_full(a.contract_sum)),
+        (f"Tildelt i {ds.year} (hele verdien, {a.awarded_in_year_count} stk.)", kr_full(a.awarded_in_year_sum)),
+        ("Doffin-andel av driftskostnadene", pct(share) if share is not None else "–"),
+    ]
+    facts_html = "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in facts)
+    note = HEALTH_NOTES.get(a.orgnr)
+    hrows = "".join(
+        f'<tr{ROW_CURRENT if y == ds.year else ""}><td>{year_text(y, short=True)}</td><td class="num">{h.contract_count}</td>'
+        f'<td class="num" title="{kr_full(h.contract_sum)}">{kr(h.contract_sum)}</td>'
+        f'<td class="num" title="{kr_full(h.spend_sum)}">{kr(h.spend_sum) if h.spend_sum else "–"}</td>'
+        f'<td class="num">{pct(_health_share(h)) if _health_share(h) is not None else "–"}</td></tr>'
+        for y, h in sorted(history, key=lambda t: -t[0]))
+    suppliers_html, contracts_html, joint_html = _contract_parts(ds, a, linked)
+    body = f"""
+<p class="crumbs"><a href="../helseforetak.html">Alle helseforetak</a></p>
+<section class="hero"><h1>{escape(a.name)}</h1></section>
+<div class="two-col">
+  <div><dl class="facts">{facts_html}</dl></div>
+  <div>{f'<ul class="notes"><li>{escape(note)}</li></ul>' if note else ""}{_health_caveat("../")}</div>
+</div>
+<section><h2>Utvikling</h2><div class="table-scroll"><table class="history"><thead><tr><th scope="col">År</th>
+<th scope="col" data-type="num">Kontrakter</th><th scope="col" data-type="num">Doffin</th>
+<th scope="col" data-type="num">{HEALTH_COSTS}</th><th scope="col" data-type="num">Doffin-andel</th></tr></thead>
+<tbody>{hrows}</tbody></table></div></section>
+{suppliers_html}
+{contracts_html}
+{joint_html}
+"""
+    return page(a.name, body, root="../", active="helseforetak", path=a.path,
+                description=f"Doffin-kontrakter og driftskostnader for {a.name} i {ds.year}.")
 
 
 # --- leverandører -------------------------------------------------------------
@@ -872,7 +1031,7 @@ def supplier_index(datasets: list[Dataset], front: int) -> list[SupplierSummary]
     by_orgnr: dict[str, SupplierSummary] = {}
     names: dict[str, Counter[str]] = {}
     for ds in datasets:
-        for a in ds.agencies:
+        for a in ds.agencies + ds.health:
             for c in a.contracts:
                 for w in c.suppliers:
                     if not w.orgnr:
@@ -922,7 +1081,7 @@ def suppliers_page(datasets: list[Dataset], suppliers: list[SupplierSummary], fr
 <section class="hero">
   <h1>Leverandører</h1>
   <p class="lede">Hvem vinner kontraktene? {_group(len(suppliers))} leverandører med organisasjonsnummer har kontrakter
-  som løper hos statlige virksomheter i oversikten, {span}. Søk på navn eller organisasjonsnummer, og sorter på
+  som løper hos statlige virksomheter{" og helseforetak" if front.health else ""} i oversikten, {span}. Søk på navn eller organisasjonsnummer, og sorter på
   hvert år.</p>
 </section>
 <p class="muted">Verdien er {"årsandelen: den delen av kontraktsverdien som faller i året" if front.annualized
@@ -983,7 +1142,7 @@ def supplier_page(datasets: list[Dataset], s: SupplierSummary, front: Dataset) -
         return str(min(ys)) if len(ys) == 1 else f"{min(ys)}–{max(ys)}"
 
     buyer_rows = "".join(
-        f'<tr><td><a href="../virksomhet/{a.slug}.html">{escape(a.name)}</a></td><td class="num">{len(ids)}</td>'
+        f'<tr><td><a href="../{a.path}">{escape(a.name)}</a></td><td class="num">{len(ids)}</td>'
         f'<td class="num">{years_span(ys)}</td>'
         f'<td class="num" title="{kr_full(s_v)}">{kr(s_v) if s_v else "–"}</td></tr>'
         for a, ids, ys, s_v in sorted(
@@ -996,7 +1155,7 @@ def supplier_page(datasets: list[Dataset], s: SupplierSummary, front: Dataset) -
         title = f'<a href="{escape(c.url)}">{escape(c.title)}</a>' if c.url else escape(c.title)
         rows.append(
             f'<tr data-name="{escape((c.title + " " + a.name).lower())}"><td>{title}{tag}</td>'
-            f'<td><a href="../virksomhet/{a.slug}.html">{escape(a.name)}</a></td>'
+            f'<td><a href="../{a.path}">{escape(a.name)}</a></td>'
             f'<td class="num" data-sort="{escape(c.published or "")}">{escape((c.published or "–")[:10])}</td>'
             f'<td class="num" data-sort="{c.first_year or ""}">{_period(c)}</td>'
             f'<td class="num" data-sort="{_num(c.value)}" title="{kr_full(c.value)}">{kr(c.value)}</td>'
@@ -1125,7 +1284,10 @@ Tolletaten og Kriminalomsorgen. Kontrakten regnes til den første kjøperen, sli
 kjøperne får kontrakten i en egen liste over felles anskaffelser på virksomhetssiden, men verdien regnes ikke med
 hos dem, fordi Doffin ikke viser hvor stor del hver kjøper står for.</p>"""
     coverage_caveat = (
-        "Kommuner, fylker, helseforetak og statlige selskaper er ikke en del av statsregnskapet og er ikke med."
+        ("Kommuner, fylker og statlige selskaper er ikke en del av statsregnskapet og er ikke med. Helseforetakene "
+         'er heller ikke i statsregnskapet, men har <a href="helseforetak.html">egne sider</a> med årsregnskapet.'
+         if ds.health else
+         "Kommuner, fylker, helseforetak og statlige selskaper er ikke en del av statsregnskapet og er ikke med.")
         if _SITE["statsregnskap"] else
         "Kommuner, fylker, helseforetak og selskaper har ikke årsrapport i Kudos. Forvaltningsbedrifter som "
         "Statsbygg og universitetene bruker et annet oppsett som foreløpig ikke leses.")
@@ -1134,6 +1296,26 @@ hos dem, fordi Doffin ikke viser hvor stor del hver kjøper står for.</p>"""
         "(Brønnøysundregistrene)</dt>\n<dd>Registeret over norske virksomheter og underenhetene deres. Vi henter "
         "underenhetene til de statlige virksomhetene, slik at en kontrakt kunngjort av for eksempel et "
         "politidistrikt regnes til Politiet.</dd>" if _SITE["units"] else "")
+    if ds.health:
+        enhetsregisteret += (
+            '\n<dt><a href="https://www.brreg.no/om-oss/registrene-vare/om-regnskapsregisteret/">Regnskapsregisteret</a> '
+            "(Brønnøysundregistrene)</dt>\n<dd>Årsregnskapene til helseforetakene, som ikke er med i statsregnskapet. "
+            "Vi bruker driftskostnadene og lønnskostnadene for de siste tre årene.</dd>")
+    health = ""
+    if ds.health:
+        n_units = sum(1 for a in ds.health for c in a.contracts if c.buyer_unit)
+        health = f"""
+<h3 id="helseforetak">Helseforetakene</h3>
+<p>De fire regionale helseforetakene og de {len(ds.health) - 4} helseforetakene som eies av dem, er statlige,
+men står ikke i statsregnskapet. Kontraktene deres hentes i Doffin på samme måte som for virksomhetene, og
+sykehusene og avdelingene som kunngjør med eget organisasjonsnummer, regnes til foretaket de hører til
+({n_units} av kontraktene i {ds.year}). Listen over foretakene ligger i
+<a href="{REPO_URL}/blob/main/site-data/helseforetak.csv">helseforetak.csv</a>.</p>
+<p>Årsregnskapet skiller ikke ut kjøp av varer og tjenester. Nærmeste tall er driftskostnadene utenom lønn, som
+også tar med avskrivninger, gjestepasientoppgjør og kjøp av helsetjenester fra private. Doffin-andelen for
+helseforetakene er derfor ikke sammenlignbar med dekningen for virksomhetene i statsregnskapet, og foretakene
+flagges ikke. Sykehusinnkjøp inngår nasjonale avtaler som foretakene bruker, så andelen blir høy der og lavere
+hos foretakene.</p>"""
     ledger = "Statsregnskapet" if _SITE["statsregnskap"] else "Årsrapportene"
     compare_rows = [
         ("Kunngjorte kontrakter med verdi og vinnere", "Ja", "Nei", "Nei"),
@@ -1144,7 +1326,7 @@ hos dem, fordi Doffin ikke viser hvor stor del hver kjøper står for.</p>"""
         ("Hvor stor del av kjøpene som er kunngjort", "Nei", "Nei", "Nei"),
         ("Sammenligning med lignende virksomheter, flere år på rad", "Nei", "Nei", "Nei"),
         ("Hver leverandørs andel hos alle statlige kjøpere, år for år", "Nei", "Nei", "Nei"),
-    ]
+    ] + ([("Helseforetakenes kontrakter sammen med årsregnskapet", "Nei", "Nei", "Nei")] if ds.health else [])
     cell = lambda v: f'<td class="cmp cmp-{"ja" if v == "Ja" else "nei" if v == "Nei" else "delvis"}">{v}</td>'  # noqa: E731
     compare = "".join(f'<tr><th scope="row">{escape(r)}</th><td class="cmp cmp-ja cmp-us">Ja</td>'
                       f'{"".join(cell(v) for v in vals)}</tr>' for r, *vals in compare_rows)
@@ -1185,7 +1367,7 @@ Lønn, tilskudd og finansposter er holdt utenfor.</dd>{statsregnskap}{enhetsregi
 <p>{"Kildene" if _SITE["statsregnskap"] else "Begge kildene"} er lisensiert under <a href="https://data.norge.no/nlod/no/2.0">Norsk lisens for offentlige data
 (NLOD 2.0)</a>, som tillater gjenbruk, også kommersielt, med kildehenvisning. Inneholder data under NLOD
 tilgjengeliggjort av Digitaliseringsdirektoratet (Doffin) og Direktoratet for forvaltning og økonomistyring
-({"statsregnskapet og Kudos" if _SITE["statsregnskap"] else "Kudos"}){" og Brønnøysundregistrene (Enhetsregisteret)" if _SITE["units"] else ""}.</p>
+({"statsregnskapet og Kudos" if _SITE["statsregnskap"] else "Kudos"}){" og Brønnøysundregistrene (Enhetsregisteret" + (" og Regnskapsregisteret" if ds.health else "") + ")" if _SITE["units"] else ""}.</p>
 
 <h2 id="kobling">Slik kobles tallene</h2>
 <p>Regnskapet har ikke leverandører, så koblingen går på <em>kjøper</em>: organisasjonsnummeret til kjøperen i
@@ -1194,6 +1376,7 @@ der avviket er større enn {pct(ds.threshold, decimals=0)} i den ene eller andre
 {annual}
 {coverage}
 {suppliers}
+{health}
 <h2 id="forbehold">Forbehold</h2>
 <ul>
 <li><strong>Doffin dekker bare en del av kjøpene.</strong> Kjøp under terskelverdiene, avrop på eksisterende
@@ -1213,7 +1396,7 @@ Andre kjente feil, som at en kunngjøring står med feil organisasjonsnummer på
 <h2>Last ned dataene</h2>
 <p>Tallene bak forsiden kan lastes ned som
 <a href="data/virksomheter.csv">CSV</a> eller <a href="data/virksomheter.json">JSON</a>, og alle kontraktene
-med leverandører som <a href="data/kontrakter.csv">kontrakter.csv</a>. Dataene fra kildene er fortsatt
+med leverandører som <a href="data/kontrakter.csv">kontrakter.csv</a>{', og helseforetakene som <a href="data/helseforetak.csv">helseforetak.csv</a>' if ds.health else ""}. Dataene fra kildene er fortsatt
 underlagt NLOD 2.0; oppgi kildene ved gjenbruk.</p>
 </div>
 """
@@ -1428,9 +1611,17 @@ def export_rows(ds: Dataset) -> list[dict[str, object]]:
     return rows
 
 
+def health_rows(ds: Dataset) -> list[dict[str, object]]:
+    return [{"foretak": a.name, "orgnr": a.orgnr, "eier": a.owner, "år": a.year,
+             "antall_kontrakter": a.contract_count, "doffin_sum_kr": round(a.contract_sum),
+             "driftskostnader_utenom_lonn_kr": round(a.spend_sum) if a.spend_source else "",
+             "doffin_andel_prosent": round(_health_share(a) * 100, 1) if _health_share(a) is not None else ""}
+            for a in ds.health]
+
+
 def contract_rows(ds: Dataset) -> list[dict[str, object]]:
     rows = []
-    for a in ds.agencies:
+    for a in ds.agencies + ds.health:
         for c in a.contracts:
             rows.append({
                 "regnskapsår": ds.year, "virksomhet": a.name, "virksomhet_orgnr": a.orgnr,
@@ -1478,9 +1669,10 @@ def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "",
                              key=lambda d: d.split(".")[::-1])
     _SITE["statsregnskap"] = "1" if any(a.spend_source for d in datasets for a in d.agencies) else ""
     _SITE["units"] = "1" if breadth and breadth.units else ""
+    _SITE["health"] = "1" if any(d.health for d in datasets) else ""
     _SITE["years"] = str(years[0]) if len(years) == 1 else f"{years[0]}/{years[-1]}"
 
-    for sub in ("virksomhet", "ar", "leverandor"):
+    for sub in ("virksomhet", "ar", "leverandor", "helseforetak"):
         if (out / sub).exists():
             shutil.rmtree(out / sub)
     (out / "virksomhet").mkdir(parents=True, exist_ok=True)
@@ -1522,9 +1714,23 @@ def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "",
         (out / "virksomhet" / f"{slug}.html").write_text(agency_page(ds, a, history[slug], linked), encoding="utf-8")
         pages += 1
 
+    if _SITE["health"]:
+        (out / "helseforetak").mkdir()
+        (out / "helseforetak.html").write_text(health_index_page(datasets, latest), encoding="utf-8")
+        pages += 1
+        h_history: dict[str, list[tuple[int, Agency]]] = {}
+        for ds in datasets:
+            for a in ds.health:
+                h_history.setdefault(a.slug, []).append((ds.year, a))
+        for a in latest.health:
+            (out / a.path).write_text(health_page(latest, a, h_history[a.slug], linked), encoding="utf-8")
+            pages += 1
+
     rows = [r for ds in datasets for r in export_rows(ds)]
     _write_csv(out / "data" / "virksomheter.csv", rows)
     _write_csv(out / "data" / "kontrakter.csv", [r for ds in datasets for r in contract_rows(ds)])
+    if _SITE["health"]:
+        _write_csv(out / "data" / "helseforetak.csv", [r for ds in datasets for r in health_rows(ds)])
     meta = {"år": years, "årsfordelt": latest.annualized, "terskel": latest.threshold,
             "lisens": "NLOD 2.0", "kilder": ["Doffin (Digdir)", "Kudos (DFØ)", "Statsregnskapet (DFØ)"]
             + (["Enhetsregisteret (Brønnøysundregistrene)"] if _SITE["units"] else []),
