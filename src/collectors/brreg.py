@@ -10,10 +10,17 @@ ofte står på et organisasjonsledd eller en underenhet. Eksempler:
 barn -> virksomhet i tabellen `orgnr_parent`. Et barn som selv er en
 regnskapsvirksomhet (f.eks. HELFO under Helsedirektoratet) beholder sitt eget
 orgnr, og treet under det hører til det.
+
+Noen virksomheter er registrert med et overordnet ledd som har samme navn, og det er
+det leddet som kunngjør i Doffin. Tolletaten står i regnskapet på 974761343, mens
+kunngjøringene står på 880455702 «TOLLETATEN», som er det overordnede leddet og ligger
+under Finansdepartementet. Et slikt navnelikt overordnet ledd, og treet under det,
+føres på virksomheten og ikke på departementet.
 """
 from __future__ import annotations
 
 import logging
+import re
 import sqlite3
 import time
 from collections.abc import Iterable
@@ -56,6 +63,32 @@ def _children(session: requests.Session, orgnr: str) -> list[tuple[str, str, str
     return out
 
 
+def _norm_name(name: str) -> str:
+    return re.sub(r"[^0-9a-zæøå]", "", (name or "").lower())
+
+
+def namesake_parents(session: requests.Session, roots: Iterable[str]) -> dict[str, tuple[str, str]]:
+    """virksomhet -> (orgnr, navn) for det overordnede leddet når det har samme navn som virksomheten."""
+    import requests
+
+    out: dict[str, tuple[str, str]] = {}
+    for root in sorted(set(roots)):
+        try:
+            resp = session.get(f"{API}/enheter/{root}", timeout=30)
+            time.sleep(PAUSE_S)
+            if resp.status_code != 200 or not resp.json().get("overordnetEnhet"):
+                continue
+            up = resp.json()["overordnetEnhet"]
+            parent = session.get(f"{API}/enheter/{up}", timeout=30)
+            time.sleep(PAUSE_S)
+        except requests.RequestException as e:
+            log.warning("Enhetsregisteret svarte ikke for %s: %s", root, e)
+            continue
+        if parent.status_code == 200 and _norm_name(parent.json().get("navn", "")) == _norm_name(resp.json().get("navn", "")):
+            out[root] = (up, parent.json().get("navn", ""))
+    return out
+
+
 def load_subunits(conn: sqlite3.Connection, orgnrs: Iterable[str], session: requests.Session | None = None) -> int:
     """Fyll `orgnr_parent` for regnskapsvirksomhetene i orgnrs. Returnerer antall barn."""
     import requests
@@ -64,9 +97,15 @@ def load_subunits(conn: sqlite3.Connection, orgnrs: Iterable[str], session: requ
     session = session or requests.Session()
     conn.executescript(SCHEMA)
     conn.execute("DELETE FROM orgnr_parent")
+    namesakes = {r: up for r, up in namesake_parents(session, roots).items() if up[0] not in roots}
+    stop = roots | {up for up, _ in namesakes.values()}
     rows: list[tuple[str, str, str, str]] = []
+    for root, (up, name) in sorted(namesakes.items()):
+        log.info("%s føres på %s (overordnet ledd med samme navn)", up, root)
+        rows.append((up, root, name, "enhet"))
     for root in sorted(roots):
-        queue, seen = [root], {root}
+        start = [root] + [namesakes[root][0]] if root in namesakes else [root]
+        queue, seen = list(start), set(start)
         while queue:
             node = queue.pop()
             try:
@@ -75,7 +114,7 @@ def load_subunits(conn: sqlite3.Connection, orgnrs: Iterable[str], session: requ
                 log.warning("Enhetsregisteret svarte ikke for %s: %s", node, e)
                 continue
             for child, name, kind in children:
-                if child in roots or child in seen:
+                if child in stop or child in seen:
                     continue
                 seen.add(child)
                 rows.append((child, root, name, kind))
@@ -84,6 +123,31 @@ def load_subunits(conn: sqlite3.Connection, orgnrs: Iterable[str], session: requ
     conn.executemany("INSERT OR REPLACE INTO orgnr_parent VALUES (?, ?, ?, ?)", rows)
     conn.commit()
     return len(rows)
+
+
+def main_units(orgnrs: Iterable[str], session: requests.Session | None = None) -> dict[str, str]:
+    """underenhet -> hovedenhet for orgnr som er underenheter (en avdeling), ikke enheter.
+
+    Rådata fra statsregnskapet fører et fåtall virksomheter på en underenhet, mens Doffin og
+    årsrapportene bruker hovedenheten: Nasjonalbiblioteket står som 979530730 (avd. Oslo) i
+    rådata og 976029100 i Doffin. Uten denne koblingen kommer virksomheten ikke med.
+    """
+    import requests
+
+    session = session or requests.Session()
+    out: dict[str, str] = {}
+    for orgnr in sorted(set(orgnrs)):
+        try:
+            if session.get(f"{API}/enheter/{orgnr}", timeout=30).status_code == 200:
+                continue
+            resp = session.get(f"{API}/underenheter/{orgnr}", timeout=30)
+        except requests.RequestException as e:
+            log.warning("Enhetsregisteret svarte ikke for %s: %s", orgnr, e)
+            continue
+        time.sleep(PAUSE_S)
+        if resp.status_code == 200 and resp.json().get("overordnetEnhet"):
+            out[orgnr] = resp.json()["overordnetEnhet"]
+    return out
 
 
 def parent_map(conn: sqlite3.Connection) -> dict[str, str]:
