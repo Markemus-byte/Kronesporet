@@ -2,6 +2,13 @@
 
 ## Ikke utgitt
 
+- **Felles anskaffelser:** alle kjøperne i en kunngjøring lagres nå (`doffin_buyers`), ikke bare den første.
+  145 kunngjøringer har flere statlige kjøpere. Virksomhetssidene viser dem under «Felles anskaffelser» der
+  virksomheten ikke står først (81 virksomheter, f.eks. 16 for Tolletaten og 45 for PST), og listen over
+  virksomheter uten egne kontrakter viser hvor mange felles anskaffelser de er med i. Verdien regnes fortsatt
+  bare hos den første kjøperen. Den månedlige oppdateringen tar med kunngjøringer der en av virksomhetene er
+  blant kjøperne, og en gjennomgang av 2017–2026 fant 85 kunngjøringer som manglet, hvorav 37 med en statlig
+  virksomhet som første kjøper.
 - **Hele regnskapet er med:** årssidene har en ny liste over virksomhetene som har kjøp i statsregnskapet, men
   ingen Doffin-kontrakter som løper i året (49 virksomheter og 59,4 mrd. kr i 2025, hvorav SDØE 57 mrd. kr).
   Listen viser kjøpene, hvor mange kunngjøringer virksomheten har hatt totalt, og når den siste var, med

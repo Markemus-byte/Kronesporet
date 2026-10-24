@@ -291,7 +291,9 @@ def _front_hero(b: Breadth, ds: Dataset, root: str) -> str:
 def _source_cards(b: Breadth, root: str) -> str:
     cards = [
         ("D", "Doffin", "Digdir", "https://doffin.no",
-         f"{_group(b.contracts)} kunngjorte kontrakter med verdi, løpetid og vinnere, {_span(b.contract_years)}. "
+         f"{_group(b.contracts)} kunngjorte kontrakter med verdi, løpetid og vinnere, {_span(b.contract_years)}"
+         + (f", hvorav {_group(b.joint)} felles anskaffelser med flere statlige kjøpere. " if b.joint else ". ")
+         + 
          f"{_group(b.winners)} vinnerplasser gir {_group(b.suppliers)} leverandører med organisasjonsnummer."),
         ("S", "Statsregnskapet", "DFØ", "https://statsregnskapet.dfo.no",
          f"Månedlige rådata fra bevilgningsregnskapet: {_group(b.ledger_rows)} linjer fordelt på "
@@ -499,21 +501,26 @@ def _unmatched_section(ds: Dataset, root: str) -> str:
         return ""
     n = len(ds.unmatched)
     total = sum(u.spend_sum for u in ds.unmatched)
+    has_joint = any(u.joint for u in ds.unmatched)
     rows = []
     for u in ds.unmatched:
         last = (f'<td class="num" data-sort="{u.last_notice}">{u.last_notice}</td>' if u.last_notice
                 else '<td class="num" data-sort="">–</td>')
+        joint = f'<td class="num" data-sort="{u.joint}">{u.joint or "–"}</td>' if has_joint else ""
         rows.append(
             f'<tr data-name="{escape(u.name.lower())} {u.orgnr}">'
             f'<td>{escape(u.name)} <span class="orgnr">{u.orgnr}</span></td>'
             f'<td class="num" data-sort="{_num(u.spend_sum)}" title="{kr_full(u.spend_sum)}">{kr(u.spend_sum)}</td>'
-            f'<td class="num" data-sort="{u.notices}">{u.notices}</td>{last}'
+            f'<td class="num" data-sort="{u.notices}">{u.notices}</td>{last}{joint}'
             f'<td class="small">{escape(u.note)}</td></tr>'
         )
+    cols = [("Virksomhet", "text"), (f"Kjøp {year_text(ds.year, short=True)}", "num"),
+            ("Kunngjøringer, alle år", "num"), ("Siste", "num")]
+    if has_joint:
+        cols.append(("Felles", "num"))
     head = "".join(
         f'<th scope="col" data-type="{t}"><button type="button">{label}</button></th>'
-        for label, t in (("Virksomhet", "text"), (f"Kjøp {year_text(ds.year, short=True)}", "num"),
-                         ("Kunngjøringer, alle år", "num"), ("Siste", "num"), ("Merknad", "text"))
+        for label, t in cols + [("Merknad", "text")]
     )
     return f"""
 <section aria-labelledby="uten-doffin">
@@ -522,8 +529,7 @@ def _unmatched_section(ds: Dataset, root: str) -> str:
   statsregnskapet, men Doffin har ingen kontrakter med verdi for dem som løper i året, verken på eget
   organisasjonsnummer eller på underenhetene. Det betyr ikke at noe er galt. Kjøp under terskelverdiene
   kunngjøres ikke, mange bruker avtaler andre har inngått, som statlige fellesavtaler fra DFØ, og noen kjøper
-  gjennom en annen virksomhet. De er med her så oversikten over statens kjøp er komplett. Kunngjøringer der
-  virksomheten er med i en felles anskaffelse, men ikke står som første kjøper, er ikke telt.</p>
+  gjennom en annen virksomhet. De er med her så oversikten over statens kjøp er komplett.</p>
   <div class="table-scroll">
   <table class="sortable" id="uten-doffin-tabell">
     <caption class="visually-hidden">Virksomheter med kjøp i {ds.year}, uten kontrakter i Doffin</caption>
@@ -532,13 +538,18 @@ def _unmatched_section(ds: Dataset, root: str) -> str:
   </table>
   </div>
   <p class="muted small">Med kjøp over 1 mill. kr. «Kunngjøringer, alle år» teller alle kontraktstildelinger i
-  Doffin som Kronesporet har hentet for virksomheten og underenhetene, og «Siste» er året for den siste.
+  Doffin som Kronesporet har hentet der virksomheten eller en underenhet står som kjøper, og «Siste» er året for
+  den siste.{" «Felles» er felles anskaffelser der virksomheten er en av flere kjøpere, men ikke står først. De er ikke med i sammenligningen, fordi Doffin ikke viser hvor stor del hver kjøper står for." if has_joint else ""}
   <a href="{root}om.html#kobling">Slik kobles kildene</a>.</p>
 </section>
 """
 
 
 # --- virksomhetsside ----------------------------------------------------------
+
+def _contract_link(c: Contract) -> str:
+    return f'<a href="{escape(c.url)}">{escape(c.title)}</a>' if c.url else escape(c.title)
+
 
 def _period(c: Contract) -> str:
     if c.start_date and c.end_date:
@@ -779,6 +790,30 @@ def agency_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]] | None
   <tbody>{srows}</tbody></table></div>
 </section>"""
 
+    joint_html = ""
+    if a.joint:
+        jrows = "".join(
+            f'<tr><td>{_contract_link(c)}'
+            + ('<span class="tag">rammeavtale</span>' if c.is_framework else "")
+            + f'</td><td>{escape(c.lead_buyer or "–")}</td><td class="num">{c.n_buyers}</td>'
+            f'<td class="num" data-sort="{escape(c.published or "")}">{escape((c.published or "–")[:10])}</td>'
+            f'<td class="num" data-sort="{_num(c.value)}" title="{kr_full(c.value)}">{kr(c.value)}</td></tr>'
+            for c in a.joint)
+        joint_html = f"""
+<section>
+  <h2>Felles anskaffelser ({len(a.joint)})</h2>
+  <p class="muted">Kunngjøringer der {escape(a.name)} er en av flere kjøpere, men ikke står først. Verdien gjelder
+  hele avtalen for alle kjøperne. Den er ikke med i Doffin-summen over, fordi Doffin ikke viser hvor stor del hver
+  kjøper står for.</p>
+  <div class="table-scroll"><table class="sortable" id="joint"><thead><tr>
+  <th scope="col" data-type="text"><button type="button">Kontrakt</button></th>
+  <th scope="col" data-type="text"><button type="button">Første kjøper</button></th>
+  <th scope="col" data-type="num"><button type="button">Kjøpere</button></th>
+  <th scope="col" data-type="num"><button type="button">Tildelt</button></th>
+  <th scope="col" data-type="num"><button type="button">Hele verdien</button></th></tr></thead>
+  <tbody>{jrows}</tbody></table></div>
+</section>"""
+
     body = f"""
 <p class="crumbs"><a href="../index.html">Alle virksomheter</a></p>
 <section class="hero">
@@ -799,6 +834,7 @@ def agency_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]] | None
   <p class="muted">{explain}</p>
   {table}
 </section>
+{joint_html}
 """
     return page(a.name, body, root="../", description=f"Doffin-kontrakter og kjøp for {a.name} i {ds.year}.",
                 path=f"virksomhet/{a.slug}.html")
@@ -1076,6 +1112,12 @@ samme navn som virksomheten, slik Tolletaten har i Enhetsregisteret, regnes ogs�
 i en egen liste nederst på årssiden med kjøpene og hvor mange kunngjøringer de har hatt. For
 {year_text(ds.year)} gjelder det {len(ds.unmatched)} virksomheter. Slik er alle virksomhetene i regnskapet med
 i oversikten, også de som ikke kunngjør selv.</p>"""
+    if any(a.joint for a in ds.agencies):
+        units += """
+<p>Noen kunngjøringer har flere kjøpere, for eksempel når Politiets fellestjenester kjøper bekledning sammen med
+Tolletaten og Kriminalomsorgen. Kontrakten regnes til den første kjøperen, slik Doffin viser den. De andre
+kjøperne får kontrakten i en egen liste over felles anskaffelser på virksomhetssiden, men verdien regnes ikke med
+hos dem, fordi Doffin ikke viser hvor stor del hver kjøper står for.</p>"""
     coverage_caveat = (
         "Kommuner, fylker, helseforetak og statlige selskaper er ikke en del av statsregnskapet og er ikke med."
         if _SITE["statsregnskap"] else
