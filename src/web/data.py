@@ -191,6 +191,56 @@ class Breadth:
         return sorted(self.contracts_by_year)
 
 
+@dataclass
+class Expiring:
+    """En avtale hos en statlig kjøper der grunnperioden slutter snart (fra datoer eller varighet i Doffin)."""
+    id: str
+    title: str
+    url: str | None
+    buyer: str
+    value: float | None
+    end: str                     # ÅÅÅÅ-MM-DD
+    source: str                  # 'datoer' | 'varighet'
+    is_framework: bool
+
+
+def load_expiring(db_path: str | Path, months: int = 12) -> tuple[str, list[Expiring]]:
+    """(referansedato, avtaler som slutter innen `months` måneder etter den), største verdi først.
+
+    Referansedatoen er siste publiseringsdato i Doffin-dataene, så bygget gir samme resultat for
+    samme data. Bare kontrakter med sluttdato eller oppgitt varighet tas med; anslag fra fritekst
+    eller standardvarighet er for usikre til å si når en avtale løper ut.
+    """
+    from datetime import date, timedelta
+    from src.analysis.annualize import contract_period
+
+    conn = sqlite3.connect(db_path)
+    try:
+        if not _has_table(conn, "doffin_contracts"):
+            return "", []
+        ref = conn.execute("SELECT MAX(substr(publication_date, 1, 10)) FROM doffin_contracts").fetchone()[0]
+        if not ref:
+            return "", []
+        today = date.fromisoformat(ref)
+        horizon = today + timedelta(days=round(months * 365.25 / 12))
+        state = "SELECT orgnr FROM statsregnskap" + (
+            " UNION SELECT child FROM orgnr_parent" if _has_table(conn, "orgnr_parent") else "")
+        out = []
+        for r in conn.execute(
+                f"""SELECT id, title, url, buyer_name, value, publication_date, start_date, end_date,
+                           duration_months, duration_source, is_framework
+                    FROM doffin_contracts WHERE buyer_orgnr IN ({state})
+                      AND duration_source IN ('datoer', 'varighet')"""):
+            period = contract_period(r[5], r[6], r[7], r[8], r[9], r[10])
+            if period and period[2] in ("datoer", "varighet") and today <= period[1] <= horizon:
+                out.append(Expiring(id=r[0], title=r[1] or "(uten tittel)", url=r[2],
+                                    buyer=display_name(r[3] or ""), value=r[4], end=period[1].isoformat(),
+                                    source=period[2], is_framework=bool(r[10])))
+        return ref, sorted(out, key=lambda e: (-(e.value or 0), e.end, e.id))
+    finally:
+        conn.close()
+
+
 def load_breadth(db_path: str | Path) -> Breadth:
     conn = sqlite3.connect(db_path)
     try:

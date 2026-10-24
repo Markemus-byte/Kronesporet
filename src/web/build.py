@@ -1203,7 +1203,9 @@ selv tyder på feil.</li>
 blir kjøpt.</li>
 <li><strong>Ikke alle virksomheter er med.</strong> {coverage_caveat}</li>
 <li><strong>Feil i kildene følger med.</strong> Navn og tall vises slik de står i kildene. Åpenbare feil i
-kontraktsperioden, som en startdato i 1900 eller en varighet over 20 år, erstattes med standard varighet.</li>
+kontraktsperioden, som en startdato i 1900 eller en varighet over 20 år, erstattes med standard varighet.
+Andre kjente feil, som at en kunngjøring står med feil organisasjonsnummer på kjøperen, rettes og er listet i
+<a href="{REPO_URL}/blob/main/site-data/rettinger.csv">rettinger.csv</a>.</li>
 </ul>
 
 <h2>Last ned dataene</h2>

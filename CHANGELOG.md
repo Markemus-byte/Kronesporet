@@ -2,6 +2,10 @@
 
 ## Ikke utgitt
 
+- **Rettinger av kjente feil i Doffin:** `site-data/rettinger.csv` (kontrakt, felt, verdi, begrunnelse) brukes av
+  den månedlige oppdateringen. Første retting gjelder en kunngjøring fra Sykehusinnkjøp HF (315 mill. kr) som står med
+  orgnr til Indre og Østre Finnmark tingrett og derfor ble regnet til Domstolene. Domstolenes Doffin-sum for 2025 går
+  fra 375 til 217 mill. kr. Metodesiden lenker til listen.
 - **Vilkår og personvern:** ny side `vilkar.html`, lenket fra bunnteksten. Den beskriver hvem som står bak, bruk
   av tallene under NLOD 2.0, forbehold, hvordan man melder feil, og personvern. Enkeltpersonforetak kan be om å bli
   skjult: orgnr i `site-data/skjulte_leverandorer.txt` vises som «Enkeltpersonforetak (skjult)» uten orgnr og
