@@ -305,11 +305,21 @@ def _raadata_period(header_rows: list[dict[str, str]]) -> tuple[int, int]:
     raise ValueError("Fant ikke regnskapsperioden i toppteksten")
 
 
-def load_raadata_xlsx(conn: sqlite3.Connection, path: str | Path) -> tuple[int, int, int]:
+def raadata_orgnrs(path: str | Path) -> set[str]:
+    """Alle orgnr i en rådatafil (for oppslag i Enhetsregisteret før innlasting)."""
+    rows = read_xlsx(path)
+    head_i = next(i for i, r in enumerate(rows[:20]) if RAADATA_REQUIRED <= set(r.values()))
+    col = {v: k for k, v in rows[head_i].items()}
+    return {o for r in rows[head_i + 1:] if len(o := re.sub(r"\D", "", r.get(col["Orgnr"], ""))) == 9}
+
+
+def load_raadata_xlsx(conn: sqlite3.Connection, path: str | Path,
+                      aliases: dict[str, str] | None = None) -> tuple[int, int, int]:
     """Last kjøp av varer og tjenester per virksomhet inn i `statsregnskap`.
 
     Én rad per orgnr og artskonto (summert over kapittel og post), source_file = filnavnet.
     Tidligere rader for samme år fra Kudos-årsrapportene fjernes, så tallene ikke telles dobbelt.
+    aliases: orgnr i rådata -> orgnr som skal brukes (underenhet -> hovedenhet, se brreg.main_units).
     Returnerer (år, måned, antall virksomheter).
     """
     path = Path(path)
@@ -328,6 +338,7 @@ def load_raadata_xlsx(conn: sqlite3.Connection, path: str | Path) -> tuple[int, 
     for r in rows[head_i + 1:]:
         art = r.get(col["Artskonto"], "")
         orgnr = re.sub(r"\D", "", r.get(col["Orgnr"], ""))
+        orgnr = (aliases or {}).get(orgnr, orgnr)
         if (purchase_category(art) is None and art not in TILSKUDD_ARTSKONTO) or len(orgnr) != 9:
             continue
         try:
