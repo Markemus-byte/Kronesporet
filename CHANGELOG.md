@@ -2,6 +2,10 @@
 
 ## Ikke utgitt
 
+- **Ytelse:** leverandørlisten laster de 100 største i HTML-en (49 kB mot 1,3 MB) og henter resten som
+  `data/leverandorer.json` først når noen søker, sorterer eller trykker «Vis alle». På en treg mobil går
+  innlastingen fra 5,5 til 0,35 sekunder. Sorteringen leser hver verdi én gang, og sorteringsverdiene er
+  kortere, så store virksomhetssider blir også raskere.
 - **Metodesiden:** ny del «Hvorfor Kronesporet» med en tabell over hva hver kilde viser alene og hva
   koblingen gir. Teksten er oppdatert til statsregnskapet og Enhetsregisteret, med egne avsnitt om
   leverandører og delår.
