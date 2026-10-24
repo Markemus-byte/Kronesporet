@@ -6,6 +6,11 @@
   biblioteket på en avdeling (979530730), mens Doffin og årsrapportene bruker hovedenheten (976029100).
   Siden brukte derfor årsrapporttall, og for 2025 var det feil: 34,8 mill. kr mot 443,5 mill. kr i
   regnskapet. Orgnr i rådata som er underenheter, kobles nå til hovedenheten via Enhetsregisteret.
+- **Tolletaten** er med for 2025 og 2026, og kontraktene for 2023 og 2024 er riktige. Tolletaten kunngjør
+  på 880455702 «TOLLETATEN», som er det overordnede leddet over regnskapsvirksomheten (974761343) og
+  ligger under Finansdepartementet. De 36 kunngjøringene ble derfor ført på departementet. Et overordnet
+  ledd med samme navn som virksomheten føres nå på virksomheten. Finansdepartementet får riktige tall og
+  har ikke lenger dekning over 100 % i 2023 og 2026.
 - **Månedlig oppdatering:** GitHub Actions henter nye Doffin-kontrakter den 20. hver måned, tar inn
   rådatafiler fra statsregnskapet som er lastet opp i `site-data/raadata/`, regner ut tallene på nytt og
   publiserer siden (`scripts/update_site_data.py`). En nyere rådatamåned erstatter den forrige

@@ -1,65 +1,65 @@
 ﻿virksomhet;orgnr;år;regnskap_maaneder;antall_kontrakter;doffin_sum_kr;kjop_varer_tjenester_kr;avvik_prosent;flagget_5_prosent;dekning_prosent;storrelsesgruppe;gruppens_mediandekning_prosent;flagget_dekning;dekningskategori;aar_med_avvik_siste_3;kilde_arsrapport;kilde_regnskap
 Arbeids- og inkluderingsdepartementet;983887457;2023;12;29;49185038;125599105;-60.8;1;39.16;mellomstore;30.2;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Arbeids- og velferdsetaten (NAV);889640782;2023;12;208;9150883759;4110093968;122.6;1;222.64;store;15.0;0;tilskudd;1;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Arbeids- og velferdsetaten (NAV);889640782;2023;12;208;9150883759;4110093968;122.6;1;222.64;store;16.0;0;tilskudd;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Arbeidstilsynet;974761211;2023;12;6;45593933;186413579;-75.5;1;24.46;mellomstore;30.2;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Arkivverket;961181399;2023;12;10;14866008;295361143;-95.0;1;5.03;mellomstore;30.2;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Barne-, ungdoms- og familiedirektoratet;986128433;2023;12;53;257277367;4954798503;-94.8;1;5.19;store;15.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Barne-, ungdoms- og familiedirektoratet;986128433;2023;12;53;257277367;4954798503;-94.8;1;5.19;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Datatilsynet;974761467;2023;12;1;3201795;20429749;-84.3;1;15.67;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Departementenes sikkerhets- og serviceorganisasjon (DSS);974761424;2023;12;45;417768813;592966773;-29.5;1;70.45;store;15.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Digitaliseringsdirektoratet;991825827;2023;12;121;460555072;582891865;-21.0;1;79.01;store;15.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Departementenes sikkerhets- og serviceorganisasjon (DSS);974761424;2023;12;45;417768813;592966773;-29.5;1;70.45;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Digitaliseringsdirektoratet;991825827;2023;12;121;460555072;582891865;-21.0;1;79.01;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Direktoratet for byggkvalitet;974760223;2023;12;6;1394723;76311588;-98.2;1;1.83;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Direktoratet for e-helse;915933149;2023;12;1;79956188;243781104;-67.2;1;32.8;mellomstore;30.2;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Direktoratet for forvaltning og økonomistyring (DFØ);986252932;2023;12;44;1744406168;309727497;463.2;1;563.21;mellomstore;30.2;0;avtaler_for_andre;1;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Direktoratet for høyere utdanning og kompetanse;974788985;2023;12;28;34943769;207709025;-83.2;1;16.82;mellomstore;30.2;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Direktoratet for samfunnssikkerhet og beredskap (DSB);974760983;2023;12;55;319452744;1303251268;-75.5;1;24.51;store;15.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Direktoratet for samfunnssikkerhet og beredskap (DSB);974760983;2023;12;55;319452744;1303251268;-75.5;1;24.51;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Direktoratet for utviklingssamarbeid (NORAD);971277882;2023;12;36;92008328;132109522;-30.4;1;69.65;mellomstore;30.2;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Diskrimineringsnemnda;988681954;2023;12;1;528542;7535190;-93.0;1;7.01;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Domstolene i Norge;984195796;2023;12;22;76344190;2804563988;-97.3;1;2.72;store;15.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Domstolene i Norge;984195796;2023;12;22;76344190;2804563988;-97.3;1;2.72;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Eksportfinansiering Norge;926718304;2023;12;9;12833052;85454748;-85.0;1;15.02;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Finansdepartementet;972417807;2023;12;36;541816613;130674592;314.6;1;414.63;mellomstore;30.2;0;avtaler_for_andre;1;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Finansdepartementet;972417807;2023;12;8;107884724;130674592;-17.4;1;82.56;mellomstore;30.2;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Finanstilsynet;840747972;2023;12;13;101155656;155551253;-35.0;1;65.03;mellomstore;30.2;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Fiskeridirektoratet;971203420;2023;12;38;117161813;237447727;-50.7;1;49.34;mellomstore;30.2;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Folkehelseinstituttet;983744516;2023;12;18;881952531;1706655964;-48.3;1;51.68;store;15.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Folkehelseinstituttet;983744516;2023;12;18;881952531;1706655964;-48.3;1;51.68;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Forbrukertilsynet;974761335;2023;12;3;2545205;19823859;-87.2;1;12.84;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Foreldreutvalget for grunnopplæring;989628011;2023;12;1;414784;5212082;-92.0;1;7.96;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Forsvaret;986105174;2023;12;147;2632920560;16093506726;-83.6;1;16.36;store;15.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Forsvarsbygg;975950662;2023;12;155;959010121;5425413076;-82.3;1;17.68;store;15.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Forsvarsdepartementet;972417823;2023;12;10;10649768;872799678;-98.8;1;1.22;store;15.0;0;observasjon;1;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Forsvarsmateriell;916075855;2023;12;34;293875900;2501215731;-88.3;1;11.75;store;15.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Havforskningsinstituttet;971349077;2023;12;42;101189410;649959252;-84.4;1;15.57;store;15.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Forsvaret;986105174;2023;12;147;2632920560;16093506726;-83.6;1;16.36;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Forsvarsbygg;975950662;2023;12;155;959010121;5425413076;-82.3;1;17.68;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Forsvarsdepartementet;972417823;2023;12;10;10649768;872799678;-98.8;1;1.22;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Forsvarsmateriell;916075855;2023;12;34;293875900;2501215731;-88.3;1;11.75;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Havforskningsinstituttet;971349077;2023;12;42;101189410;649959252;-84.4;1;15.57;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Helse- og omsorgsdepartementet;983887406;2023;12;3;2208630;66648230;-96.7;1;3.31;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Helsedirektoratet;983544622;2023;12;1;146425;1053814344;-100.0;1;0.01;store;15.0;0;observasjon;1;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Helsedirektoratet;983544622;2023;12;1;146425;1053814344;-100.0;1;0.01;store;16.0;0;observasjon;1;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Helseøkonomiforvaltningen (HELFO);986965610;2023;12;2;126738193;73196447;73.1;1;173.15;små;8.4;0;tilskudd;1;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Hovedredningssentralen;971390425;2023;12;2;4397433;84225431;-94.8;1;5.22;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Husbanken;942114184;2023;12;8;32797075;135247508;-75.8;1;24.25;mellomstore;30.2;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Høgskulen på Vestlandet;917641404;2023;12;27;71704612;900457000;-92.0;1;7.96;store;15.0;0;;0;https://kudos.dfo.no/dokument/c127a86c-e55c-4587-b22a-ea660fbf5115/filer/1b83133d-3a0f-41cf-84b5-e9cca75e16d1.pdf;
+Høgskulen på Vestlandet;917641404;2023;12;27;71704612;900457000;-92.0;1;7.96;store;16.0;0;;0;https://kudos.dfo.no/dokument/c127a86c-e55c-4587-b22a-ea660fbf5115/filer/1b83133d-3a0f-41cf-84b5-e9cca75e16d1.pdf;
 Integrerings- og mangfoldsdirektoratet;987879696;2023;12;45;144716720;230085957;-37.1;1;62.9;mellomstore;30.2;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Jernbanedirektoratet;916810962;2023;12;30;77447367;236668143;-67.3;1;32.72;mellomstore;30.2;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Justervesenet;874761192;2023;12;10;9537031;49585369;-80.8;1;19.23;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Justis- og beredskapsdepartementet;972417831;2023;12;16;28917863;2004411580;-98.6;1;1.44;store;15.0;0;observasjon;1;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Justis- og beredskapsdepartementet;972417831;2023;12;16;28917863;2004411580;-98.6;1;1.44;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Klagenemndssekretariatet (KNS);918195548;2023;12;1;395483;11743843;-96.6;1;3.37;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Klima- og miljødepartementet;972417882;2023;12;8;7608167;161321707;-95.3;1;4.72;mellomstore;30.2;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Kommunal- og distriktsdepartementet;972417858;2023;12;24;42155413;257344237;-83.6;1;16.38;mellomstore;30.2;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Kompetansesenter for distriktsutvikling;992375434;2023;12;1;599589;11823517;-94.9;1;5.07;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Konfliktrådene;986074465;2023;12;2;2793977;27968815;-90.0;1;9.99;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Kriminalomsorgsdirektoratet;911830868;2023;12;23;124733468;1944646907;-93.6;1;6.41;store;15.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Kriminalomsorgsdirektoratet;911830868;2023;12;23;124733468;1944646907;-93.6;1;6.41;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Kultur- og likestillingsdepartementet;972417866;2023;12;1;900000;73346578;-98.8;1;1.23;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Kulturdirektoratet;971527412;2023;12;4;35464339;63887460;-44.5;1;55.51;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Kunnskapsdepartementet;872417842;2023;12;76;786660360;171562573;358.5;1;458.53;mellomstore;30.2;0;tilskudd;1;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Kystverket;874783242;2023;12;37;436559773;1719036377;-74.6;1;25.4;store;15.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Kystverket;874783242;2023;12;37;436559773;1719036377;-74.6;1;25.4;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Landbruks- og matdepartementet;972417874;2023;12;25;40947816;52675199;-22.3;1;77.74;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Landbruksdirektoratet;981544315;2023;12;24;57453147;140957828;-59.2;1;40.76;mellomstore;30.2;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Lotteri- og stiftelsestilsynet;982391490;2023;12;1;261191;46717539;-99.4;1;0.56;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Mattilsynet;985399077;2023;12;21;79085785;455412666;-82.6;1;17.37;store;15.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Mattilsynet;985399077;2023;12;21;79085785;455412666;-82.6;1;17.37;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Medietilsynet;974760886;2023;12;6;4778009;29557280;-83.8;1;16.17;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Miljødirektoratet;999601391;2023;12;6;24844235;1825235692;-98.6;1;1.36;store;15.0;0;observasjon;1;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Miljødirektoratet;999601391;2023;12;6;24844235;1825235692;-98.6;1;1.36;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Nasjonal kommunikasjonsmyndighet;974446871;2023;12;6;9176863;119911965;-92.3;1;7.65;mellomstore;30.2;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Nasjonalbiblioteket;976029100;2023;12;3;2015754;343895607;-99.4;1;0.59;mellomstore;30.2;0;observasjon;1;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Nasjonalt organ for kvalitet i utdanningen NOKUT;985042667;2023;12;3;2942425;32114500;-90.8;1;9.16;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Norges geologiske undersøkelse;970188290;2023;12;5;3300540;81682854;-96.0;1;4.04;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Norges institusjon for menneskerettigheter;914781175;2023;12;1;1498973;3184008;-52.9;1;47.08;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Norges miljø- og biovitenskapelige universitet;969159570;2023;12;92;177028084;699697000;-74.7;1;25.3;store;15.0;0;;0;https://kudos.dfo.no/dokument/f3738ac2-27dd-457f-b53c-12576ff99e9c/filer/b030c7ea-7330-4bfd-bd01-9c3131f75372.pdf;
-Norges vassdrags- og energidirektorat (NVE);970205039;2023;12;36;216097152;786812270;-72.5;1;27.46;store;15.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Norges miljø- og biovitenskapelige universitet;969159570;2023;12;92;177028084;699697000;-74.7;1;25.3;store;16.0;0;;0;https://kudos.dfo.no/dokument/f3738ac2-27dd-457f-b53c-12576ff99e9c/filer/b030c7ea-7330-4bfd-bd01-9c3131f75372.pdf;
+Norges vassdrags- og energidirektorat (NVE);970205039;2023;12;36;216097152;786812270;-72.5;1;27.46;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Norsk filminstitutt;892211442;2023;12;3;5034744;59704508;-91.6;1;8.43;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Norsk jernbanemuseum;918147764;2023;12;2;1132504;25337546;-95.5;1;4.47;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Norsk lyd- og blindeskriftbibliotek;970145567;2023;12;3;1;11999414;-100.0;1;0.0;små;8.4;0;observasjon;1;;Raadata_desember_2023_bevilgningsregnskap.xlsx
@@ -67,15 +67,15 @@ Norsk nukleær dekommisjonering;920440754;2023;12;15;483201509;343883592;40.5;1;
 Norsk pasientskadeerstatning;984936923;2023;12;1;2936749;124473003;-97.6;1;2.36;mellomstore;30.2;0;observasjon;1;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Norsk Polarinstitutt;971022264;2023;12;11;36855473;287062161;-87.2;1;12.84;mellomstore;30.2;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Norsk senter for utvekslingssamarbeid (Norec);981965132;2023;12;3;690720;24539434;-97.2;1;2.81;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Ntnu;974767880;2023;12;203;919149276;3704109000;-75.2;1;24.81;store;15.0;0;;0;https://kudos.dfo.no/dokument/f4c6866c-ab04-4b22-a472-b3dee8ff2a56/filer/8b74d560-2ceb-4a70-944e-378429d57990.pdf;
-Nærings- og fiskeridepartementet;912660680;2023;12;15;21989021;1851504637;-98.8;1;1.19;store;15.0;0;observasjon;1;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Ntnu;974767880;2023;12;203;919149276;3704109000;-75.2;1;24.81;store;16.0;0;;0;https://kudos.dfo.no/dokument/f4c6866c-ab04-4b22-a472-b3dee8ff2a56/filer/8b74d560-2ceb-4a70-944e-378429d57990.pdf;
+Nærings- og fiskeridepartementet;912660680;2023;12;15;21989021;1851504637;-98.8;1;1.19;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Olje- og energidepartementet;977161630;2023;12;8;14612708;60436520;-75.8;1;24.18;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Oljedirektoratet;870917732;2023;12;2;4813699;366813756;-98.7;1;1.31;store;15.0;0;observasjon;1;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-OsloMet - storbyuniversitetet;997058925;2023;12;46;154545971;1179788000;-86.9;1;13.1;store;15.0;0;;0;https://kudos.dfo.no/dokument/318029ee-8f5e-46a7-93d4-2b98caf40473/filer/769ed369-7cfa-4dcb-b5e8-8606d316f363.pdf;
+Oljedirektoratet;870917732;2023;12;2;4813699;366813756;-98.7;1;1.31;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+OsloMet - storbyuniversitetet;997058925;2023;12;46;154545971;1179788000;-86.9;1;13.1;store;16.0;0;;0;https://kudos.dfo.no/dokument/318029ee-8f5e-46a7-93d4-2b98caf40473/filer/769ed369-7cfa-4dcb-b5e8-8606d316f363.pdf;
 Patentstyret;971526157;2023;12;19;13027695;89650377;-85.5;1;14.53;mellomstore;30.2;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Petroleumstilsynet;986174613;2023;12;13;34909671;111986617;-68.8;1;31.17;mellomstore;30.2;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Politi- og lensmannsetaten;915429785;2023;12;261;2501805612;5692861371;-56.1;1;43.95;store;15.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Politiets sikkerhetstjeneste;974769484;2023;12;5;69173371;479066401;-85.6;1;14.44;store;15.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Politi- og lensmannsetaten;915429785;2023;12;261;2501805612;5692861371;-56.1;1;43.95;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Politiets sikkerhetstjeneste;974769484;2023;12;5;69173371;479066401;-85.6;1;14.44;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Registerenheten i Brønnøysund;974760673;2023;12;51;219431596;238629060;-8.0;1;91.96;mellomstore;30.2;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Riksantikvaren;974760819;2023;12;9;33132371;106768955;-69.0;1;31.03;mellomstore;30.2;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Riksrevisjonen;974760843;2023;12;8;43956823;132984089;-66.9;1;33.05;mellomstore;30.2;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
@@ -85,18 +85,18 @@ Samferdselsdepartementet;972417904;2023;12;12;798033727;41257694;1834.3;1;1934.2
 Sivil klareringsmyndighet;918929673;2023;12;1;0;17906389;-100.0;1;0.0;små;8.4;0;observasjon;1;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Sivilombudet Stortingets ombud for kontroll med forvaltningen;974761270;2023;12;2;3337318;27711705;-88.0;1;12.04;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Sjøfartsdirektoratet;974761262;2023;12;29;89273308;149278247;-40.2;1;59.8;mellomstore;30.2;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Skatteetaten;974761076;2023;12;115;554330724;2697624824;-79.5;1;20.55;store;15.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Skatteetaten;974761076;2023;12;115;554330724;2697624824;-79.5;1;20.55;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Språkrådet;971527404;2023;12;2;1316791;13217245;-90.0;1;9.96;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Statens arbeidsmiljøinstitutt;874761222;2023;12;10;1443115;63130642;-97.7;1;2.29;små;8.4;0;;0;https://kudos.dfo.no/dokument/fa1270d0-3f68-43e7-bc08-6c1a92c1d2a9/filer/311bfd2f-bacf-420f-b6c6-7c7a35bda780.pdf;
 Statens havarikommisjon;881143712;2023;12;1;0;29393312;-100.0;1;0.0;små;8.4;0;observasjon;1;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Statens kartverk;971040238;2023;12;26;331041319;646144528;-48.8;1;51.23;store;15.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Statens kartverk;971040238;2023;12;26;331041319;646144528;-48.8;1;51.23;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Statens legemiddelverk;974761122;2023;12;1;2809726;151766064;-98.1;1;1.85;mellomstore;30.2;0;observasjon;1;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Statens lånekasse for utdanning;960885406;2023;12;6;54613137;180748365;-69.8;1;30.22;mellomstore;30.2;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Statens pensjonskasse forvaltningsbedrift;982583462;2023;12;18;218752538;247191886;-11.5;1;88.5;mellomstore;30.2;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Statens vegvesen;971032081;2023;12;410;36076981600;33237077950;8.5;1;108.54;store;15.0;0;avtaler_for_andre;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Statens vegvesen;971032081;2023;12;410;36076981600;33237077950;8.5;1;108.54;store;16.0;0;avtaler_for_andre;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Statistisk sentralbyrå;971526920;2023;12;16;49525503;210426803;-76.5;1;23.54;mellomstore;30.2;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Statped;998554640;2023;12;1;4403288;168487405;-97.4;1;2.61;mellomstore;30.2;0;observasjon;1;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Statsbygg;971278374;2023;12;245;2852534270;5961395938;-52.1;1;47.85;store;15.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Statsbygg;971278374;2023;12;245;2852534270;5961395938;-52.1;1;47.85;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Statsforvaltaren i  Møre og Romsdal;974764067;2023;12;4;2684145;54851837;-95.1;1;4.89;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Statsforvaltaren i Vestlandet;974760665;2023;12;2;2240032;123677096;-98.2;1;1.81;mellomstore;30.2;0;observasjon;1;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Statsforvalteren i Agder;974762994;2023;12;1;2219341;96277907;-97.7;1;2.31;mellomstore;30.2;0;observasjon;1;;Raadata_desember_2023_bevilgningsregnskap.xlsx
@@ -106,58 +106,58 @@ Statsforvalteren i Trøndelag;974764350;2023;12;1;1142283;88373821;-98.7;1;1.29;
 Statsforvalterens fellestjenester;921627009;2023;12;35;94124800;77221212;21.9;1;121.89;små;8.4;0;avtaler_for_andre;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Statsministerens kontor;972417777;2023;12;1;1017123;43068449;-97.6;1;2.36;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Stortinget;971524960;2023;12;82;194224142;354484803;-45.2;1;54.79;mellomstore;30.2;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Tolletaten;974761343;2023;12;7;52821971;570728063;-90.7;1;9.26;store;15.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-UiT Norges arktiske universitet;970422528;2023;12;62;160373897;1475429000;-89.1;1;10.87;store;15.0;0;;0;https://kudos.dfo.no/dokument/cc27eeec-1ad8-4710-995c-ef8bd38b534c/filer/7a3a298e-e9f9-4951-b9d0-6bffe8f81ef5.pdf;
-Universitetet i Agder;970546200;2023;12;17;13385831;703329000;-98.1;1;1.9;store;15.0;0;;0;https://kudos.dfo.no/dokument/b4342374-2ed5-44b4-bd62-1b17cc5f7395/filer/b98a0691-c329-46ad-9b1f-9b7bba9b6858.pdf;
-Universitetet i Bergen;874789542;2023;12;151;165499921;1941499000;-91.5;1;8.52;store;15.0;0;;0;https://kudos.dfo.no/dokument/c1a644f3-d139-4563-99e0-469339a7944c/filer/0647096e-f5ab-4267-ba30-475c35524d49.pdf;
-Universitetet i Stavanger;971564679;2023;12;38;61068305;750724000;-91.9;1;8.13;store;15.0;0;;0;https://kudos.dfo.no/dokument/3445283e-dd4c-441a-bce3-eb8be2eece58/filer/40e3ca7d-1b42-4645-a1ae-e9aa4e5f3b3f.pdf;
-Universitetet i Sørøst-Norge (USN);911770709;2023;12;24;26849220;464000000;-94.2;1;5.79;store;15.0;0;;0;https://kudos.dfo.no/dokument/dca9f6e6-dd13-4422-bf84-b3dedd4d02cf/filer/3497348c-1583-4153-b552-ee105f8cad1f.pdf;
-Utdanningsdirektoratet;970018131;2023;12;8;218401025;1124819715;-80.6;1;19.42;store;15.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Utenriksdepartementet;972417920;2023;12;38;123111940;6280875917;-98.0;1;1.96;store;15.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
-Utlendingsdirektoratet;974760746;2023;12;48;718572582;3841231569;-81.3;1;18.71;store;15.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Tolletaten;974761343;2023;12;35;486753860;570728063;-14.7;1;85.29;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+UiT Norges arktiske universitet;970422528;2023;12;62;160373897;1475429000;-89.1;1;10.87;store;16.0;0;;0;https://kudos.dfo.no/dokument/cc27eeec-1ad8-4710-995c-ef8bd38b534c/filer/7a3a298e-e9f9-4951-b9d0-6bffe8f81ef5.pdf;
+Universitetet i Agder;970546200;2023;12;17;13385831;703329000;-98.1;1;1.9;store;16.0;0;;0;https://kudos.dfo.no/dokument/b4342374-2ed5-44b4-bd62-1b17cc5f7395/filer/b98a0691-c329-46ad-9b1f-9b7bba9b6858.pdf;
+Universitetet i Bergen;874789542;2023;12;151;165499921;1941499000;-91.5;1;8.52;store;16.0;0;;0;https://kudos.dfo.no/dokument/c1a644f3-d139-4563-99e0-469339a7944c/filer/0647096e-f5ab-4267-ba30-475c35524d49.pdf;
+Universitetet i Stavanger;971564679;2023;12;38;61068305;750724000;-91.9;1;8.13;store;16.0;0;;0;https://kudos.dfo.no/dokument/3445283e-dd4c-441a-bce3-eb8be2eece58/filer/40e3ca7d-1b42-4645-a1ae-e9aa4e5f3b3f.pdf;
+Universitetet i Sørøst-Norge (USN);911770709;2023;12;24;26849220;464000000;-94.2;1;5.79;store;16.0;0;;0;https://kudos.dfo.no/dokument/dca9f6e6-dd13-4422-bf84-b3dedd4d02cf/filer/3497348c-1583-4153-b552-ee105f8cad1f.pdf;
+Utdanningsdirektoratet;970018131;2023;12;8;218401025;1124819715;-80.6;1;19.42;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Utenriksdepartementet;972417920;2023;12;38;123111940;6280875917;-98.0;1;1.96;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
+Utlendingsdirektoratet;974760746;2023;12;48;718572582;3841231569;-81.3;1;18.71;store;16.0;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Utlendingsnemnda;982019095;2023;12;7;11924725;74271874;-83.9;1;16.06;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 Valgdirektoratet;916132727;2023;12;9;12817477;60565658;-78.8;1;21.16;små;8.4;0;;0;;Raadata_desember_2023_bevilgningsregnskap.xlsx
 22. juli-senteret;922727457;2024;12;2;4740411;21269464;-77.7;1;22.29;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Arbeids- og inkluderingsdepartementet;983887457;2024;12;30;38655702;127925008;-69.8;1;30.22;mellomstore;25.0;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Arbeids- og velferdsetaten (NAV);889640782;2024;12;209;7286702615;4334408249;68.1;1;168.11;store;14.8;0;tilskudd;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Arbeids- og velferdsetaten (NAV);889640782;2024;12;209;7286702615;4334408249;68.1;1;168.11;store;16.6;0;tilskudd;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Arbeidstilsynet;974761211;2024;12;6;22028521;187392307;-88.2;1;11.76;mellomstore;25.0;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Arkivverket;961181399;2024;12;8;32168432;302356607;-89.4;1;10.64;mellomstore;25.0;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Barne- og familiedepartementet;972417793;2024;12;1;293278;41630219;-99.3;1;0.7;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Barne-, ungdoms- og familiedirektoratet;986128433;2024;12;39;207478869;5890681767;-96.5;1;3.52;store;14.8;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Barne-, ungdoms- og familiedirektoratet;986128433;2024;12;39;207478869;5890681767;-96.5;1;3.52;store;16.6;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Datatilsynet;974761467;2024;12;1;1868445;16276720;-88.5;1;11.48;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Departementenes sikkerhets- og serviceorganisasjon (DSS);974761424;2024;12;57;422557616;601480301;-29.7;1;70.25;store;14.8;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Departementenes sikkerhets- og serviceorganisasjon (DSS);974761424;2024;12;57;422557616;601480301;-29.7;1;70.25;store;16.6;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Digitaliserings- og forvaltningsdepartementet;932384469;2024;12;1;771658;226842516;-99.7;1;0.34;mellomstore;25.0;0;observasjon;1;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Digitaliseringsdirektoratet;991825827;2024;12;133;316345544;676683090;-53.3;1;46.75;store;14.8;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Digitaliseringsdirektoratet;991825827;2024;12;133;316345544;676683090;-53.3;1;46.75;store;16.6;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Direktoratet for byggkvalitet;974760223;2024;12;4;8317164;92501415;-91.0;1;8.99;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Direktoratet for forvaltning og økonomistyring (DFØ);986252932;2024;12;36;1976125708;323838199;510.2;1;610.22;mellomstore;25.0;0;avtaler_for_andre;2;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Direktoratet for høyere utdanning og kompetanse;974788985;2024;12;32;377074970;200205979;88.3;1;188.34;mellomstore;25.0;0;tilskudd;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Direktoratet for medisinske produkter;974761122;2024;12;1;6467671;170692975;-96.2;1;3.79;mellomstore;25.0;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Direktoratet for samfunnssikkerhet og beredskap (DSB);974760983;2024;12;52;583275289;1513165731;-61.5;1;38.55;store;14.8;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Direktoratet for samfunnssikkerhet og beredskap (DSB);974760983;2024;12;52;583275289;1513165731;-61.5;1;38.55;store;16.6;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Direktoratet for utviklingssamarbeid (NORAD);971277882;2024;12;41;127530369;145129145;-12.1;1;87.87;mellomstore;25.0;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Diskrimineringsnemnda;988681954;2024;12;1;175215;8276728;-97.9;1;2.12;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Domstolene i Norge;984195796;2024;12;39;128919603;3150292682;-95.9;1;4.09;store;14.8;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Domstolene i Norge;984195796;2024;12;39;128919603;3150292682;-95.9;1;4.09;store;16.6;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Eksportfinansiering Norge;926718304;2024;12;11;14713777;84555476;-82.6;1;17.4;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Energidepartementet;977161630;2024;12;8;17119434;56337537;-69.6;1;30.39;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Finansdepartementet;972417807;2024;12;34;282656824;114845522;146.1;1;246.12;mellomstore;25.0;0;avtaler_for_andre;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Finansdepartementet;972417807;2024;12;8;118329859;114845522;3.0;0;103.03;mellomstore;25.0;0;avtaler_for_andre;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Finanstilsynet;840747972;2024;12;11;79070254;121130142;-34.7;1;65.28;mellomstore;25.0;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Fiskeridirektoratet;971203420;2024;12;41;156576613;224105062;-30.1;1;69.87;mellomstore;25.0;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Folkehelseinstituttet;983744516;2024;12;14;639468559;1532961195;-58.3;1;41.71;store;14.8;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Folkehelseinstituttet;983744516;2024;12;14;639468559;1532961195;-58.3;1;41.71;store;16.6;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Folketrygdfondet;971525061;2024;12;8;11098062;95931000;-88.4;1;11.57;mellomstore;25.0;0;;0;https://kudos.dfo.no/dokument/34c9009b-a8db-441c-993b-78caaabae93e/filer/aba929ed-cd2a-40bd-b30c-102f3dc3d033.pdf;
 Forbrukertilsynet;974761335;2024;12;2;5013699;25208851;-80.1;1;19.89;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Foreldreutvalget for grunnopplæring;989628011;2024;12;1;751540;3741021;-79.9;1;20.09;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Forsvaret;986105174;2024;12;157;3416353196;18566723580;-81.6;1;18.4;store;14.8;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Forsvarsbygg;975950662;2024;12;159;1499405798;5086022730;-70.5;1;29.48;store;14.8;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Forsvarsdepartementet;972417823;2024;12;12;36899082;1848007621;-98.0;1;2.0;store;14.8;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Forsvarsmateriell;916075855;2024;12;37;3503314264;3980134965;-12.0;1;88.02;store;14.8;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Havforskningsinstituttet;971349077;2024;12;40;74133420;751249316;-90.1;1;9.87;store;14.8;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Forsvaret;986105174;2024;12;157;3416353196;18566723580;-81.6;1;18.4;store;16.6;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Forsvarsbygg;975950662;2024;12;159;1499405798;5086022730;-70.5;1;29.48;store;16.6;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Forsvarsdepartementet;972417823;2024;12;12;36899082;1848007621;-98.0;1;2.0;store;16.6;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Forsvarsmateriell;916075855;2024;12;37;3503314264;3980134965;-12.0;1;88.02;store;16.6;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Havforskningsinstituttet;971349077;2024;12;40;74133420;751249316;-90.1;1;9.87;store;16.6;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Havindustritilsynet;986174613;2024;12;6;27811688;111131484;-75.0;1;25.03;mellomstore;25.0;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Helse- og omsorgsdepartementet;983887406;2024;12;4;4463836;62317081;-92.8;1;7.16;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Helsedirektoratet;983544622;2024;12;3;2013578;1049663712;-99.8;1;0.19;store;14.8;1;flagg;2;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Helsedirektoratet;983544622;2024;12;3;2013578;1049663712;-99.8;1;0.19;store;16.6;1;flagg;2;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Helseøkonomiforvaltningen (HELFO);986965610;2024;12;2;126835592;71480470;77.4;1;177.44;små;10.3;0;tilskudd;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Hovedredningssentralen;971390425;2024;12;2;3905508;1318686067;-99.7;1;0.3;store;14.8;0;observasjon;1;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Hovedredningssentralen;971390425;2024;12;2;3905508;1318686067;-99.7;1;0.3;store;16.6;0;observasjon;1;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Husbanken;942114184;2024;12;10;97485781;164809931;-40.8;1;59.15;mellomstore;25.0;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Høgskolen i Innlandet;918108467;2024;12;30;13326810;598476000;-97.8;1;2.23;store;14.8;0;;0;https://kudos.dfo.no/dokument/352ee9ab-f13d-4783-b049-c386e0aef6bb/filer/0dd953ff-7d16-4f36-aeee-825c25396f43.pdf;
-Høgskulen på Vestlandet;917641404;2024;12;28;40962292;865653000;-95.3;1;4.73;store;14.8;0;;0;https://kudos.dfo.no/dokument/fc0de7d2-2de5-4996-a238-605a2b176a9d/filer/1a646b19-84c8-4ac0-8f80-5924e0fbc858.pdf;
+Høgskolen i Innlandet;918108467;2024;12;30;13326810;598476000;-97.8;1;2.23;store;16.6;0;;0;https://kudos.dfo.no/dokument/352ee9ab-f13d-4783-b049-c386e0aef6bb/filer/0dd953ff-7d16-4f36-aeee-825c25396f43.pdf;
+Høgskulen på Vestlandet;917641404;2024;12;28;40962292;865653000;-95.3;1;4.73;store;16.6;0;;0;https://kudos.dfo.no/dokument/fc0de7d2-2de5-4996-a238-605a2b176a9d/filer/1a646b19-84c8-4ac0-8f80-5924e0fbc858.pdf;
 Integrerings- og mangfoldsdirektoratet;987879696;2024;12;26;76754124;168071299;-54.3;1;45.67;mellomstore;25.0;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Jernbanedirektoratet;916810962;2024;12;28;78486595;193418637;-59.4;1;40.58;mellomstore;25.0;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Justervesenet;874761192;2024;12;7;9405884;50494857;-81.4;1;18.63;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
@@ -167,35 +167,35 @@ Klima- og miljødepartementet;972417882;2024;12;5;23463080;147277756;-84.1;1;15.
 Kommunal- og distriktsdepartementet;972417858;2024;12;18;17244867;99976196;-82.8;1;17.25;mellomstore;25.0;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Kompetansesenter for distriktsutvikling;992375434;2024;12;2;278984;9974369;-97.2;1;2.8;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Konfliktrådene;986074465;2024;12;2;3256674;39669719;-91.8;1;8.21;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Kriminalomsorgsdirektoratet;911830868;2024;12;11;108029755;2095704656;-94.8;1;5.15;store;14.8;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Kriminalomsorgsdirektoratet;911830868;2024;12;11;108029755;2095704656;-94.8;1;5.15;store;16.6;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Kultur- og likestillingsdepartementet;972417866;2024;12;4;2480123;72024599;-96.6;1;3.44;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Kulturdirektoratet;971527412;2024;12;8;47450815;76169285;-37.7;1;62.3;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Kulturtanken - Den kulturelle skolesekken Norge;974761114;2024;12;2;1516382;28863423;-94.7;1;5.25;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Kunnskapsdepartementet;872417842;2024;12;76;805626692;141984013;467.4;1;567.41;mellomstore;25.0;0;tilskudd;2;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Kystverket;874783242;2024;12;30;511224035;1798503133;-71.6;1;28.42;store;14.8;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Kystverket;874783242;2024;12;30;511224035;1798503133;-71.6;1;28.42;store;16.6;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Landbruks- og matdepartementet;972417874;2024;12;37;37832800;53134864;-28.8;1;71.2;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Landbruksdirektoratet;981544315;2024;12;26;188510202;192405274;-2.0;0;97.98;mellomstore;25.0;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Mattilsynet;985399077;2024;12;23;71200963;463434217;-84.6;1;15.36;store;14.8;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Mattilsynet;985399077;2024;12;23;71200963;463434217;-84.6;1;15.36;store;16.6;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Medietilsynet;974760886;2024;12;6;12076668;31846654;-62.1;1;37.92;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Miljødirektoratet;999601391;2024;12;26;59253960;1994240180;-97.0;1;2.97;store;14.8;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Miljødirektoratet;999601391;2024;12;26;59253960;1994240180;-97.0;1;2.97;store;16.6;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Nasjonal kommunikasjonsmyndighet;974446871;2024;12;7;11345244;102134267;-88.9;1;11.11;mellomstore;25.0;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Nasjonalbiblioteket;976029100;2024;12;5;7416329;374719625;-98.0;1;1.98;mellomstore;25.0;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Nasjonalt organ for kvalitet i utdanningen NOKUT;985042667;2024;12;4;8897044;23444422;-62.1;1;37.95;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Norges geologiske undersøkelse;970188290;2024;12;2;1478262;87069904;-98.3;1;1.7;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Norges Handelshøyskole;974789523;2024;12;16;41239054;317187000;-87.0;1;13.0;mellomstore;25.0;0;;0;https://kudos.dfo.no/dokument/1db65a23-a897-4606-bc5c-25418e72d16f/filer/fa2b0883-5c27-4b26-bd5c-9a7e79a0d6c2.pdf;
 Norges institusjon for menneskerettigheter;914781175;2024;12;1;1503080;4168278;-63.9;1;36.06;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Norges miljø- og biovitenskapelige universitet;969159570;2024;12;77;186029451;686624000;-72.9;1;27.09;store;14.8;0;;0;https://kudos.dfo.no/dokument/eef00e0d-686c-4bb5-9eec-85ceff9bbb1d/filer/7cc81386-972b-4cd3-abb1-3b2b7911e51d.pdf;
-Norges vassdrags- og energidirektorat (NVE);970205039;2024;12;34;112409328;787380506;-85.7;1;14.28;store;14.8;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Norges miljø- og biovitenskapelige universitet;969159570;2024;12;77;186029451;686624000;-72.9;1;27.09;store;16.6;0;;0;https://kudos.dfo.no/dokument/eef00e0d-686c-4bb5-9eec-85ceff9bbb1d/filer/7cc81386-972b-4cd3-abb1-3b2b7911e51d.pdf;
+Norges vassdrags- og energidirektorat (NVE);970205039;2024;12;34;112409328;787380506;-85.7;1;14.28;store;16.6;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Norsk filminstitutt;892211442;2024;12;3;3943361;53434679;-92.6;1;7.38;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Norsk jernbanemuseum;918147764;2024;12;2;1135607;27098489;-95.8;1;4.19;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Norsk nukleær dekommisjonering;920440754;2024;12;21;547165186;428262921;27.8;1;127.76;mellomstore;25.0;0;avtaler_for_andre;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Norsk Polarinstitutt;971022264;2024;12;11;34781167;344334629;-89.9;1;10.1;mellomstore;25.0;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Norsk senter for utvekslingssamarbeid (Norec);981965132;2024;12;3;428941;23520183;-98.2;1;1.82;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Ntnu;974767880;2024;12;199;772963254;3491283000;-77.9;1;22.14;store;14.8;0;;0;https://kudos.dfo.no/dokument/535754c8-2c3c-449e-9de0-5c828c131c8c/filer/a0b705ad-967e-436f-849b-bbef4cb946c5.pdf;
-Nærings- og fiskeridepartementet;912660680;2024;12;15;24043203;1507914446;-98.4;1;1.59;store;14.8;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-OsloMet - storbyuniversitetet;997058925;2024;12;45;98865267;1144343000;-91.4;1;8.64;store;14.8;0;;0;https://kudos.dfo.no/dokument/84aa4bc3-e199-4636-8f10-eaa134e0dbeb/filer/c3f7e5ed-b81c-46aa-9884-670e48d4ba57.pdf;
+Ntnu;974767880;2024;12;199;772963254;3491283000;-77.9;1;22.14;store;16.6;0;;0;https://kudos.dfo.no/dokument/535754c8-2c3c-449e-9de0-5c828c131c8c/filer/a0b705ad-967e-436f-849b-bbef4cb946c5.pdf;
+Nærings- og fiskeridepartementet;912660680;2024;12;15;24043203;1507914446;-98.4;1;1.59;store;16.6;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+OsloMet - storbyuniversitetet;997058925;2024;12;45;98865267;1144343000;-91.4;1;8.64;store;16.6;0;;0;https://kudos.dfo.no/dokument/84aa4bc3-e199-4636-8f10-eaa134e0dbeb/filer/c3f7e5ed-b81c-46aa-9884-670e48d4ba57.pdf;
 Patentstyret;971526157;2024;12;19;58003895;95709128;-39.4;1;60.6;mellomstore;25.0;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Politi- og lensmannsetaten;915429785;2024;12;260;4758574748;5686097648;-16.3;1;83.69;store;14.8;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Politi- og lensmannsetaten;915429785;2024;12;260;4758574748;5686097648;-16.3;1;83.69;store;16.6;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Politiets sikkerhetstjeneste;974769484;2024;12;4;37574989;353216403;-89.4;1;10.64;mellomstore;25.0;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Registerenheten i Brønnøysund;974760673;2024;12;82;343933250;302755806;13.6;1;113.6;mellomstore;25.0;0;avtaler_for_andre;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Riksantikvaren;974760819;2024;12;3;21331591;122152694;-82.5;1;17.46;mellomstore;25.0;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
@@ -205,139 +205,139 @@ Samferdselsdepartementet;972417904;2024;12;9;1011588709;43125130;2245.7;1;2345.7
 Sivil klareringsmyndighet;918929673;2024;12;1;0;14401388;-100.0;1;0.0;små;10.3;1;flagg;2;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Sivilombudet Stortingets ombud for kontroll med forvaltningen;974761270;2024;12;1;2395205;30106115;-92.0;1;7.96;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Sjøfartsdirektoratet;974761262;2024;12;31;223673869;154392691;44.9;1;144.87;mellomstore;25.0;0;tilskudd;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Skatteetaten;974761076;2024;12;95;561706507;2178627057;-74.2;1;25.78;store;14.8;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Skatteetaten;974761076;2024;12;95;561706507;2178627057;-74.2;1;25.78;store;16.6;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Sokkeldirektoratet;870917732;2024;12;2;6517808;257183495;-97.5;1;2.53;mellomstore;25.0;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Språkrådet;971527404;2024;12;2;2084754;11352306;-81.6;1;18.36;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Statens arbeidsmiljøinstitutt;874761222;2024;12;10;7987575;70834045;-88.7;1;11.28;små;10.3;0;;0;https://kudos.dfo.no/dokument/c59fc8a9-56d3-41d4-9898-55a07bda975a/filer/69d29a92-43b8-414a-b3c4-d4bd53fd98a0.pdf;
 Statens havarikommisjon;881143712;2024;12;2;671458;31608019;-97.9;1;2.12;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Statens jernbanetilsyn;979363974;2024;12;3;343000;21272134;-98.4;1;1.61;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Statens kartverk;971040238;2024;12;30;291625075;675994082;-56.9;1;43.14;store;14.8;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Statens kartverk;971040238;2024;12;30;291625075;675994082;-56.9;1;43.14;store;16.6;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Statens lånekasse for utdanning;960885406;2024;12;1;588715;165214169;-99.6;1;0.36;mellomstore;25.0;0;observasjon;1;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Statens pensjonskasse forvaltningsbedrift;982583462;2024;12;16;279415242;265455898;5.3;1;105.26;mellomstore;25.0;0;avtaler_for_andre;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Statens vegvesen;971032081;2024;12;431;38597814940;32298993559;19.5;1;119.5;store;14.8;0;avtaler_for_andre;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Statens vegvesen;971032081;2024;12;431;38597814940;32298993559;19.5;1;119.5;store;16.6;0;avtaler_for_andre;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Statistisk sentralbyrå;971526920;2024;12;9;37581079;201259960;-81.3;1;18.67;mellomstore;25.0;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Statped;998554640;2024;12;4;29999743;166681812;-82.0;1;18.0;mellomstore;25.0;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Statsbygg;971278374;2024;12;284;4198392986;7636313005;-45.0;1;54.98;store;14.8;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Statsbygg;971278374;2024;12;284;4198392986;7636313005;-45.0;1;54.98;store;16.6;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Statsforvaltaren i  Møre og Romsdal;974764067;2024;12;2;646768;52028749;-98.8;1;1.24;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Statsforvaltaren i Vestlandet;974760665;2024;12;2;3760649;103091345;-96.4;1;3.65;mellomstore;25.0;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Statsforvalteren i Troms og Finnmark;967311014;2024;12;4;8071104;78570230;-89.7;1;10.27;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Statsforvalterens fellestjenester;921627009;2024;12;41;94082625;92758397;1.4;0;101.43;mellomstore;25.0;0;avtaler_for_andre;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Stortinget;971524960;2024;12;77;220555650;438576883;-49.7;1;50.29;store;14.8;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Tolletaten;974761343;2024;12;4;5515195;605315728;-99.1;1;0.91;store;14.8;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Stortinget;971524960;2024;12;77;220555650;438576883;-49.7;1;50.29;store;16.6;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Tolletaten;974761343;2024;12;30;169842160;605315728;-71.9;1;28.06;store;16.6;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Trygderetten;974761084;2024;12;1;910959;36348905;-97.5;1;2.51;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-UiT Norges arktiske universitet;970422528;2024;12;64;157832015;1654775000;-90.5;1;9.54;store;14.8;0;;0;https://kudos.dfo.no/dokument/20cf112f-51dd-4017-bb4b-17b8b45ea3cf/filer/7c35d7a1-2aba-4825-8a3e-4098e48008c4.pdf;
-Universitetet i Agder;970546200;2024;12;14;15384740;582532000;-97.4;1;2.64;store;14.8;0;;0;https://kudos.dfo.no/dokument/b5db073c-98a3-4d71-8e36-e61804fd7da1/filer/a77d23ea-7d30-470f-8c65-47e0be8fe80a.pdf;
-Universitetet i bergen;874789542;2024;12;134;272984812;1903223000;-85.7;1;14.34;store;14.8;0;;0;https://kudos.dfo.no/dokument/af1a8353-73be-4532-8965-adb6c40ea8b2/filer/47f6b41d-5eea-467c-8548-be3e5f0fee74.pdf;
-Universitetet i Stavanger;971564679;2024;12;35;46791508;739082000;-93.7;1;6.33;store;14.8;0;;0;https://kudos.dfo.no/dokument/4d6287f8-e7f7-4c73-9d5b-ea769a09ce32/filer/a475b782-9d16-4078-9466-50ccb750c394.pdf;
-Universitetet i Sørøst-Norge (USN);911770709;2024;12;23;22044428;452000000;-95.1;1;4.88;store;14.8;0;;0;https://kudos.dfo.no/dokument/22b6cb02-e24f-405e-9590-f855a7def283/filer/c2eca6dd-9156-40f4-af1c-e6b863b71d26.pdf;
-Utdanningsdirektoratet;970018131;2024;12;5;202065320;1120633208;-82.0;1;18.03;store;14.8;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Utenriksdepartementet;972417920;2024;12;37;225512196;5808559767;-96.1;1;3.88;store;14.8;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Utlendingsdirektoratet;974760746;2024;12;44;1593160136;3487171880;-54.3;1;45.69;store;14.8;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+UiT Norges arktiske universitet;970422528;2024;12;64;157832015;1654775000;-90.5;1;9.54;store;16.6;0;;0;https://kudos.dfo.no/dokument/20cf112f-51dd-4017-bb4b-17b8b45ea3cf/filer/7c35d7a1-2aba-4825-8a3e-4098e48008c4.pdf;
+Universitetet i Agder;970546200;2024;12;14;15384740;582532000;-97.4;1;2.64;store;16.6;0;;0;https://kudos.dfo.no/dokument/b5db073c-98a3-4d71-8e36-e61804fd7da1/filer/a77d23ea-7d30-470f-8c65-47e0be8fe80a.pdf;
+Universitetet i bergen;874789542;2024;12;134;272984812;1903223000;-85.7;1;14.34;store;16.6;0;;0;https://kudos.dfo.no/dokument/af1a8353-73be-4532-8965-adb6c40ea8b2/filer/47f6b41d-5eea-467c-8548-be3e5f0fee74.pdf;
+Universitetet i Stavanger;971564679;2024;12;35;46791508;739082000;-93.7;1;6.33;store;16.6;0;;0;https://kudos.dfo.no/dokument/4d6287f8-e7f7-4c73-9d5b-ea769a09ce32/filer/a475b782-9d16-4078-9466-50ccb750c394.pdf;
+Universitetet i Sørøst-Norge (USN);911770709;2024;12;23;22044428;452000000;-95.1;1;4.88;store;16.6;0;;0;https://kudos.dfo.no/dokument/22b6cb02-e24f-405e-9590-f855a7def283/filer/c2eca6dd-9156-40f4-af1c-e6b863b71d26.pdf;
+Utdanningsdirektoratet;970018131;2024;12;5;202065320;1120633208;-82.0;1;18.03;store;16.6;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Utenriksdepartementet;972417920;2024;12;37;225512196;5808559767;-96.1;1;3.88;store;16.6;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Utlendingsdirektoratet;974760746;2024;12;44;1593160136;3487171880;-54.3;1;45.69;store;16.6;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Utlendingsnemnda;982019095;2024;12;5;9086716;63634284;-85.7;1;14.28;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Valgdirektoratet;916132727;2024;12;11;21328976;36450246;-41.5;1;58.52;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-22. juli-senteret;922727457;2025;12;2;15875000;20108571;-21.1;1;78.95;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Advokattilsynet;914459265;2025;12;1;18608;51270519;-100.0;1;0.04;små;10.1;0;observasjon;1;;raadata_desember_2025_bevilgningsregnskap.xlsx
+22. juli-senteret;922727457;2025;12;2;15875000;20108571;-21.1;1;78.95;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Advokattilsynet;914459265;2025;12;1;18608;51270519;-100.0;1;0.04;små;9.6;0;observasjon;1;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Arbeids- og inkluderingsdepartementet;983887457;2025;12;30;25862305;123551448;-79.1;1;20.93;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Arbeids- og velferdsetaten (NAV);889640782;2025;12;172;8524013917;4415513006;93.0;1;193.05;store;10.7;0;tilskudd;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Arbeidstilsynet;974761211;2025;12;5;4151754;194815195;-97.9;1;2.13;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Arkivverket;961181399;2025;12;6;65418744;276718054;-76.4;1;23.64;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Artsdatabanken;919666102;2025;12;1;297741;46596736;-99.4;1;0.64;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Barne- og familiedepartementet;972417793;2025;12;2;1475589;37666447;-96.1;1;3.92;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Artsdatabanken;919666102;2025;12;1;297741;46596736;-99.4;1;0.64;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Barne- og familiedepartementet;972417793;2025;12;2;1475589;37666447;-96.1;1;3.92;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Barne-, ungdoms- og familiedirektoratet;986128433;2025;12;36;216189310;6364981282;-96.6;1;3.4;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Departementenes digitaliseringsorganisasjon (DIO);932931311;2025;12;4;80791661;387508405;-79.2;1;20.85;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Departementenes sikkerhets- og serviceorganisasjon (DSS);974761424;2025;12;56;845275069;417627104;102.4;1;202.4;store;10.7;0;avtaler_for_andre;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Det kongelige hoff;971524545;2025;12;6;8346329;6966801;19.8;1;119.8;små;10.1;0;avtaler_for_andre;0;https://kudos.dfo.no/dokument/a19b61f7-9934-4442-b571-44b374d93bea/filer/a19b61f7-a0ce-46f2-8712-614b5742e04c.pdf;
+Det kongelige hoff;971524545;2025;12;6;8346329;6966801;19.8;1;119.8;små;9.6;0;avtaler_for_andre;0;https://kudos.dfo.no/dokument/a19b61f7-9934-4442-b571-44b374d93bea/filer/a19b61f7-a0ce-46f2-8712-614b5742e04c.pdf;
 Digitaliserings- og forvaltningsdepartementet;932384469;2025;12;3;18401952;309617699;-94.1;1;5.94;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Digitaliseringsdirektoratet;991825827;2025;12;129;280832035;760041399;-63.1;1;36.95;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Direktoratet for byggkvalitet;974760223;2025;12;5;32188467;115325268;-72.1;1;27.91;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Direktoratet for forvaltning og økonomistyring (DFØ);986252932;2025;12;43;2425730757;343164218;606.9;1;706.87;mellomstore;18.5;0;avtaler_for_andre;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Direktoratet for høyere utdanning og kompetanse;974788985;2025;12;22;536935073;240400799;123.3;1;223.35;mellomstore;18.5;0;tilskudd;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Direktoratet for medisinske produkter;974761122;2025;12;2;4449707;263678730;-98.3;1;1.69;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Direktoratet for mineralforvaltning med Bergmesteren for svalbard;974760282;2025;12;2;4432238;39184808;-88.7;1;11.31;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Direktoratet for mineralforvaltning med Bergmesteren for svalbard;974760282;2025;12;2;4432238;39184808;-88.7;1;11.31;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Direktoratet for samfunnssikkerhet og beredskap (DSB);974760983;2025;12;49;569440534;1460280035;-61.0;1;39.0;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Direktoratet for strålevern og atomsikkerhet;867668292;2025;12;1;335616;119019728;-99.7;1;0.28;mellomstore;18.5;0;observasjon;1;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Direktoratet for utviklingssamarbeid (NORAD);971277882;2025;12;36;114297408;157012153;-27.2;1;72.8;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Domstolene i Norge;984195796;2025;12;45;374963418;3434801084;-89.1;1;10.92;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Eksportfinansiering Norge;926718304;2025;12;8;10342652;96776156;-89.3;1;10.69;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Energidepartementet;977161630;2025;12;8;8099001;59862569;-86.5;1;13.53;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Finansdepartementet;972417807;2025;12;29;240159268;106884207;124.7;1;224.69;mellomstore;18.5;0;avtaler_for_andre;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Eksportfinansiering Norge;926718304;2025;12;8;10342652;96776156;-89.3;1;10.69;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Energidepartementet;977161630;2025;12;8;8099001;59862569;-86.5;1;13.53;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Finansdepartementet;972417807;2025;12;5;108018814;106884207;1.1;0;101.06;mellomstore;18.5;0;avtaler_for_andre;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Finanstilsynet;840747972;2025;12;10;90948275;136072977;-33.2;1;66.84;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Fiskeridirektoratet;971203420;2025;12;36;161773781;209636523;-22.8;1;77.17;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Folkehelseinstituttet;983744516;2025;12;7;15577095;1621737942;-99.0;1;0.96;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Folketrygdfondet;971525061;2025;12;9;14374213;113342000;-87.3;1;12.68;mellomstore;18.5;0;;0;https://kudos.dfo.no/dokument/a1a3726d-7bce-4e9e-a713-0faee3e7eeed/filer/a1a3726d-7d8e-449c-b28d-2b4b6c11bf39.pdf;
-Forbrukerrådet;871033382;2025;12;1;410678;34808113;-98.8;1;1.18;små;10.1;0;;0;https://kudos.dfo.no/dokument/a1b58ca6-e56a-4acf-9a48-35aba827bb4b/filer/a1b58ca8-6898-4a54-9c98-506e3e4c2fc7.pdf;
-Forbrukertilsynet;974761335;2025;12;2;2527397;28503483;-91.1;1;8.87;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Foreldreutvalget for grunnopplæringen;989628011;2025;12;1;749487;4695275;-84.0;1;15.96;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Forbrukerrådet;871033382;2025;12;1;410678;34808113;-98.8;1;1.18;små;9.6;0;;0;https://kudos.dfo.no/dokument/a1b58ca6-e56a-4acf-9a48-35aba827bb4b/filer/a1b58ca8-6898-4a54-9c98-506e3e4c2fc7.pdf;
+Forbrukertilsynet;974761335;2025;12;2;2527397;28503483;-91.1;1;8.87;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Foreldreutvalget for grunnopplæringen;989628011;2025;12;1;749487;4695275;-84.0;1;15.96;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Forsvaret;986105174;2025;12;122;2707504954;28555818835;-90.5;1;9.48;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Forsvarsbygg;975950662;2025;12;160;2555766551;5618843790;-54.5;1;45.49;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Forsvarsdepartementet;972417823;2025;12;12;33832875;1046791055;-96.8;1;3.23;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Forsvarshistorisk museum;833805002;2025;12;1;123945;82173096;-99.8;1;0.15;små;10.1;0;observasjon;1;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Forsvarshistorisk museum;833805002;2025;12;1;123945;82173096;-99.8;1;0.15;små;9.6;0;observasjon;1;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Forsvarsmateriell;916075855;2025;12;58;3915352769;6192079760;-36.8;1;63.23;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Havforskningsinstituttet;971349077;2025;12;38;68362234;829157267;-91.8;1;8.24;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Havindustritilsynet;986174613;2025;12;4;20332280;110127986;-81.5;1;18.46;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Helse- og omsorgsdepartementet;983887406;2025;12;5;5534384;71125710;-92.2;1;7.78;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Helse- og omsorgsdepartementet;983887406;2025;12;5;5534384;71125710;-92.2;1;7.78;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Helsedirektoratet;983544622;2025;12;8;3889046;964897360;-99.6;1;0.4;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Helseøkonomiforvaltningen (HELFO);986965610;2025;12;3;125690930;80603835;55.9;1;155.94;små;10.1;0;tilskudd;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Helseøkonomiforvaltningen (HELFO);986965610;2025;12;3;125690930;80603835;55.9;1;155.94;små;9.6;0;tilskudd;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Hovedredningssentralen;971390425;2025;12;1;2453799;1474643946;-99.8;1;0.17;store;10.7;1;flagg;2;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Husbanken;942114184;2025;12;8;119438359;169241634;-29.4;1;70.57;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Høgskolen i Molde;971555483;2025;12;7;1599795;118639000;-98.7;1;1.35;mellomstore;18.5;0;;0;https://kudos.dfo.no/dokument/a14aee79-772b-4120-911a-83b3ac7a294b/filer/a14aee7e-0677-4b8e-9050-5f5f3da817da.pdf;
 Høgskulen på Vestlandet;917641404;2025;12;22;27378364;892099000;-96.9;1;3.07;store;10.7;0;;0;https://kudos.dfo.no/dokument/a14aee78-9c81-48db-823b-3f5b82e723df/filer/a14aee7d-9734-41b3-bfcf-667c4652c37c.pdf;
 Integrerings- og mangfoldsdirektoratet;987879696;2025;12;20;34815454;168476876;-79.3;1;20.66;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Jernbanedirektoratet;916810962;2025;12;31;139976442;190507545;-26.5;1;73.48;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Justervesenet;874761192;2025;12;7;8077033;53516174;-84.9;1;15.09;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Justervesenet;874761192;2025;12;7;8077033;53516174;-84.9;1;15.09;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Justis- og beredskapsdepartementet;972417831;2025;12;12;23604987;168331805;-86.0;1;14.02;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Klagenemndssekretariatet (KNS);918195548;2025;12;1;449692;24299851;-98.1;1;1.85;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Klagenemndssekretariatet (KNS);918195548;2025;12;1;449692;24299851;-98.1;1;1.85;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Klima- og miljødepartementet;972417882;2025;12;7;21103159;221431152;-90.5;1;9.53;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Kommunal- og distriktsdepartementet;972417858;2025;12;16;15389086;107003979;-85.6;1;14.38;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Kompetansesenter for distriktsutvikling;992375434;2025;12;2;1692307;11457607;-85.2;1;14.77;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Konfliktrådene;986074465;2025;12;1;3247775;44236308;-92.7;1;7.34;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Kompetansesenter for distriktsutvikling;992375434;2025;12;2;1692307;11457607;-85.2;1;14.77;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Konfliktrådene;986074465;2025;12;1;3247775;44236308;-92.7;1;7.34;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Kriminalomsorgsdirektoratet;911830868;2025;12;5;37873304;2281938838;-98.3;1;1.66;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Kultur- og likestillingsdepartementet;972417866;2025;12;6;4328098;73400115;-94.1;1;5.9;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Kulturdirektoratet;971527412;2025;12;6;20213281;76675684;-73.6;1;26.36;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Kulturtanken - Den kulturelle skolesekken Norge;974761114;2025;12;2;2424196;25353083;-90.4;1;9.56;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Kultur- og likestillingsdepartementet;972417866;2025;12;6;4328098;73400115;-94.1;1;5.9;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Kulturdirektoratet;971527412;2025;12;6;20213281;76675684;-73.6;1;26.36;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Kulturtanken - Den kulturelle skolesekken Norge;974761114;2025;12;2;2424196;25353083;-90.4;1;9.56;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Kunnskapsdepartementet;872417842;2025;12;66;739976330;159561398;363.8;1;463.76;mellomstore;18.5;0;tilskudd;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Kystverket;874783242;2025;12;21;484625530;1624964077;-70.2;1;29.82;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Landbruks- og matdepartementet;972417874;2025;12;39;31874329;59542186;-46.5;1;53.53;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Landbruks- og matdepartementet;972417874;2025;12;39;31874329;59542186;-46.5;1;53.53;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Landbruksdirektoratet;981544315;2025;12;34;945401286;147013635;543.1;1;643.07;mellomstore;18.5;0;tilskudd;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Mattilsynet;985399077;2025;12;18;49431518;549398977;-91.0;1;9.0;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Medietilsynet;974760886;2025;12;9;18048901;38949188;-53.7;1;46.34;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Medietilsynet;974760886;2025;12;9;18048901;38949188;-53.7;1;46.34;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Miljødirektoratet;999601391;2025;12;40;104078007;1988088500;-94.8;1;5.24;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Nasjonal kommunikasjonsmyndighet;974446871;2025;12;5;4520206;131025308;-96.6;1;3.45;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Nasjonalbiblioteket;976029100;2025;12;9;9101634;443469762;-97.9;1;2.05;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Nasjonalt organ for kvalitet i utdanningen NOKUT;985042667;2025;12;4;24129637;29789585;-19.0;1;81.0;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Nasjonalt organ for kvalitet i utdanningen NOKUT;985042667;2025;12;4;24129637;29789585;-19.0;1;81.0;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Norges forskningsråd;970141669;2025;12;1;1006160;283694579;-99.6;1;0.35;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Norges geologiske undersøkelse;970188290;2025;12;4;9741958;103791210;-90.6;1;9.39;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Norges geologiske undersøkelse;970188290;2025;12;4;9741958;103791210;-90.6;1;9.39;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Norges Handelshøyskole;974789523;2025;12;14;34917846;313333000;-88.9;1;11.14;mellomstore;18.5;0;;0;https://kudos.dfo.no/dokument/a14aee78-7444-4ef2-8410-ebf4eac928de/filer/a14aee7d-7d8d-4d8b-afe2-8b11dc6b9992.pdf;
-Norges institusjon for menneskerettigheter;914781175;2025;12;1;229979;4298114;-94.6;1;5.35;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Norges institusjon for menneskerettigheter;914781175;2025;12;1;229979;4298114;-94.6;1;5.35;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Norges miljø- og biovitenskapelige universitet;969159570;2025;12;65;88253323;633142000;-86.1;1;13.94;store;10.7;0;;0;https://kudos.dfo.no/dokument/a150f76c-389a-4341-b08a-350500c45a18/filer/a150f76e-31e3-4a4a-9730-66b277049c2a.pdf;
 Norges vassdrags- og energidirektorat (NVE);970205039;2025;12;25;134701541;623915230;-78.4;1;21.59;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Norsk Akkreditering;986028307;2025;12;1;1509589;33156196;-95.4;1;4.55;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Norsk filminstitutt;892211442;2025;12;3;1399506;49316505;-97.2;1;2.84;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Norsk jernbanemuseum;918147764;2025;12;2;938344;26949359;-96.5;1;3.48;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Norsk Akkreditering;986028307;2025;12;1;1509589;33156196;-95.4;1;4.55;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Norsk filminstitutt;892211442;2025;12;3;1399506;49316505;-97.2;1;2.84;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Norsk jernbanemuseum;918147764;2025;12;2;938344;26949359;-96.5;1;3.48;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Norsk nukleær dekommisjonering;920440754;2025;12;20;679103500;391800899;73.3;1;173.33;mellomstore;18.5;0;avtaler_for_andre;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Norsk pasientskadeerstatning;984936923;2025;12;17;15576656;145018684;-89.3;1;10.74;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Norsk Polarinstitutt;971022264;2025;12;10;41070124;411175599;-90.0;1;9.99;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Norsk senter for utvekslingssamarbeid (Norec);981965132;2025;12;3;1928104;29006816;-93.4;1;6.65;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Norsk utenrikspolitisk institutt;970955992;2025;12;1;210046;72931312;-99.7;1;0.29;små;10.1;0;observasjon;1;https://kudos.dfo.no/dokument/a150f76b-bd53-47b9-ba45-9b5c9439bb2f/filer/a150f76e-07a9-4cc4-ae12-3860b1f0bc87.pdf;
+Norsk Polarinstitutt;971022264;2025;12;10;41070124;411175599;-90.0;1;9.99;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Norsk senter for utvekslingssamarbeid (Norec);981965132;2025;12;3;1928104;29006816;-93.4;1;6.65;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Norsk utenrikspolitisk institutt;970955992;2025;12;1;210046;72931312;-99.7;1;0.29;små;9.6;0;observasjon;1;https://kudos.dfo.no/dokument/a150f76b-bd53-47b9-ba45-9b5c9439bb2f/filer/a150f76e-07a9-4cc4-ae12-3860b1f0bc87.pdf;
 Ntnu;974767880;2025;12;183;724568670;3463711000;-79.1;1;20.92;store;10.7;0;;0;https://kudos.dfo.no/dokument/a263ef51-5cbd-4d1e-b2b0-ab7430b99f5c/filer/a263f068-fca0-44a5-8729-b9d944205482.pdf;
 Nærings- og fiskeridepartementet;912660680;2025;12;15;35072266;1524461778;-97.7;1;2.3;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 OsloMet - storbyuniversitetet;997058925;2025;12;37;86105881;1163711000;-92.6;1;7.4;store;10.7;0;;0;https://kudos.dfo.no/dokument/a14aee78-d1a2-4095-8c7e-fac778411420/filer/a14aee7d-bc27-4cb2-8dac-d52e31cca5eb.pdf;
-Patentstyret;971526157;2025;12;18;58567943;84900911;-31.0;1;68.98;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Patentstyret;971526157;2025;12;18;58567943;84900911;-31.0;1;68.98;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Politi- og lensmannsetaten;915429785;2025;12;235;5192037510;6439896941;-19.4;1;80.62;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Politiets sikkerhetstjeneste;974769484;2025;12;1;7494867;467904684;-98.4;1;1.6;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Registerenheten i Brønnøysund;974760673;2025;12;86;271100945;276999162;-2.1;0;97.87;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Riksantikvaren;974760819;2025;12;2;958681;118033143;-99.2;1;0.81;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Riksrevisjonen;974760843;2025;12;10;39705543;142832802;-72.2;1;27.8;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Riksteatret;974907550;2025;12;1;10992471;55732940;-80.3;1;19.72;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Riksteatret;974907550;2025;12;1;10992471;55732940;-80.3;1;19.72;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Sametinget;974760347;2025;12;6;3445460;121174684;-97.2;1;2.84;mellomstore;18.5;0;;0;https://kudos.dfo.no/dokument/a1671840-519a-465c-888b-9e7236d4fb32/filer/a1671843-dd48-4c68-941b-067c1d256a01.pdf;
-Samferdselsdepartementet;972417904;2025;12;7;1091348176;36354210;2902.0;1;3001.99;små;10.1;0;tilskudd;3;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Samferdselsdepartementet;972417904;2025;12;7;1091348176;36354210;2902.0;1;3001.99;små;9.6;0;tilskudd;3;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Sjøfartsdirektoratet;974761262;2025;12;22;191547582;154360647;24.1;1;124.09;mellomstore;18.5;0;tilskudd;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Skatteetaten;974761076;2025;12;85;1164246994;2172639313;-46.4;1;53.59;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Sokkeldirektoratet;870917732;2025;12;2;1668493;305862284;-99.5;1;0.55;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Språkrådet;971527404;2025;12;2;2442577;13059800;-81.3;1;18.7;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Statens arbeidsmiljøinstitutt;874761222;2025;12;12;23972454;81754010;-70.7;1;29.32;små;10.1;0;;0;https://kudos.dfo.no/dokument/a19156ea-ddd8-41b0-9767-fcbd966be15d/filer/a19156eb-a412-4fc0-9f6a-c4fcd37d37ac.pdf;
-Statens havarikommisjon;881143712;2025;12;2;749487;24745900;-97.0;1;3.03;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Statens jernbanetilsyn;979363974;2025;12;4;688316;19422777;-96.5;1;3.54;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Språkrådet;971527404;2025;12;2;2442577;13059800;-81.3;1;18.7;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Statens arbeidsmiljøinstitutt;874761222;2025;12;12;23972454;81754010;-70.7;1;29.32;små;9.6;0;;0;https://kudos.dfo.no/dokument/a19156ea-ddd8-41b0-9767-fcbd966be15d/filer/a19156eb-a412-4fc0-9f6a-c4fcd37d37ac.pdf;
+Statens havarikommisjon;881143712;2025;12;2;749487;24745900;-97.0;1;3.03;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Statens jernbanetilsyn;979363974;2025;12;4;688316;19422777;-96.5;1;3.54;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Statens kartverk;971040238;2025;12;31;272561812;862248172;-68.4;1;31.61;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Statens lånekasse for utdanning;960885406;2025;12;1;599589;163231190;-99.6;1;0.37;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Statens pensjonskasse;982583462;2025;12;15;234925902;278817594;-15.7;1;84.26;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
@@ -345,12 +345,13 @@ Statens vegvesen;971032081;2025;12;452;28208487478;34024127891;-17.1;1;82.91;sto
 Statistisk sentralbyrå;971526920;2025;12;7;35097786;199216785;-82.4;1;17.62;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Statped;998554640;2025;12;4;34600541;140121375;-75.3;1;24.69;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Statsbygg;971278374;2025;12;362;4389010690;8643296782;-49.2;1;50.78;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Statsforvaltaren i Vestland;974760665;2025;12;2;1500067;101780764;-98.5;1;1.47;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Statsforvaltaren i Vestland;974760665;2025;12;2;1500067;101780764;-98.5;1;1.47;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Statsforvalteren i Agder;974762994;2025;12;1;955852;108147899;-99.1;1;0.88;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Statsforvalteren i Troms og Finnmark;967311014;2025;12;3;8330867;110500544;-92.5;1;7.54;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Statsforvalterens fellestjenester;921627009;2025;12;37;51789708;99318956;-47.9;1;52.14;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Statsforvalterens fellestjenester;921627009;2025;12;37;51789708;99318956;-47.9;1;52.14;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Stortinget;971524960;2025;12;58;227447288;439292881;-48.2;1;51.78;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Trygderetten;974761084;2025;12;1;2500000;37657566;-93.4;1;6.64;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Tolletaten;974761343;2025;12;24;132140453;628743286;-79.0;1;21.02;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Trygderetten;974761084;2025;12;1;2500000;37657566;-93.4;1;6.64;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 UiT Norges arktiske universitet;970422528;2025;12;63;201107007;1874549000;-89.3;1;10.73;store;10.7;0;;0;https://kudos.dfo.no/dokument/a154fd64-1c7e-46bf-b5da-bb4c9ff93ee4/filer/a154fd65-b855-4f6a-a40c-2f0f4f7139a3.pdf;
 Universitetet i Agder;970546200;2025;12;12;10457282;637136000;-98.4;1;1.64;store;10.7;0;;0;https://kudos.dfo.no/dokument/a14aee78-c942-4b46-a1a3-70984716d84c/filer/a14aee7d-b5ea-487d-a8af-55b93b11a3c4.pdf;
 Universitetet i bergen;874789542;2025;12;106;440057564;1978115000;-77.8;1;22.25;store;10.7;0;;0;https://kudos.dfo.no/dokument/a1b58ca9-f321-4326-b5f8-35b416328175/filer/a1b58caf-420e-4d4c-917b-de528fd9cfa1.pdf;
@@ -361,46 +362,46 @@ University of South-Eastern Norway;911770709;2025;12;23;19395212;430000000;-95.5
 Utdanningsdirektoratet;970018131;2025;12;5;184284911;844418576;-78.2;1;21.82;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Utenriksdepartementet;972417920;2025;12;42;235043940;4809834453;-95.1;1;4.89;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Utlendingsdirektoratet;974760746;2025;12;42;1638273932;2991600454;-45.2;1;54.76;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Utlendingsnemnda;982019095;2025;12;5;7483564;64912438;-88.5;1;11.53;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Valgdirektoratet;916132727;2025;12;12;30909782;60053879;-48.5;1;51.47;små;10.1;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Utlendingsnemnda;982019095;2025;12;5;7483564;64912438;-88.5;1;11.53;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Valgdirektoratet;916132727;2025;12;12;30909782;60053879;-48.5;1;51.47;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 22. juli-senteret;922727457;2026;8;2;9703082;10804504;-10.2;1;89.81;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Arbeids- og inkluderingsdepartementet;983887457;2026;8;22;21005804;58798935;-64.3;1;35.72;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Arbeids- og velferdsetaten (NAV);889640782;2026;8;140;4511543104;2688561690;67.8;1;167.81;store;29.1;0;tilskudd;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Arbeids- og velferdsetaten (NAV);889640782;2026;8;140;4511543104;2688561690;67.8;1;167.81;store;21.0;0;tilskudd;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Arbeidstilsynet;974761211;2026;8;5;25887110;128479993;-79.9;1;20.15;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Artsdatabanken;919666102;2026;8;1;831622;15808210;-94.7;1;5.26;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Barne- og familiedepartementet;972417793;2026;8;3;1555859;23336873;-93.3;1;6.67;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Barne-, ungdoms- og familiedirektoratet;986128433;2026;8;28;181887975;4365651739;-95.8;1;4.17;store;29.1;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Departementenes digitaliseringsorganisasjon (DIO);932931311;2026;8;12;149471564;312167269;-52.1;1;47.88;store;29.1;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Departementenes sikkerhets- og serviceorganisasjon (DSS);974761424;2026;8;64;617005782;384494487;60.5;1;160.47;store;29.1;0;avtaler_for_andre;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Barne-, ungdoms- og familiedirektoratet;986128433;2026;8;28;181887975;4365651739;-95.8;1;4.17;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Departementenes digitaliseringsorganisasjon (DIO);932931311;2026;8;12;149471564;312167269;-52.1;1;47.88;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Departementenes sikkerhets- og serviceorganisasjon (DSS);974761424;2026;8;64;617005782;384494487;60.5;1;160.47;store;21.0;0;avtaler_for_andre;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Digitaliserings- og forvaltningsdepartementet;932384469;2026;8;5;14217764;43868890;-67.6;1;32.41;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Digitaliseringsdirektoratet;991825827;2026;8;85;165029322;408703305;-59.6;1;40.38;store;29.1;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Digitaliseringsdirektoratet;991825827;2026;8;85;165029322;408703305;-59.6;1;40.38;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Direktoratet for byggkvalitet;974760223;2026;8;5;24130030;68668132;-64.9;1;35.14;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Direktoratet for forvaltning og økonomistyring (DFØ);986252932;2026;8;42;3546866795;242516635;1362.5;1;1462.53;store;29.1;0;avtaler_for_andre;2;;raadata_august_2026_bevilgningsregnskap.xlsx
+Direktoratet for forvaltning og økonomistyring (DFØ);986252932;2026;8;42;3546866795;242516635;1362.5;1;1462.53;store;21.0;0;avtaler_for_andre;2;;raadata_august_2026_bevilgningsregnskap.xlsx
 Direktoratet for høyere utdanning og kompetanse;974788985;2026;8;15;350457979;107961404;224.6;1;324.61;mellomstore;28.9;0;tilskudd;1;;raadata_august_2026_bevilgningsregnskap.xlsx
 Direktoratet for medisinske produkter;974761122;2026;8;1;948049;105886091;-99.1;1;0.9;mellomstore;28.9;0;observasjon;1;;raadata_august_2026_bevilgningsregnskap.xlsx
 Direktoratet for mineralforvaltning med Bergmesteren for svalbard;974760282;2026;8;2;6736140;23412997;-71.2;1;28.77;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Direktoratet for samfunnssikkerhet og beredskap (DSB);974760983;2026;8;43;383002492;827198930;-53.7;1;46.3;store;29.1;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Direktoratet for samfunnssikkerhet og beredskap (DSB);974760983;2026;8;43;383002492;827198930;-53.7;1;46.3;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Direktoratet for strålevern og atomsikkerhet;867668292;2026;8;1;1165068;57179377;-98.0;1;2.04;mellomstore;28.9;1;flagg;2;;raadata_august_2026_bevilgningsregnskap.xlsx
 Direktoratet for utviklingssamarbeid (NORAD);971277882;2026;8;29;46233164;84463648;-45.3;1;54.74;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Domstolene i Norge;984195796;2026;8;46;439164540;2455202624;-82.1;1;17.89;store;29.1;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Domstolene i Norge;984195796;2026;8;46;439164540;2455202624;-82.1;1;17.89;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Eksportfinansiering Norge;926718304;2026;8;10;13911912;38566669;-63.9;1;36.07;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Energidepartementet;977161630;2026;8;4;2892830;32692771;-91.2;1;8.85;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Finansdepartementet;972417807;2026;8;18;157277072;76277970;106.2;1;206.19;mellomstore;28.9;0;avtaler_for_andre;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Finansdepartementet;972417807;2026;8;4;70145257;76277970;-8.0;1;91.96;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Finanstilsynet;840747972;2026;8;9;60960076;98829958;-38.3;1;61.68;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Fiskeridirektoratet;971203420;2026;8;28;84336780;128550635;-34.4;1;65.61;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Folkehelseinstituttet;983744516;2026;8;6;10794979;745267908;-98.6;1;1.45;store;29.1;0;observasjon;1;;raadata_august_2026_bevilgningsregnskap.xlsx
+Folkehelseinstituttet;983744516;2026;8;6;10794979;745267908;-98.6;1;1.45;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Foreldreutvalget for grunnopplæringen;989628011;2026;8;1;498973;2950355;-83.1;1;16.91;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Forsvaret;986105174;2026;8;93;1490336968;19566233711;-92.4;1;7.62;store;29.1;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Forsvarsbygg;975950662;2026;8;168;2064537437;3691023978;-44.1;1;55.93;store;29.1;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Forsvarsdepartementet;972417823;2026;8;10;20318894;359856248;-94.4;1;5.65;store;29.1;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Forsvaret;986105174;2026;8;93;1490336968;19566233711;-92.4;1;7.62;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Forsvarsbygg;975950662;2026;8;168;2064537437;3691023978;-44.1;1;55.93;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Forsvarsdepartementet;972417823;2026;8;10;20318894;359856248;-94.4;1;5.65;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Forsvarshistorisk museum;833805002;2026;8;1;1038575;58443134;-98.2;1;1.78;mellomstore;28.9;1;flagg;2;;raadata_august_2026_bevilgningsregnskap.xlsx
-Forsvarsmateriell;916075855;2026;8;68;3306970308;4503845067;-26.6;1;73.43;store;29.1;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Havforskningsinstituttet;971349077;2026;8;39;58769968;599313951;-90.2;1;9.81;store;29.1;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Forsvarsmateriell;916075855;2026;8;68;3306970308;4503845067;-26.6;1;73.43;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Havforskningsinstituttet;971349077;2026;8;39;58769968;599313951;-90.2;1;9.81;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Havindustritilsynet;986174613;2026;8;5;11414787;71140686;-84.0;1;16.05;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Helse- og omsorgsdepartementet;983887406;2026;8;1;1093151;49425262;-97.8;1;2.21;små;18.0;0;observasjon;1;;raadata_august_2026_bevilgningsregnskap.xlsx
-Helsedirektoratet;983544622;2026;8;10;56869738;437372346;-87.0;1;13.0;store;29.1;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Helsedirektoratet;983544622;2026;8;10;56869738;437372346;-87.0;1;13.0;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Helseøkonomiforvaltningen (HELFO);986965610;2026;8;3;38220098;56665085;-32.6;1;67.45;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Hovedredningssentralen;971390425;2026;8;1;466283;553984024;-99.9;1;0.08;store;29.1;1;flagg;3;;raadata_august_2026_bevilgningsregnskap.xlsx
+Hovedredningssentralen;971390425;2026;8;1;466283;553984024;-99.9;1;0.08;store;21.0;1;flagg;3;;raadata_august_2026_bevilgningsregnskap.xlsx
 Husbanken;942114184;2026;8;7;79708311;112605209;-29.2;1;70.79;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Integrerings- og mangfoldsdirektoratet;987879696;2026;8;14;19933473;87531107;-77.2;1;22.77;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Jernbanedirektoratet;916810962;2026;8;25;104200164;111405434;-6.5;1;93.53;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
@@ -411,57 +412,58 @@ Klima- og miljødepartementet;972417882;2026;8;3;13913138;153216896;-90.9;1;9.08
 Kommunal- og distriktsdepartementet;972417858;2026;8;8;5746125;43404100;-86.8;1;13.24;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Kompetansesenter for distriktsutvikling;992375434;2026;8;1;409222;6393771;-93.6;1;6.4;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Konfliktrådene;986074465;2026;8;1;2162218;21963525;-90.2;1;9.84;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Kriminalomsorgsdirektoratet;911830868;2026;8;4;4446456;1646301627;-99.7;1;0.27;store;29.1;0;observasjon;1;;raadata_august_2026_bevilgningsregnskap.xlsx
+Kriminalomsorgsdirektoratet;911830868;2026;8;4;4446456;1646301627;-99.7;1;0.27;store;21.0;0;observasjon;1;;raadata_august_2026_bevilgningsregnskap.xlsx
 Kultur- og likestillingsdepartementet;972417866;2026;8;6;6218563;54073503;-88.5;1;11.5;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Kulturdirektoratet;971527412;2026;8;7;11767341;35901004;-67.2;1;32.78;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Kulturtanken - Den kulturelle skolesekken Norge;974761114;2026;8;3;2349224;19310969;-87.8;1;12.17;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Kunnskapsdepartementet;872417842;2026;8;51;245442548;91505995;168.2;1;268.23;mellomstore;28.9;0;tilskudd;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Kystverket;874783242;2026;8;18;151789276;948086505;-84.0;1;16.01;store;29.1;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Kystverket;874783242;2026;8;18;151789276;948086505;-84.0;1;16.01;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Landbruks- og matdepartementet;972417874;2026;8;30;17649686;45422408;-61.1;1;38.86;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Landbruksdirektoratet;981544315;2026;8;22;696928566;100132393;596.0;1;696.01;mellomstore;28.9;0;tilskudd;1;;raadata_august_2026_bevilgningsregnskap.xlsx
-Mattilsynet;985399077;2026;8;13;28368571;274161078;-89.7;1;10.35;store;29.1;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Mattilsynet;985399077;2026;8;13;28368571;274161078;-89.7;1;10.35;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Medietilsynet;974760886;2026;8;6;15220964;20627032;-26.2;1;73.79;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Miljødirektoratet;999601391;2026;8;77;324882714;532053058;-38.9;1;61.06;store;29.1;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Miljødirektoratet;999601391;2026;8;77;324882714;532053058;-38.9;1;61.06;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Nasjonal kommunikasjonsmyndighet;974446871;2026;8;1;1452014;80911895;-98.2;1;1.79;mellomstore;28.9;0;observasjon;1;;raadata_august_2026_bevilgningsregnskap.xlsx
 Nasjonalarkivet;961181399;2026;8;5;44153388;196744341;-77.6;1;22.44;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Nasjonalbiblioteket;976029100;2026;8;11;16324957;368005867;-95.6;1;4.44;store;29.1;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Nasjonalbiblioteket;976029100;2026;8;11;16324957;368005867;-95.6;1;4.44;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Nasjonalt organ for kvalitet i utdanningen NOKUT;985042667;2026;8;3;14401234;21241725;-32.2;1;67.8;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Norges geologiske undersøkelse;970188290;2026;8;6;15066222;63517467;-76.3;1;23.72;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Norges vassdrags- og energidirektorat (NVE);970205039;2026;8;33;180904885;369204547;-51.0;1;49.0;store;29.1;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Norges vassdrags- og energidirektorat (NVE);970205039;2026;8;33;180904885;369204547;-51.0;1;49.0;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Norsk Akkreditering;986028307;2026;8;1;6324658;28027841;-77.4;1;22.57;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Norsk filminstitutt;892211442;2026;8;2;571972;36296685;-98.4;1;1.58;små;18.0;0;observasjon;1;;raadata_august_2026_bevilgningsregnskap.xlsx
 Norsk jernbanemuseum;918147764;2026;8;1;598768;15938246;-96.2;1;3.76;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Norsk nukleær dekommisjonering;920440754;2026;8;20;396955326;282703993;40.4;1;140.41;store;29.1;0;avtaler_for_andre;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Norsk nukleær dekommisjonering;920440754;2026;8;20;396955326;282703993;40.4;1;140.41;store;21.0;0;avtaler_for_andre;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Norsk pasientskadeerstatning;984936923;2026;8;23;24904051;77383959;-67.8;1;32.18;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Norsk Polarinstitutt;971022264;2026;8;15;59550830;228807881;-74.0;1;26.03;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Norsk senter for utvekslingssamarbeid (Norec);981965132;2026;8;6;4123943;18374385;-77.6;1;22.44;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Nærings- og fiskeridepartementet;912660680;2026;8;12;16061407;770662020;-97.9;1;2.08;store;29.1;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Nærings- og fiskeridepartementet;912660680;2026;8;12;16061407;770662020;-97.9;1;2.08;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Patentstyret;971526157;2026;8;7;15331454;53701040;-71.5;1;28.55;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Politi- og lensmannsetaten;915429785;2026;8;213;2722119421;4088234951;-33.4;1;66.58;store;29.1;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Politiets sikkerhetstjeneste;974769484;2026;8;1;4989733;248979636;-98.0;1;2.0;store;29.1;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Politi- og lensmannsetaten;915429785;2026;8;213;2722119421;4088234951;-33.4;1;66.58;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Politiets sikkerhetstjeneste;974769484;2026;8;1;4989733;248979636;-98.0;1;2.0;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Registerenheten i Brønnøysund;974760673;2026;8;65;157227121;210560912;-25.3;1;74.67;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Riksrevisjonen;974760843;2026;8;10;34768051;100558849;-65.4;1;34.57;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Riksteatret;974907550;2026;8;1;7318275;32301191;-77.3;1;22.66;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Samferdselsdepartementet;972417904;2026;8;5;617750569;22916605;2595.6;1;2695.65;små;18.0;0;tilskudd;3;;raadata_august_2026_bevilgningsregnskap.xlsx
 Sjøfartsdirektoratet;974761262;2026;8;14;58718843;98717282;-40.5;1;59.48;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Skatteetaten;974761076;2026;8;66;1487423504;1337852949;11.2;1;111.18;store;29.1;0;avtaler_for_andre;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Skatteetaten;974761076;2026;8;66;1487423504;1337852949;11.2;1;111.18;store;21.0;0;avtaler_for_andre;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Språkrådet;971527404;2026;8;2;1626154;5511038;-70.5;1;29.51;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Statens havarikommisjon;881143712;2026;8;1;498973;15125295;-96.7;1;3.3;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Statens jernbanetilsyn;979363974;2026;8;3;374572;13186686;-97.2;1;2.84;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Statens kartverk;971040238;2026;8;22;108287248;514969580;-79.0;1;21.03;store;29.1;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Statens kartverk;971040238;2026;8;22;108287248;514969580;-79.0;1;21.03;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Statens lånekasse for utdanning;960885406;2026;8;5;22799760;120251633;-81.0;1;18.96;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Statens pensjonskasse;982583462;2026;8;8;46029421;183339539;-74.9;1;25.11;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Statens vegvesen;971032081;2026;8;389;9982828320;20537404275;-51.4;1;48.61;store;29.1;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Statens vegvesen;971032081;2026;8;389;9982828320;20537404275;-51.4;1;48.61;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Statistisk sentralbyrå;971526920;2026;8;8;19105813;106454907;-82.1;1;17.95;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Statped;998554640;2026;8;3;9098243;88197777;-89.7;1;10.32;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Statsbygg;971278374;2026;8;425;3687126274;4830483138;-23.7;1;76.33;store;29.1;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Statsbygg;971278374;2026;8;425;3687126274;4830483138;-23.7;1;76.33;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Statsforvalteren i Agder;974762994;2026;8;1;948049;73429424;-98.7;1;1.29;mellomstore;28.9;0;observasjon;1;;raadata_august_2026_bevilgningsregnskap.xlsx
 Statsforvalteren i Troms og Finnmark;967311014;2026;8;3;9835841;40152228;-75.5;1;24.5;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Statsforvalterens fellestjenester;921627009;2026;8;35;31688222;61883481;-48.8;1;51.21;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Stortinget;971524960;2026;8;50;132334713;309309775;-57.2;1;42.78;store;29.1;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Stortinget;971524960;2026;8;50;132334713;309309775;-57.2;1;42.78;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Tolletaten;974761343;2026;8;14;87131816;443441826;-80.4;1;19.65;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Trygderetten;974761084;2026;8;1;1589041;25691768;-93.8;1;6.19;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Utdanningsdirektoratet;970018131;2026;8;3;151739184;280237605;-45.9;1;54.15;store;29.1;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Utenriksdepartementet;972417920;2026;8;28;157616950;1150098449;-86.3;1;13.7;store;29.1;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Utlendingsdirektoratet;974760746;2026;8;34;412535909;2156081586;-80.9;1;19.13;store;29.1;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Utdanningsdirektoratet;970018131;2026;8;3;151739184;280237605;-45.9;1;54.15;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Utenriksdepartementet;972417920;2026;8;28;157616950;1150098449;-86.3;1;13.7;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
+Utlendingsdirektoratet;974760746;2026;8;34;412535909;2156081586;-80.9;1;19.13;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Utlendingsnemnda;982019095;2026;8;4;7986307;41474655;-80.7;1;19.26;små;18.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Valgdirektoratet;916132727;2026;8;7;17099107;16262740;5.1;1;105.14;små;18.0;0;avtaler_for_andre;0;;raadata_august_2026_bevilgningsregnskap.xlsx
