@@ -86,6 +86,31 @@ def load_subunits(conn: sqlite3.Connection, orgnrs: Iterable[str], session: requ
     return len(rows)
 
 
+def main_units(orgnrs: Iterable[str], session: requests.Session | None = None) -> dict[str, str]:
+    """underenhet -> hovedenhet for orgnr som er underenheter (en avdeling), ikke enheter.
+
+    Rådata fra statsregnskapet fører et fåtall virksomheter på en underenhet, mens Doffin og
+    årsrapportene bruker hovedenheten: Nasjonalbiblioteket står som 979530730 (avd. Oslo) i
+    rådata og 976029100 i Doffin. Uten denne koblingen kommer virksomheten ikke med.
+    """
+    import requests
+
+    session = session or requests.Session()
+    out: dict[str, str] = {}
+    for orgnr in sorted(set(orgnrs)):
+        try:
+            if session.get(f"{API}/enheter/{orgnr}", timeout=30).status_code == 200:
+                continue
+            resp = session.get(f"{API}/underenheter/{orgnr}", timeout=30)
+        except requests.RequestException as e:
+            log.warning("Enhetsregisteret svarte ikke for %s: %s", orgnr, e)
+            continue
+        time.sleep(PAUSE_S)
+        if resp.status_code == 200 and resp.json().get("overordnetEnhet"):
+            out[orgnr] = resp.json()["overordnetEnhet"]
+    return out
+
+
 def parent_map(conn: sqlite3.Connection) -> dict[str, str]:
     """barn -> regnskapsvirksomhet, tom hvis `load_subunits` ikke er kjørt."""
     try:

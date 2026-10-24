@@ -57,8 +57,10 @@ from src.analysis.coverage import (  # noqa: E402
 )  # noqa: E402
 from src.collectors.doffin import DoffinClient, collect, init_db, save_contracts  # noqa: E402
 from src.collectors.kudos_arsrapport import load_kudos_purchases  # noqa: E402
-from src.collectors.brreg import load_subunits, parent_map  # noqa: E402
-from src.collectors.statsregnskap import is_raadata, load_raadata_xlsx, load_utgifter_xlsx  # noqa: E402
+from src.collectors.brreg import load_subunits, main_units, parent_map  # noqa: E402
+from src.collectors.statsregnskap import (  # noqa: E402
+    is_raadata, load_raadata_xlsx, load_utgifter_xlsx, raadata_orgnrs,
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -138,7 +140,8 @@ def main() -> int:
                        if getattr(a, f"col_{f}")}
             try:
                 if path.suffix.lower() == ".xlsx" and is_raadata(path):
-                    yr, month, n = load_raadata_xlsx(conn, path)
+                    aliases = {} if a.no_brreg else main_units(raadata_orgnrs(path))
+                    yr, month, n = load_raadata_xlsx(conn, path, aliases)
                     print(f"[3/4] Rådata {yr} januar-{month:02d}: kjøp av varer og tjenester for {n} virksomheter "
                           f"({path.name})")
                     continue

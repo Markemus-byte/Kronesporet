@@ -2,6 +2,10 @@
 
 ## Ikke utgitt
 
+- **Nasjonalbiblioteket** har nå regnskapstall fra statsregnskapet for alle år, også 2026. Rådata fører
+  biblioteket på en avdeling (979530730), mens Doffin og årsrapportene bruker hovedenheten (976029100).
+  Siden brukte derfor årsrapporttall, og for 2025 var det feil: 34,8 mill. kr mot 443,5 mill. kr i
+  regnskapet. Orgnr i rådata som er underenheter, kobles nå til hovedenheten via Enhetsregisteret.
 - **Månedlig oppdatering:** GitHub Actions henter nye Doffin-kontrakter den 20. hver måned, tar inn
   rådatafiler fra statsregnskapet som er lastet opp i `site-data/raadata/`, regner ut tallene på nytt og
   publiserer siden (`scripts/update_site_data.py`). En nyere rådatamåned erstatter den forrige

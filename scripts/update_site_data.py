@@ -40,7 +40,8 @@ from src.collectors.doffin import (  # noqa: E402
     DoffinClient, DoffinError, _first_buyer_orgnr, init_db, iter_search_hits, month_ranges, normalize,
     save_contracts, save_winners, winners,
 )
-from src.collectors.statsregnskap import load_raadata_xlsx  # noqa: E402
+from src.collectors.brreg import main_units  # noqa: E402
+from src.collectors.statsregnskap import load_raadata_xlsx, raadata_orgnrs  # noqa: E402
 from src.web.data import source_month  # noqa: E402
 
 log = logging.getLogger("oppdatering")
@@ -115,7 +116,7 @@ def load_ledgers(conn: sqlite3.Connection, files: list[Path]) -> list[str]:
         if month and year and have.get(year, 0) >= month:
             log.info("%s: har allerede %s til og med måned %d", path.name, year, have[year])
             continue
-        year, month, n = load_raadata_xlsx(conn, path)
+        year, month, n = load_raadata_xlsx(conn, path, main_units(raadata_orgnrs(path)))
         have[year] = month
         loaded.append(f"{year} januar–{month:02d} ({n} virksomheter, {path.name})")
     return loaded

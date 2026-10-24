@@ -15,7 +15,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "site-data/raadata/**"
+      - "site-data/raadata/*.xlsx"
   pull_request:
     paths:
       - "scripts/update_site_data.py"
