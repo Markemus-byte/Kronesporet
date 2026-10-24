@@ -29,6 +29,7 @@ DEFAULT_DESCRIPTION = ("Kronesporet sammenligner statlige virksomheters kunngjor
 
 CURRENT = ' aria-current="page"'
 NUM_TYPE = ' data-type="num"'
+ROW_CURRENT = ' aria-current="true"'
 
 # Settes av build_site() for hele byggingen: offentlig adresse (for canonical, Open Graph
 # og sidekart) og datoen dataene sist ble hentet (vises i bunnteksten).
@@ -633,52 +634,72 @@ def agency_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]] | None
 class SupplierSummary:
     orgnr: str
     name: str
-    contracts: list[tuple[Agency, Contract, float]] = field(default_factory=list)  # (kjøper, kontrakt, andel)
+    # år -> [(kjøper, kontrakt, andel av årets verdi)]; andelen er delt likt når flere vant
+    years: dict[int, list[tuple[Agency, Contract, float]]] = field(default_factory=dict)
 
-    @property
-    def total(self) -> float:
-        return sum(v for _, _, v in self.contracts)
+    def total(self, year: int) -> float:
+        return sum(v for _, _, v in self.years.get(year, ()))
 
     @property
     def buyers(self) -> set[str]:
-        return {a.orgnr for a, _, _ in self.contracts}
+        return {a.orgnr for rows in self.years.values() for a, _, _ in rows}
+
+    @property
+    def contract_ids(self) -> set[str]:
+        return {c.id for rows in self.years.values() for _, c, _ in rows}
 
 
-def supplier_index(ds: Dataset) -> list[SupplierSummary]:
-    """Leverandører med orgnr i året, med andel av verdien (delt likt når flere vant)."""
+def supplier_index(datasets: list[Dataset], front: int) -> list[SupplierSummary]:
+    """Leverandører med orgnr på tvers av årene, sortert etter verdien i forsideåret."""
     by_orgnr: dict[str, SupplierSummary] = {}
     names: dict[str, Counter[str]] = {}
-    for a in ds.agencies:
-        for c in a.contracts:
-            for w in c.suppliers:
-                if not w.orgnr:
-                    continue
-                sup = by_orgnr.setdefault(w.orgnr, SupplierSummary(orgnr=w.orgnr, name=w.name))
-                sup.contracts.append((a, c, (c.year_value or 0.0) / len(c.suppliers)))
-                names.setdefault(w.orgnr, Counter())[w.name] += 1
+    for ds in datasets:
+        for a in ds.agencies:
+            for c in a.contracts:
+                for w in c.suppliers:
+                    if not w.orgnr:
+                        continue
+                    sup = by_orgnr.setdefault(w.orgnr, SupplierSummary(orgnr=w.orgnr, name=w.name))
+                    sup.years.setdefault(ds.year, []).append((a, c, (c.year_value or 0.0) / len(c.suppliers)))
+                    names.setdefault(w.orgnr, Counter())[w.name] += 1
     for orgnr, sup in by_orgnr.items():
         sup.name = names[orgnr].most_common(1)[0][0]  # vanligste skrivemåte
-    return sorted(by_orgnr.values(), key=lambda s: (-s.total, s.name.lower()))
+    return sorted(by_orgnr.values(),
+                  key=lambda s: (-s.total(front), -sum(s.total(y) for y in s.years), s.name.lower()))
 
 
-def suppliers_page(ds: Dataset, suppliers: list[SupplierSummary]) -> str:
-    value_label = f"Andel {ds.year}" if ds.annualized else "Verdi"
-    rows = "".join(
-        f'<tr data-name="{escape(s.name.lower())} {s.orgnr}">'
-        f'<td><a href="leverandor/{escape(s.orgnr)}.html">{escape(s.name)}</a> <span class="orgnr">{s.orgnr}</span></td>'
-        f'<td class="num" data-sort="{len(s.contracts)}">{len(s.contracts)}</td>'
-        f'<td class="num" data-sort="{len(s.buyers)}">{len(s.buyers)}</td>'
-        f'<td class="num" data-sort="{_num(s.total)}" title="{kr_full(s.total)}">{kr(s.total)}</td></tr>'
-        for s in suppliers)
+def _value_label(ds: Dataset) -> str:
+    return f"Andel {year_text(ds.year, short=True)}" if ds.annualized else f"Verdi {ds.year}"
+
+
+def suppliers_page(datasets: list[Dataset], suppliers: list[SupplierSummary], front: Dataset) -> str:
+    shown = sorted(datasets, key=lambda d: -d.year)
+    year_heads = "".join(
+        f'<th scope="col" data-type="num">'
+        f'<button type="button">{escape(_value_label(d))}</button></th>' for d in shown)
+    rows = []
+    for s in suppliers:
+        cells = "".join(
+            f'<td class="num" data-sort="{_num(s.total(d.year))}" title="{kr_full(s.total(d.year))}">'
+            f'{kr(s.total(d.year)) if d.year in s.years else "–"}</td>' for d in shown)
+        rows.append(
+            f'<tr data-name="{escape(s.name.lower())} {s.orgnr}">'
+            f'<td><a href="leverandor/{escape(s.orgnr)}.html">{escape(s.name)}</a> <span class="orgnr">{s.orgnr}</span></td>'
+            f'<td class="num" data-sort="{len(s.contract_ids)}">{len(s.contract_ids)}</td>'
+            f'<td class="num" data-sort="{len(s.buyers)}">{len(s.buyers)}</td>{cells}</tr>')
+    years = [d.year for d in datasets]
+    span = str(years[0]) if len(years) == 1 else f"{min(years)}–{max(years)}"
     body = f"""
 <section class="hero">
   <h1>Leverandører</h1>
   <p class="lede">Hvem vinner kontraktene? {len(suppliers)} leverandører med organisasjonsnummer har kontrakter
-  som løper i {ds.year} hos de {len(ds.agencies)} statlige virksomhetene i oversikten.</p>
+  som løper hos statlige virksomheter i oversikten, {span}. Søk på navn eller organisasjonsnummer, og sorter på
+  hvert år.</p>
 </section>
-<p class="muted">Verdien er {"årsandelen for " + str(ds.year) if ds.annualized else "kontraktsverdien"}. Når flere
-leverandører vant samme kontrakt (typisk rammeavtaler), er verdien delt likt mellom dem, fordi Doffin sjelden viser
-fordelingen. Leverandører uten organisasjonsnummer i kunngjøringen (ofte utenlandske) er ikke med her.</p>
+<p class="muted">Verdien er {"årsandelen: den delen av kontraktsverdien som faller i året" if front.annualized
+else "kontraktsverdien"}. Når flere leverandører vant samme kontrakt (typisk rammeavtaler), er verdien delt likt
+mellom dem, fordi Doffin sjelden viser fordelingen. Leverandører uten organisasjonsnummer i kunngjøringen (ofte
+utenlandske) er ikke med her.</p>
 <section>
   <div class="table-tools">
     <label for="filter">Søk etter leverandør</label>
@@ -688,33 +709,55 @@ fordelingen. Leverandører uten organisasjonsnummer i kunngjøringen (ofte utenl
   </div>
   <div class="table-scroll">
   <table class="sortable" id="suppliers">
-    <caption class="visually-hidden">Leverandører med kontrakter som løper i {ds.year}</caption>
+    <caption class="visually-hidden">Leverandører med kontrakter hos statlige virksomheter, {span}</caption>
     <thead><tr><th scope="col" data-type="text"><button type="button">Leverandør</button></th>
-    <th scope="col" data-type="num"><button type="button">Kontrakter</button></th>
-    <th scope="col" data-type="num"><button type="button">Kjøpere</button></th>
-    <th scope="col" data-type="num"><button type="button">{value_label}</button></th></tr></thead>
-    <tbody>{rows}</tbody>
+    <th scope="col" data-type="num" title="Ulike kontrakter, alle år"><button type="button">Kontrakter</button></th>
+    <th scope="col" data-type="num" title="Ulike statlige kjøpere, alle år"><button type="button">Kjøpere</button></th>
+    {year_heads}</tr></thead>
+    <tbody>{"".join(rows)}</tbody>
   </table>
   </div>
 </section>
 """
     return page("Leverandører", body, active="leverandorer", path="leverandorer.html",
-                description=f"Leverandørene som vinner statlige kontrakter i Doffin, {ds.year}.")
+                description=f"Leverandørene som vinner statlige kontrakter i Doffin, {span}.")
 
 
-def supplier_page(ds: Dataset, s: SupplierSummary) -> str:
-    value_label = f"Andel {ds.year}" if ds.annualized else "Verdi"
+def supplier_page(datasets: list[Dataset], s: SupplierSummary, front: Dataset) -> str:
+    shown = [d for d in sorted(datasets, key=lambda d: -d.year) if d.year in s.years]
+    year_rows = "".join(
+        f'<tr{ROW_CURRENT if d is front else ""}><td>{year_text(d.year, short=True)}</td>'
+        f'<td class="num">{len({c.id for _, c, _ in s.years[d.year]})}</td>'
+        f'<td class="num">{len({a.orgnr for a, _, _ in s.years[d.year]})}</td>'
+        f'<td class="num" title="{kr_full(s.total(d.year))}">{kr(s.total(d.year))}</td></tr>' for d in shown)
+
+    # Én rad per kjøper og per kontrakt, med andelen i forsideåret (eller siste år kontrakten løper)
     per_buyer: dict[str, list] = {}
-    for a, _, v in s.contracts:
-        row = per_buyer.setdefault(a.orgnr, [a, 0, 0.0])
-        row[1] += 1
-        row[2] += v
+    contracts: dict[str, list] = {}
+    for d in sorted(datasets, key=lambda d: d.year):
+        for a, c, v in s.years.get(d.year, ()):
+            b = per_buyer.setdefault(a.orgnr, [a, set(), set()])
+            b[0] = a
+            b[1].add(c.id)
+            b[2].add(d.year)
+            row = contracts.setdefault(c.id, [a, c, None])
+            row[0], row[1] = a, c
+            if d.year == front.year:
+                row[2] = v
+    front_label = _value_label(front)
+
+    def years_span(ys: set[int]) -> str:
+        return str(min(ys)) if len(ys) == 1 else f"{min(ys)}–{max(ys)}"
+
     buyer_rows = "".join(
-        f'<tr><td><a href="../virksomhet/{a.slug}.html">{escape(a.name)}</a></td><td class="num">{n}</td>'
-        f'<td class="num" title="{kr_full(v)}">{kr(v)}</td></tr>'
-        for a, n, v in sorted(per_buyer.values(), key=lambda r: -r[2]))
+        f'<tr><td><a href="../virksomhet/{a.slug}.html">{escape(a.name)}</a></td><td class="num">{len(ids)}</td>'
+        f'<td class="num">{years_span(ys)}</td>'
+        f'<td class="num" title="{kr_full(s_v)}">{kr(s_v) if s_v else "–"}</td></tr>'
+        for a, ids, ys, s_v in sorted(
+            ((a, ids, ys, sum(v for b, _, v in s.years.get(front.year, ()) if b.orgnr == a.orgnr))
+             for a, ids, ys in per_buyer.values()), key=lambda r: (-r[3], -len(r[1]))))
     rows = []
-    for a, c, v in sorted(s.contracts, key=lambda t: -t[2]):
+    for a, c, v in sorted(contracts.values(), key=lambda t: (-(t[2] or 0.0), -(t[1].value or 0.0))):
         others = len(c.suppliers) - 1
         tag = f'<span class="tag">delt med {others} andre</span>' if others else ""
         title = f'<a href="{escape(c.url)}">{escape(c.title)}</a>' if c.url else escape(c.title)
@@ -722,26 +765,34 @@ def supplier_page(ds: Dataset, s: SupplierSummary) -> str:
             f'<tr data-name="{escape((c.title + " " + a.name).lower())}"><td>{title}{tag}</td>'
             f'<td><a href="../virksomhet/{a.slug}.html">{escape(a.name)}</a></td>'
             f'<td class="num" data-sort="{escape(c.published or "")}">{escape((c.published or "–")[:10])}</td>'
+            f'<td class="num" data-sort="{c.first_year or ""}">{_period(c)}</td>'
             f'<td class="num" data-sort="{_num(c.value)}" title="{kr_full(c.value)}">{kr(c.value)}</td>'
-            f'<td class="num" data-sort="{_num(v)}" title="{kr_full(v)}">{kr(v)}</td></tr>')
+            f'<td class="num" data-sort="{_num(v)}" title="{kr_full(v)}">{kr(v) if v is not None else "–"}</td></tr>')
     facts = [
         ("Organisasjonsnummer", f'<a href="https://data.brreg.no/enhetsregisteret/oppslag/enheter/{s.orgnr}">'
                                 f'{s.orgnr}</a>'),
-        (f"Kontrakter som løper i {ds.year}" if ds.annualized else f"Kontrakter tildelt i {ds.year}",
-         str(len(s.contracts))),
+        ("Kontrakter med staten", str(len(contracts))),
         ("Statlige kjøpere", str(len(per_buyer))),
-        (f"{value_label} (delt likt ved flere vinnere)", kr_full(s.total)),
     ]
+    if front.year in s.years:
+        facts.append((f"{front_label} (delt likt ved flere vinnere)", kr_full(s.total(front.year))))
     facts_html = "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in facts)
     body = f"""
 <p class="crumbs"><a href="../leverandorer.html">Alle leverandører</a></p>
 <section class="hero"><h1>{escape(s.name)}</h1></section>
 <div class="two-col">
   <dl class="facts">{facts_html}</dl>
-  <div class="table-scroll"><table><thead><tr><th scope="col">Kjøper</th>
-  <th scope="col" data-type="num">Kontrakter</th><th scope="col" data-type="num">{value_label}</th></tr></thead>
-  <tbody>{buyer_rows}</tbody></table></div>
+  <div class="table-scroll"><table class="history"><thead><tr><th scope="col">År</th>
+  <th scope="col" data-type="num">Kontrakter</th><th scope="col" data-type="num">Kjøpere</th>
+  <th scope="col" data-type="num">Årsandel</th></tr></thead><tbody>{year_rows}</tbody></table></div>
 </div>
+<section>
+  <h2>Kjøpere ({len(per_buyer)})</h2>
+  <div class="table-scroll"><table><thead><tr><th scope="col">Kjøper</th>
+  <th scope="col" data-type="num">Kontrakter</th><th scope="col" data-type="num">År</th>
+  <th scope="col" data-type="num">{escape(front_label)}</th></tr></thead>
+  <tbody>{buyer_rows}</tbody></table></div>
+</section>
 <section>
   <h2>Kontrakter ({len(rows)})</h2>
   <div class="table-tools"><label for="contract-filter">Søk i kontraktene</label>
@@ -751,13 +802,14 @@ def supplier_page(ds: Dataset, s: SupplierSummary) -> str:
   <th scope="col" data-type="text"><button type="button">Kontrakt</button></th>
   <th scope="col" data-type="text"><button type="button">Kjøper</button></th>
   <th scope="col" data-type="num"><button type="button">Tildelt</button></th>
+  <th scope="col" data-type="num"><button type="button">Løper</button></th>
   <th scope="col" data-type="num"><button type="button">Hele verdien</button></th>
-  <th scope="col" data-type="num"><button type="button">{value_label}</button></th></tr></thead>
+  <th scope="col" data-type="num"><button type="button">{escape(front_label)}</button></th></tr></thead>
   <tbody>{"".join(rows)}</tbody></table></div>
 </section>
 """
     return page(s.name, body, root="../", active="leverandorer", path=f"leverandor/{s.orgnr}.html",
-                description=f"Statlige kontrakter i Doffin vunnet av {s.name}, {ds.year}.")
+                description=f"Statlige kontrakter i Doffin vunnet av {s.name}.")
 
 
 # --- om dataene ---------------------------------------------------------------
@@ -1021,11 +1073,12 @@ def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "")
             (out / "ar" / f"{ds.year}.html").write_text(index_page(ds, root="../", years=years), encoding="utf-8")
             pages += 1
 
-    suppliers = supplier_index(latest) if latest.has_suppliers else []
+    suppliers = supplier_index(datasets, latest.year) if any(d.has_suppliers for d in datasets) else []
     (out / "leverandor").mkdir()
-    (out / "leverandorer.html").write_text(suppliers_page(latest, suppliers), encoding="utf-8")
+    (out / "leverandorer.html").write_text(suppliers_page(datasets, suppliers, latest), encoding="utf-8")
     for sup in suppliers:
-        (out / "leverandor" / f"{sup.orgnr}.html").write_text(supplier_page(latest, sup), encoding="utf-8")
+        (out / "leverandor" / f"{sup.orgnr}.html").write_text(supplier_page(datasets, sup, latest),
+                                                                encoding="utf-8")
     pages += 1 + len(suppliers)
     linked = {sup.orgnr for sup in suppliers}
 
