@@ -109,8 +109,10 @@ def pct(x: float | None, signed: bool = False, decimals: int = 1) -> str:
 
 
 def _num(x: float | None) -> str:
-    """Rå tallverdi til data-sort-attributter."""
-    return "" if x is None else repr(float(x))
+    """Tallverdi til data-sort-attributter: hele kroner for beløp, seks gjeldende siffer ellers."""
+    if x is None:
+        return ""
+    return str(round(x)) if abs(x) >= 1000 else f"{x:.6g}"
 
 
 # --- sidemal ----------------------------------------------------------------
@@ -798,15 +800,26 @@ def _value_label(ds: Dataset) -> str:
     return f"Andel {year_text(ds.year, short=True)}" if ds.annualized else f"Verdi {ds.year}"
 
 
+SUPPLIERS_INLINE = 100  # rader i HTML-en; resten hentes fra data/leverandorer.json ved søk, sortering eller «Vis alle»
+
+
+def suppliers_json(datasets: list[Dataset], suppliers: list[SupplierSummary]) -> str:
+    """Hele leverandørlisten i kompakt form for leverandorer.html: én rad per leverandør, samme kolonner."""
+    shown = sorted(datasets, key=lambda d: -d.year)
+    rows = [[s.name, s.orgnr, len(s.contract_ids), len(s.buyers)]
+            + [round(s.total(d.year)) if d.year in s.years else None for d in shown] for s in suppliers]
+    return json.dumps({"rows": rows}, ensure_ascii=False, separators=(",", ":"))
+
+
 def suppliers_page(datasets: list[Dataset], suppliers: list[SupplierSummary], front: Dataset) -> str:
     shown = sorted(datasets, key=lambda d: -d.year)
     year_heads = "".join(
         f'<th scope="col" data-type="num">'
         f'<button type="button">{escape(_value_label(d))}</button></th>' for d in shown)
     rows = []
-    for s in suppliers:
+    for s in suppliers[:SUPPLIERS_INLINE]:
         cells = "".join(
-            f'<td class="num" data-sort="{_num(s.total(d.year))}" title="{kr_full(s.total(d.year))}">'
+            f'<td class="num" data-sort="{round(s.total(d.year)) if d.year in s.years else ""}">'
             f'{kr(s.total(d.year)) if d.year in s.years else "–"}</td>' for d in shown)
         rows.append(
             f'<tr data-name="{escape(s.name.lower())} {s.orgnr}">'
@@ -818,7 +831,7 @@ def suppliers_page(datasets: list[Dataset], suppliers: list[SupplierSummary], fr
     body = f"""
 <section class="hero">
   <h1>Leverandører</h1>
-  <p class="lede">Hvem vinner kontraktene? {len(suppliers)} leverandører med organisasjonsnummer har kontrakter
+  <p class="lede">Hvem vinner kontraktene? {_group(len(suppliers))} leverandører med organisasjonsnummer har kontrakter
   som løper hos statlige virksomheter i oversikten, {span}. Søk på navn eller organisasjonsnummer, og sorter på
   hvert år.</p>
 </section>
@@ -834,7 +847,7 @@ utenlandske) er ikke med her.</p>
     <a class="download" href="data/kontrakter.csv" download>Last ned kontraktene (CSV)</a>
   </div>
   <div class="table-scroll">
-  <table class="sortable" id="suppliers">
+  <table class="sortable" id="suppliers" data-source="data/leverandorer.json" data-total="{len(suppliers)}">
     <caption class="visually-hidden">Leverandører med kontrakter hos statlige virksomheter, {span}</caption>
     <thead><tr><th scope="col" data-type="text"><button type="button">Leverandør</button></th>
     <th scope="col" data-type="num" title="Ulike kontrakter, alle år"><button type="button">Kontrakter</button></th>
@@ -843,6 +856,10 @@ utenlandske) er ikke med her.</p>
     <tbody>{"".join(rows)}</tbody>
   </table>
   </div>
+  {f'''<p class="table-more" data-more-for="suppliers"><span class="muted small" data-shown-for="suppliers">Viser de
+  {SUPPLIERS_INLINE} største av {_group(len(suppliers))}. Søk eller sorter for å se alle.</span>
+  <button type="button" class="button button-quiet" data-show-all="suppliers">Vis alle {_group(len(suppliers))}</button></p>'''
+  if len(suppliers) > SUPPLIERS_INLINE else ""}
 </section>
 """
     return page("Leverandører", body, active="leverandorer", path="leverandorer.html",
@@ -1254,6 +1271,7 @@ def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "",
     suppliers = supplier_index(datasets, latest.year) if any(d.has_suppliers for d in datasets) else []
     (out / "leverandor").mkdir()
     (out / "leverandorer.html").write_text(suppliers_page(datasets, suppliers, latest), encoding="utf-8")
+    (out / "data" / "leverandorer.json").write_text(suppliers_json(datasets, suppliers), encoding="utf-8")
     for sup in suppliers:
         (out / "leverandor" / f"{sup.orgnr}.html").write_text(supplier_page(datasets, sup, latest),
                                                                 encoding="utf-8")

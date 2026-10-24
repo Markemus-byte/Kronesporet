@@ -191,3 +191,7 @@ a:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visibl
 .compare tbody tr:last-child th { border-bottom: 0; }
 .compare th[scope="row"] { min-width: 14rem; }
 @media (max-width: 600px) { .compare th[scope="row"] { min-width: 9.5rem; font-size: .88rem; } .compare th, .compare td { padding: 8px 8px; } }
+.table-more { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 10px 0 0; }
+.button-quiet { background: var(--surface); color: var(--accent); border: 1px solid var(--line); font: inherit; font-weight: 600; cursor: pointer; }
+.button-quiet:hover { border-color: var(--accent); }
+[hidden] { display: none !important; }
