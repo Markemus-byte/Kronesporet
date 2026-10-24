@@ -85,6 +85,26 @@ class Agency:
 
 
 @dataclass
+class Unmatched:
+    """Virksomhet med kjøp i regnskapet, men uten Doffin-kontrakter i året (eget orgnr eller underenheter)."""
+    orgnr: str
+    name: str
+    spend_sum: float
+    notices: int = 0                 # kunngjøringer i Doffin alle år
+    last_notice: int | None = None   # siste tildelingsår
+    note: str = ""
+
+
+# Kjente forklaringer, vist ved siden av virksomheten når den ikke har kontrakter i Doffin.
+UNMATCHED_NOTES = {
+    "980977269": "Statens eierandeler i olje- og gassfeltene. Kjøpene gjøres av operatørene på feltene.",
+    "921455313": "Regnskapet for skatte- og avgiftsinntektene, ikke Skatteetatens egne kjøp.",
+}
+STATSFORVALTER_NOTE = "Statsforvalterens fellestjenester (STAF) gjør mange av innkjøpene for embetene."
+UNMATCHED_MIN_SPEND = 1e6
+
+
+@dataclass
 class Dataset:
     year: int
     annualized: bool
@@ -94,6 +114,7 @@ class Dataset:
     has_suppliers: bool = False
     data_date: str = ""          # siste henting fra Doffin (DD.MM.ÅÅÅÅ), fra doffin_contracts.fetched_at
     through_month: int = 12      # siste måned regnskapstallene dekker; under 12 betyr delår (f.eks. jan–aug)
+    unmatched: list[Unmatched] = field(default_factory=list)  # med regnskap, uten kontrakter i året
 
     @property
     def partial(self) -> bool:
@@ -158,6 +179,7 @@ class Breadth:
     ledger_years: list[int] = field(default_factory=list)
     report_rows: int = 0                                       # tall hentet fra årsrapporter i Kudos
     agencies: int = 0                                          # virksomheter med både regnskap og Doffin
+    ledger_agencies: int = 0                                   # virksomheter i regnskapet
 
     @property
     def contract_years(self) -> list[int]:
@@ -187,6 +209,7 @@ def load_breadth(db_path: str | Path) -> Breadth:
             b.ledger_years = [r[0] for r in conn.execute(
                 f"SELECT DISTINCT year FROM statsregnskap WHERE {ledger} ORDER BY year")]
             b.report_rows = one("SELECT COUNT(*) FROM statsregnskap WHERE source_file LIKE 'kudos:%'")
+            b.ledger_agencies = one("SELECT COUNT(DISTINCT orgnr) FROM statsregnskap WHERE orgnr IS NOT NULL")
         b.agencies = one("SELECT COUNT(DISTINCT orgnr) FROM contract_spend_comparison")
         return b
     finally:
@@ -267,14 +290,34 @@ def load_dataset(db_path: str | Path, year: int | None = None, threshold: float 
                 for c in a.contracts:
                     c.suppliers = by_contract.get(c.id, [])
                     has_suppliers = has_suppliers or bool(c.suppliers)
+        unmatched = _unmatched(conn, year, {a.orgnr for a in agencies}, has_parents)
         fetched = conn.execute("SELECT MAX(fetched_at) FROM doffin_contracts").fetchone()[0]
         data_date = f"{fetched[8:10]}.{fetched[5:7]}.{fetched[:4]}" if fetched and len(fetched) >= 10 else ""
         months = [m for a in agencies if (m := source_month(a.spend_source))]
         return Dataset(year=year, annualized=annualized, threshold=threshold, agencies=agencies,
                        has_coverage=any(a.coverage for a in agencies), has_suppliers=has_suppliers,
-                       data_date=data_date, through_month=max(months, default=12))
+                       data_date=data_date, through_month=max(months, default=12), unmatched=unmatched)
     finally:
         conn.close()
+
+
+def _unmatched(conn: sqlite3.Connection, year: int, matched: set[str], has_parents: bool) -> list[Unmatched]:
+    """Virksomheter med kjøp i regnskapet for året som ikke er i sammenligningen fordi Doffin ikke har
+    kontrakter for dem som løper i året. Størst kjøp først."""
+    out = []
+    units = ("buyer_orgnr = ? OR buyer_orgnr IN (SELECT child FROM orgnr_parent WHERE parent = ?)"
+             if has_parents else "buyer_orgnr = ? OR buyer_orgnr = ?")
+    for orgnr, name, spend in conn.execute(
+            "SELECT orgnr, MAX(virksomhet), SUM(amount) FROM statsregnskap "
+            "WHERE year = ? AND orgnr IS NOT NULL GROUP BY orgnr", (year,)).fetchall():
+        if orgnr in matched or (spend or 0) < UNMATCHED_MIN_SPEND:
+            continue
+        n, last = conn.execute(f"SELECT COUNT(*), MAX(year) FROM doffin_contracts WHERE {units}",
+                               (orgnr, orgnr)).fetchone()
+        name = display_name(name or orgnr)
+        note = UNMATCHED_NOTES.get(orgnr) or (STATSFORVALTER_NOTE if name.lower().startswith(("statsforvalter", "statsforvaltar")) else "")
+        out.append(Unmatched(orgnr=orgnr, name=name, spend_sum=spend, notices=n, last_notice=last, note=note))
+    return sorted(out, key=lambda u: -u.spend_sum)
 
 
 def _contracts(conn: sqlite3.Connection, orgnr: str, year: int, annualized: bool) -> list[Contract]:
