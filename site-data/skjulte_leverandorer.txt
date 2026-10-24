@@ -1,0 +1,3 @@
+# Enkeltpersonforetak som har bedt om å ikke vises med navn på Kronesporet (se vilkar.html#personvern).
+# Ett organisasjonsnummer per linje. scripts/export_site_data.py erstatter navnet med
+# «Enkeltpersonforetak (skjult)» og fjerner orgnr, så foretaket ikke får egen leverandørside.
