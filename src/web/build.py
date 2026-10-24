@@ -1024,6 +1024,7 @@ def health_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]], linke
 MUNICIPAL_PARTS = {"drift": "Kjøp av varer og tjenester", "erstatter": "Kjøp som erstatter egen produksjon",
                    "investering": "Investeringer i bygg, anlegg og utstyr"}
 MUNICIPAL_KIND = {"kommune": "Kommune", "fylke": "Fylkeskommune"}
+MUNICIPAL_REFORM = 2024  # fylkesdelingen; Ålesund og Haram ble delt, og sju fylkeskommuner opprettet
 
 
 def _coverage_badge(a: Agency) -> str:
@@ -1066,20 +1067,28 @@ def _municipal_missing(missing: list[int], have: list[int]) -> str:
     return f'<p class="muted small">{text[:1].upper() + text[1:]}. Disse årene har bare Doffin-tall.</p>'
 
 
-def municipal_index_page(datasets: list[Dataset], front: Dataset) -> str:
+def municipal_index_page(datasets: list[Dataset], front: Dataset,
+                         history: dict[str, list[tuple[int, Agency]]] | None = None) -> str:
     year = front.year
+    by_year = {d.year: d.municipal for d in datasets if d.municipal}
+    for rows_ in (history or {}).values():
+        for y, a in rows_:
+            if y not in {d.year for d in datasets}:
+                by_year.setdefault(y, []).append(a)
     totals = []
-    for d in sorted(datasets, key=lambda d: -d.year):
-        if not d.municipal:
-            continue
-        doffin = sum(a.contract_sum for a in d.municipal)
-        spend = sum(a.spend_sum for a in d.municipal)
-        n = sum(a.contract_count for a in d.municipal)
+    for y in sorted(by_year, reverse=True):
+        units = by_year[y]
+        n = sum(a.contract_count for a in units)
+        # dekningen regnes bare for kommunene med KOSTRA-tall i året (før 2024 mangler de nye fylkeskommunene)
+        doffin = sum(a.contract_sum for a in units if a.spend_sum)
+        spend = sum(a.spend_sum for a in units)
+        shown = sum(a.contract_sum for a in units)
         totals.append(
-            f'<tr{ROW_CURRENT if d is front else ""}><td>{year_text(d.year, short=True)}</td><td class="num">{_group(n)}</td>'
-            f'<td class="num" title="{kr_full(doffin)}">{kr(doffin)}</td>'
+            f'<tr{ROW_CURRENT if y == front.year else ""}><td>{year_text(y, short=True)}</td><td class="num">{_group(n)}</td>'
+            f'<td class="num" title="{kr_full(shown)}">{kr(shown)}</td>'
             f'<td class="num" title="{kr_full(spend)}">{kr(spend) if spend else "–"}</td>'
-            f'<td class="num">{pct(doffin / spend) if spend else "–"}</td></tr>')
+            f'<td class="num">{pct(doffin / spend) if spend else "–"}</td>'
+            f'<td class="num">{sum(1 for a in units if a.spend_sum) or "–"}</td></tr>')
     missing = [d.year for d in sorted(datasets, key=lambda d: d.year)
                if d.municipal and not any(a.spend_source for a in d.municipal)]
     rows = []
@@ -1122,8 +1131,13 @@ def municipal_index_page(datasets: list[Dataset], front: Dataset) -> str:
   <h2>Utvikling, alle kommunene og fylkene</h2>
   <div class="table-scroll"><table class="history"><thead><tr><th scope="col">År</th>
   <th scope="col" data-type="num">Kontrakter</th><th scope="col" data-type="num">Doffin, årsandel</th>
-  <th scope="col" data-type="num">Kjøp (KOSTRA)</th><th scope="col" data-type="num">Dekning</th></tr></thead>
+  <th scope="col" data-type="num">Kjøp (KOSTRA)</th><th scope="col" data-type="num">Dekning</th>
+  <th scope="col" data-type="num">Med KOSTRA</th></tr></thead>
   <tbody>{"".join(totals)}</tbody></table></div>
+  <p class="muted small">Før 2024 mangler Ålesund og Haram (delt i 2024) og de sju fylkeskommunene som ble opprettet
+  i 2024. Dekningen regnes bare for kommunene og fylkeskommunene med KOSTRA-tall i året. Doffin-tallene går
+  tilbake til 2017, så eldre kontrakter som fortsatt løpte i 2020 og 2021, mangler, og dekningen de første årene er
+  derfor lavere.</p>
   {_municipal_missing(missing, [d.year for d in datasets if any(a.spend_source for a in d.municipal)])}
 </section>
 <section>
@@ -1197,6 +1211,10 @@ def municipal_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]], li
         f'<td class="num">{pct(h.contract_sum / h.spend_sum) if h.spend_sum else "–"}</td>'
         f'<td>{_coverage_badge(h)}</td></tr>'
         for y, h in sorted(history, key=lambda t: -t[0]))
+    early = [y for y, h in history if not h.spend_sum and y < MUNICIPAL_REFORM]
+    hnote = (f'<p class="muted small">{MUNICIPAL_KIND.get(a.owner, a.owner)}n ble opprettet ved kommune- og '
+             f'fylkesendringene i {MUNICIPAL_REFORM}, så KOSTRA har ikke sammenlignbare tall for årene før.</p>'
+             if early else "")
     suppliers_html, contracts_html, joint_html = _contract_parts(ds, a, linked)
     body = f"""
 <p class="crumbs"><a href="../kommuner.html">Alle kommuner og fylker</a></p>
@@ -1208,7 +1226,7 @@ def municipal_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]], li
 <section><h2>Utvikling</h2><div class="table-scroll"><table class="history"><thead><tr><th scope="col">År</th>
 <th scope="col" data-type="num">Kontrakter</th><th scope="col" data-type="num">Doffin</th>
 <th scope="col" data-type="num">Kjøp (KOSTRA)</th><th scope="col" data-type="num">Dekning</th>
-<th scope="col">Merknad</th></tr></thead><tbody>{hrows}</tbody></table></div></section>
+<th scope="col">Merknad</th></tr></thead><tbody>{hrows}</tbody></table></div>{hnote}</section>
 {suppliers_html}
 {contracts_html}
 {joint_html}
@@ -1541,8 +1559,10 @@ hos dem, fordi Doffin ikke viser hvor stor del hver kjøper står for.</p>"""
 <p>Alle {n_k} kommuner og {len(ds.municipal) - n_k} fylkeskommuner er med. Kjøpene er KOSTRA-tallene for
 kommunekonsernet, altså med kommunale foretak og interkommunale selskaper: kjøp av varer og tjenester, kjøp som
 erstatter egen tjenesteproduksjon (som private barnehager) og investeringer i varige driftsmidler. Det tilsvarer
-omtrent kjøp av varer og tjenester i statsregnskapet. KOSTRA følger dagens kommuneinndeling fra 2024, så årene
-før er ikke med i sammenligningen ennå.</p>
+omtrent kjøp av varer og tjenester i statsregnskapet. Tallene går tilbake til 2020. Mange kommuner fikk nytt
+kommunenummer da fylkene ble delt i 2024, og de gamle numrene kobles til dagens kommuner med SSBs klassifikasjon.
+Ålesund og Haram ble delt i 2024 og har bare tall fra da. Det samme gjelder de sju fylkeskommunene som ble
+opprettet i 2024, fordi forgjengerne (Viken, Vestfold og Telemark, Troms og Finnmark) ikke finnes lenger.</p>
 <p>Kontraktene kobles på kjøperen i Doffin. Etater, bydeler og kommunale foretak som kunngjør med eget
 organisasjonsnummer, slås opp i Enhetsregisteret og regnes til kommunen de hører til. Interkommunale selskaper og
 innkjøpssamarbeid har flere eiere og regnes ikke til én kommune.</p>
@@ -1914,12 +1934,13 @@ def _write_csv(path: Path, rows: list[dict[str, object]]) -> None:
 
 
 def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "",
-               breadth: Breadth | None = None, expiring: tuple[str, list[Expiring]] | None = None) -> int:
+               breadth: Breadth | None = None, expiring: tuple[str, list[Expiring]] | None = None,
+               municipal_history: dict[str, list[tuple[int, Agency]]] | None = None) -> int:
     """Skriver hele nettstedet til `out`. Returnerer antall HTML-sider.
 
     Med flere år blir index.html siste år og ar/<år>.html de andre årene. Hver
     virksomhet får én side for det siste året den har tall, med utviklingen over
-    alle årene.
+    alle årene. `municipal_history` gir kommunesidene eldre KOSTRA-år uten egen årsside.
     """
     if isinstance(datasets, Dataset):
         datasets = [datasets]
@@ -1995,14 +2016,16 @@ def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "",
 
     if _SITE["municipal"]:
         (out / "kommune").mkdir()
-        (out / "kommuner.html").write_text(municipal_index_page(datasets, latest), encoding="utf-8")
+        (out / "kommuner.html").write_text(municipal_index_page(datasets, latest, municipal_history),
+                                           encoding="utf-8")
         pages += 1
         m_history: dict[str, list[tuple[int, Agency]]] = {}
         for ds in datasets:
             for a in ds.municipal:
                 m_history.setdefault(a.slug, []).append((ds.year, a))
         for a in latest.municipal:
-            (out / a.path).write_text(municipal_page(latest, a, m_history[a.slug], linked), encoding="utf-8")
+            history = m_history[a.slug] + (municipal_history or {}).get(a.orgnr, [])
+            (out / a.path).write_text(municipal_page(latest, a, history, linked), encoding="utf-8")
             pages += 1
 
     rows = [r for ds in datasets for r in export_rows(ds)]

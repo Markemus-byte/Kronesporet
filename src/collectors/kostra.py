@@ -14,8 +14,12 @@ investeringer, uten lønn, tilskudd og finans). Tabellene:
   13547 / 13548  drift / investering, fylkeskommunekonsern, etter art (F)
 
 Kommunene kobles til organisasjonsnummer via Enhetsregisteret (organisasjonsform KOMM og FYLK).
-Regionkodene er dagens kommunenummer, så bare år med dagens kommuneinndeling (fra 2024) tas med;
-fylkene ble delt opp igjen fra 2024.
+Regionkodene er dagens kommunenummer. Mange kommuner fikk nytt nummer da fylkene ble delt i 2024
+(Halden 3001 -> 3101); de gamle numrene for 2020–2023 hentes fra SSBs klassifikasjon (KLASS 131).
+En kommune som ble delt (Ålesund og Haram i 2024), har ikke tall for årene før delingen. Det
+samme gjelder fylkeskommunene som ble opprettet i 2024 (Østfold, Akershus, Buskerud, Vestfold,
+Telemark, Troms og Finnmark): forgjengerne Viken, Vestfold og Telemark og Troms og Finnmark er
+ikke med.
 """
 from __future__ import annotations
 
@@ -33,7 +37,9 @@ log = logging.getLogger(__name__)
 
 SSB_API = "https://data.ssb.no/api/v0/no/table/{}"
 BRREG_API = "https://data.brreg.no/enhetsregisteret/api/enheter"
-FIRST_YEAR = 2024  # dagens kommune- og fylkesinndeling
+FIRST_YEAR = 2020  # KOSTRA-tabellene etter art starter i 2020
+REFORM_YEAR = 2024  # fylkesdelingen; kommunenumrene før dette hentes fra KLASS
+KLASS_CHANGES = "https://data.ssb.no/api/klass/v1/classifications/131/changes"
 PURCHASE_ARTS = {"AG17": "drift", "AGD51": "erstatter", "AGI39": "investering"}
 TABLES = {  # (nivå, tabell, regionvariabel, arter)
     "kommune": [("13551", "KOKkommuneregion0000", ("AG17", "AGD51")), ("13552", "KOKkommuneregion0000", ("AGI39",))],
@@ -155,6 +161,34 @@ def _query(session: requests.Session, table: str, var: str, regions: list[str], 
     return out
 
 
+def old_codes(session: requests.Session, first_year: int = FIRST_YEAR) -> dict[str, str]:
+    """dagens kommunenummer -> nummeret før 2024, for kommuner som bare fikk nytt nummer eller navn.
+    Kommuner som ble delt (ett gammelt nummer til flere nye), er ikke med."""
+    resp = session.get(KLASS_CHANGES, params={"from": f"{first_year}-01-02", "to": f"{REFORM_YEAR}-12-31"},
+                       headers={"Accept": "application/json"}, timeout=60)
+    resp.raise_for_status()
+    changes = resp.json().get("codeChanges", [])
+    targets: dict[str, set[str]] = {}
+    for c in changes:
+        targets.setdefault(c["oldCode"], set()).add(c["newCode"])
+    new_to_old: dict[str, str] = {}
+    for old, new in targets.items():
+        if len(new) == 1:
+            new_to_old[next(iter(new))] = old
+    out = {}
+    for new in new_to_old:  # følg kjeder (navnebytte 2022, nytt nummer 2024)
+        old, seen = new_to_old[new], {new}
+        while old in new_to_old and old not in seen:
+            seen.add(old)
+            old = new_to_old[old]
+        out[new] = old
+    split = {old for old, new in targets.items() if len(new) > 1}
+    for old in split:  # dagens kommuner fra en deling har ingen sammenlignbare tall før delingen
+        for new in targets[old]:
+            out[new] = ""
+    return out
+
+
 def load(conn: sqlite3.Connection, session: requests.Session | None = None,
          years: list[int] | None = None) -> tuple[int, int]:
     """Hent kommunene, fylkeskommunene og kjøpene deres. Returnerer (enheter, regnskapsrader)."""
@@ -170,14 +204,26 @@ def load(conn: sqlite3.Connection, session: requests.Session | None = None,
     conn.execute("DELETE FROM kommuner")
     conn.executemany("INSERT INTO kommuner VALUES (?, ?, ?, ?)", units)
     orgnr = {(kind, code): o for o, _, kind, code in units}
+    renumbered = old_codes(session) if min(years) < REFORM_YEAR else {}
     rows = []
     for kind, tables in TABLES.items():
-        regions = sorted(code for k, code in orgnr if k == kind)
-        for table, var, arts in tables:
-            for i in range(0, len(regions), 120):  # SSB begrenser antall celler per spørring
-                for (code, art, year), amount in _query(session, table, var, regions[i:i + 120], arts, years).items():
-                    rows.append((orgnr[(kind, code)], year, PURCHASE_ARTS[art], amount))
-                time.sleep(PAUSE_S)
+        current = sorted(code for k, code in orgnr if k == kind)
+        # (år, regionkode i SSB -> dagens kode): kommunene har andre numre før 2024, fylkeskommunene samme
+        groups = [([y for y in years if y >= REFORM_YEAR], {c: c for c in current})]
+        before = [y for y in years if y < REFORM_YEAR]
+        if before:
+            groups.append((before, {renumbered.get(c, c): c for c in current if renumbered.get(c, c)}
+                           if kind == "kommune" else {c: c for c in current}))
+        for group_years, codes in groups:
+            if not group_years:
+                continue
+            regions = sorted(codes)
+            for table, var, arts in tables:
+                for i in range(0, len(regions), 120):  # SSB begrenser antall celler per spørring
+                    for (code, art, year), amount in _query(session, table, var, regions[i:i + 120], arts,
+                                                            group_years).items():
+                        rows.append((orgnr[(kind, codes[code])], year, PURCHASE_ARTS[art], amount))
+                    time.sleep(PAUSE_S)
     conn.execute(f"DELETE FROM kommune_regnskap WHERE year IN ({', '.join('?' for _ in years)})", years)
     conn.executemany("INSERT OR REPLACE INTO kommune_regnskap VALUES (?, ?, ?, ?)", rows)
     conn.commit()

@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import re
 import sqlite3
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -507,6 +508,34 @@ def _municipal(conn: sqlite3.Connection, year: int, annualized: bool, has_parent
             a.joint = _joint(conn, orgnr, has_parents)
         out.append(a)
     return sorted(out, key=lambda a: a.name.lower())
+
+
+def load_municipal_history(db_path: str | Path, skip: Iterable[int] = ()) -> dict[str, list[tuple[int, Agency]]]:
+    """Kjøp og Doffin-dekning per kommune for årene med KOSTRA-tall som ikke har egen årsside (`skip`),
+    til utviklingstabellen. Bare summene, uten kontraktslistene. orgnr -> [(år, Agency)]."""
+    conn = sqlite3.connect(db_path)
+    try:
+        if not (_has_table(conn, "kommune_regnskap") and _has_table(conn, "doffin_contract_years")):
+            return {}
+        scores = _municipal_scores(conn)
+        skip = set(skip)
+        out: dict[str, list[tuple[int, Agency]]] = {}
+        for orgnr, name, kind, year, spend, n, doffin in conn.execute(
+            """SELECT k.orgnr, k.name, k.kind, r.year, SUM(r.amount),
+                      (SELECT COUNT(*) FROM doffin_contract_years y WHERE y.buyer_orgnr = k.orgnr AND y.year = r.year),
+                      (SELECT COALESCE(SUM(value_share), 0) FROM doffin_contract_years y
+                       WHERE y.buyer_orgnr = k.orgnr AND y.year = r.year)
+               FROM kommuner k JOIN kommune_regnskap r ON r.orgnr = k.orgnr
+               GROUP BY k.orgnr, r.year ORDER BY r.year"""):
+            if year in skip:
+                continue
+            out.setdefault(orgnr, []).append((year, Agency(
+                orgnr=orgnr, name=display_name(name), year=year, contract_sum=doffin, contract_count=n,
+                spend_sum=spend or 0.0, deviation=0.0, flagged=False, match_method=None,
+                spend_source=MUNICIPAL_SOURCE, coverage=scores.get((orgnr, year)), section="kommune", owner=kind)))
+        return out
+    finally:
+        conn.close()
 
 
 def _units(has_parents: bool, column: str = "buyer_orgnr") -> str:

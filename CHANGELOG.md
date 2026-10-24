@@ -2,6 +2,11 @@
 
 ## Ikke utgitt
 
+- **KOSTRA 2020–2023:** kommunene har nå kjøpstall for seks år (2020–2025) i stedet for to. Kommuner som fikk nytt
+  nummer i 2024 (som Halden, 3001 til 3101), kobles til de gamle numrene med SSBs klassifikasjon (KLASS 131). 355
+  kommuner og 7 fylkeskommuner har tall for 2020–2023; Ålesund og Haram (delt i 2024) og de sju nye
+  fylkeskommunene har tall fra 2024. Utviklingstabellen på kommunesidene og på `kommuner.html` går tilbake til
+  2020, og 2023 er sammenligningsår for 2024, så 7 kommuner har uvanlig dekning to år på rad i 2024 (8 i 2025).
 - **Kommuner og fylkeskommuner:** alle 357 kommuner og 14 fylkeskommuner er med. Kjøpene hentes fra KOSTRA (SSB)
   for 2024 og 2025 (345 og 352 mrd. kr), og 11 755 nye Doffin-kontrakter for 2017–2026 er hentet (24 235 i alt,
   6 253 leverandører). 128 etater, bydeler og kommunale foretak som kunngjør med eget orgnr, er funnet ved å slå opp
