@@ -93,6 +93,13 @@ python scripts/run_phase1.py --year 2025 --kudos --statsregnskap \
   (tabellen `orgnr_parent`, `src/collectors/brreg.py`) og føres på virksomheten i regnskapet.
   En underenhet som selv står i regnskapet (f.eks. HELFO under Helsedirektoratet) beholder sitt eget orgnr.
 
+Helseforetakene (de fire RHF-ene og foretakene de eier) står i `site-data/helseforetak.csv`.
+`scripts/update_site_data.py` henter underenhetene deres (sykehus og avdelinger) fra Enhetsregisteret,
+kontraktene fra Doffin og årsregnskapene for de siste tre årene fra Regnskapsregisteret
+(`src/collectors/foretak.py`). Nettsiden viser dem på `helseforetak.html` og `docs/helseforetak/<orgnr>.html`
+med driftskostnader utenom lønn som sammenligningstall. De flagges ikke, fordi tallet ikke er det samme som
+kjøp av varer og tjenester i statsregnskapet.
+
 Med leverandører i databasen får nettsiden også en leverandøroversikt (`leverandorer.html`) og én
 side per leverandør med organisasjonsnummer (`docs/leverandor/<orgnr>.html`) med kontraktene på
 tvers av statlige kjøpere.
@@ -184,8 +191,9 @@ leverandørene.
   5 %-terskelen flagger nesten alle. Et flagg betyr «verdt å se nærmere på», ikke at noe er galt.
 - **Kontraktverdier er anslag.** For rammeavtaler er verdien ofte et tak, ikke det som faktisk
   blir kjøpt. Kontrakter uten oppgitt periode får en antatt varighet.
-- **Ikke alle virksomheter er med.** Kommuner, fylker, helseforetak og selskaper er verken i
-  statsregnskapet eller har årsrapport i Kudos. Statens direkte økonomiske engasjement (SDØE)
+- **Ikke alle virksomheter er med.** Kommuner, fylker og selskaper er verken i
+  statsregnskapet eller har årsrapport i Kudos. Helseforetakene er heller ikke i statsregnskapet, men har
+  egne sider med årsregnskapet fra Regnskapsregisteret (se under). Statens direkte økonomiske engasjement (SDØE)
   står i regnskapet, men kunngjør ikke i Doffin.
 - **Feil i kildene følger med.** Navn og tall vises slik de står i Doffin og årsrapportene.
 

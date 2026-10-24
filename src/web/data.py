@@ -4,6 +4,10 @@ Kilden er databasen som `scripts/run_phase1.py` skriver: tabellene
 `contract_spend_comparison`, `statsregnskap`, `doffin_contracts` og (når
 kontraktverdien er årsfordelt) `doffin_contract_years`.
 
+Helseforetakene (tabellene `foretak` og `foretak_regnskap`, src/collectors/foretak.py) er ikke
+i statsregnskapet. De lastes som egne Agency-objekter (section 'helseforetak') i Dataset.health,
+med driftskostnader utenom lønn fra årsregnskapet i stedet for kjøp fra statsregnskapet.
+
 Finnes tabellen `doffin_coverage` (src/analysis/coverage.py), tas
 Doffin-dekningsgraden og dekningsflagget med, og finnes `doffin_winners`
 (scripts/fetch_winners.py), får kontraktene leverandører; ellers bygges
@@ -77,10 +81,16 @@ class Agency:
     coverage: Coverage | None = None   # fylles når doffin_coverage finnes
     contracts: list[Contract] = field(default_factory=list)
     joint: list[Contract] = field(default_factory=list)  # felles anskaffelser der virksomheten ikke står først
+    section: str = "virksomhet"        # mappen siden ligger i: 'virksomhet' | 'helseforetak'
+    owner: str = ""                    # eieren, for helseforetakene (RHF-et eller departementet)
 
     @property
     def slug(self) -> str:
         return self.orgnr or re.sub(r"[^a-z0-9]+", "-", self.name.lower()).strip("-")
+
+    @property
+    def path(self) -> str:
+        return f"{self.section}/{self.slug}.html"
 
     @property
     def direction(self) -> str:
@@ -119,6 +129,7 @@ class Dataset:
     data_date: str = ""          # siste henting fra Doffin (DD.MM.ÅÅÅÅ), fra doffin_contracts.fetched_at
     through_month: int = 12      # siste måned regnskapstallene dekker; under 12 betyr delår (f.eks. jan–aug)
     unmatched: list[Unmatched] = field(default_factory=list)  # med regnskap, uten kontrakter i året
+    health: list[Agency] = field(default_factory=list)        # helseforetakene, utenfor statsregnskapet
 
     @property
     def partial(self) -> bool:
@@ -159,6 +170,16 @@ def _report_url(source_file: str | None) -> str | None:
     return None
 
 
+def _state(conn: sqlite3.Connection) -> str:
+    """SELECT med orgnr for alle statlige kjøpere: virksomhetene i regnskapet, helseforetakene og underenhetene."""
+    sql = "SELECT orgnr FROM statsregnskap"
+    if _has_table(conn, "foretak"):
+        sql += " UNION SELECT orgnr FROM foretak"
+    if _has_table(conn, "orgnr_parent"):
+        sql += " UNION SELECT child FROM orgnr_parent"
+    return sql
+
+
 def available_years(db_path: str | Path) -> list[int]:
     conn = sqlite3.connect(db_path)
     try:
@@ -185,6 +206,8 @@ class Breadth:
     agencies: int = 0                                          # virksomheter med både regnskap og Doffin
     joint: int = 0                                             # kunngjøringer med flere statlige kjøpere
     ledger_agencies: int = 0                                   # virksomheter i regnskapet
+    health: int = 0                                            # helseforetak med årsregnskap
+    health_years: list[int] = field(default_factory=list)      # år med årsregnskap fra Regnskapsregisteret
 
     @property
     def contract_years(self) -> list[int]:
@@ -223,8 +246,7 @@ def load_expiring(db_path: str | Path, months: int = 12) -> tuple[str, list[Expi
             return "", []
         today = date.fromisoformat(ref)
         horizon = today + timedelta(days=round(months * 365.25 / 12))
-        state = "SELECT orgnr FROM statsregnskap" + (
-            " UNION SELECT child FROM orgnr_parent" if _has_table(conn, "orgnr_parent") else "")
+        state = _state(conn)
         out = []
         for r in conn.execute(
                 f"""SELECT id, title, url, buyer_name, value, publication_date, start_date, end_date,
@@ -250,8 +272,7 @@ def load_breadth(db_path: str | Path) -> Breadth:
             b.contracts_by_year = {y: n for y, n in conn.execute(
                 "SELECT year, COUNT(*) FROM doffin_contracts WHERE year IS NOT NULL GROUP BY year")}
             b.contracts = sum(b.contracts_by_year.values())
-            state = "SELECT orgnr FROM statsregnskap" + (
-                " UNION SELECT child FROM orgnr_parent" if _has_table(conn, "orgnr_parent") else "")
+            state = _state(conn)
             b.buyers = one(f"SELECT COUNT(DISTINCT buyer_orgnr) FROM doffin_contracts WHERE buyer_orgnr IN ({state})")
             if _has_table(conn, "doffin_buyers"):
                 b.joint = one(f"SELECT COUNT(*) FROM (SELECT contract_id FROM doffin_buyers WHERE orgnr IN ({state}) "
@@ -270,6 +291,9 @@ def load_breadth(db_path: str | Path) -> Breadth:
                 f"SELECT DISTINCT year FROM statsregnskap WHERE {ledger} ORDER BY year")]
             b.report_rows = one("SELECT COUNT(*) FROM statsregnskap WHERE source_file LIKE 'kudos:%'")
             b.ledger_agencies = one("SELECT COUNT(DISTINCT orgnr) FROM statsregnskap WHERE orgnr IS NOT NULL")
+        if _has_table(conn, "foretak_regnskap"):
+            b.health = one("SELECT COUNT(DISTINCT orgnr) FROM foretak_regnskap")
+            b.health_years = [r[0] for r in conn.execute("SELECT DISTINCT year FROM foretak_regnskap ORDER BY year")]
         b.agencies = one("SELECT COUNT(DISTINCT orgnr) FROM contract_spend_comparison")
         return b
     finally:
@@ -344,12 +368,13 @@ def load_dataset(db_path: str | Path, year: int | None = None, threshold: float 
                 a.joint = _joint(conn, a.orgnr, has_parents)
 
         agencies.sort(key=lambda a: a.name.lower())
+        health = _health(conn, year, annualized, has_parents, has_buyers) if _has_table(conn, "foretak") else []
         has_suppliers = False
         if _has_table(conn, "doffin_winners"):
             by_contract: dict[str, list[Supplier]] = {}
             for w in conn.execute("SELECT contract_id, name, orgnr FROM doffin_winners ORDER BY contract_id, position"):
                 by_contract.setdefault(w["contract_id"], []).append(Supplier(name=w["name"], orgnr=w["orgnr"]))
-            for a in agencies:
+            for a in agencies + health:
                 for c in a.contracts:
                     c.suppliers = by_contract.get(c.id, [])
                     has_suppliers = has_suppliers or bool(c.suppliers)
@@ -359,9 +384,37 @@ def load_dataset(db_path: str | Path, year: int | None = None, threshold: float 
         months = [m for a in agencies if (m := source_month(a.spend_source))]
         return Dataset(year=year, annualized=annualized, threshold=threshold, agencies=agencies,
                        has_coverage=any(a.coverage for a in agencies), has_suppliers=has_suppliers,
-                       data_date=data_date, through_month=max(months, default=12), unmatched=unmatched)
+                       data_date=data_date, through_month=max(months, default=12), unmatched=unmatched,
+                       health=health)
     finally:
         conn.close()
+
+
+HEALTH_SOURCE = "regnskapsregisteret"
+
+
+def _health(conn: sqlite3.Connection, year: int, annualized: bool, has_parents: bool,
+            has_buyers: bool) -> list[Agency]:
+    """Helseforetakene for året: Doffin-kontraktene som for virksomhetene, og driftskostnader utenom lønn
+    fra årsregnskapet som «kjøp» (0 når regnskapet for året ikke er levert ennå). Ingen flagg."""
+    out = []
+    for orgnr, name, owner in conn.execute("SELECT orgnr, name, owner FROM foretak").fetchall():
+        acc = conn.execute("SELECT operating_costs, payroll FROM foretak_regnskap WHERE orgnr = ? AND year = ?",
+                           (orgnr, year)).fetchone()
+        costs = acc[0] - (acc[1] or 0.0) if acc and acc[0] is not None else 0.0
+        contracts = _contracts(conn, orgnr, year, annualized)
+        a = Agency(orgnr=orgnr, name=name, year=year, contract_sum=sum(c.year_value or 0.0 for c in contracts),
+                   contract_count=len(contracts), spend_sum=costs, deviation=0.0, flagged=False, match_method=None,
+                   spend_source=HEALTH_SOURCE if acc else None, contracts=contracts, section="helseforetak",
+                   owner=owner or "")
+        awarded = conn.execute(
+            f"SELECT COUNT(*), COALESCE(SUM(value), 0) FROM doffin_contracts WHERE {_units(has_parents)} AND year = ?",
+            (orgnr, orgnr, year)).fetchone()
+        a.awarded_in_year_count, a.awarded_in_year_sum = awarded[0], awarded[1]
+        if has_buyers:
+            a.joint = _joint(conn, orgnr, has_parents)
+        out.append(a)
+    return sorted(out, key=lambda a: a.name.lower())
 
 
 def _units(has_parents: bool, column: str = "buyer_orgnr") -> str:

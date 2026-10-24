@@ -7,8 +7,10 @@ Tar utgangspunkt i dataene som allerede ligger i repoet og legger til det som er
      gitt med --raadata eller lastet ned med --fetch-raadata (scripts/fetch_raadata.py; nettstedet
      stenger for kall fra skyen, også fra GitHub Actions). En nyere måned erstatter den forrige for
      samme år, og filer som allerede er lastet inn, hoppes over.
-  3. Kjente feil i Doffin rettes etter site-data/rettinger.csv (f.eks. feil orgnr på kjøperen).
-  4. Årsfordeling, avvik og Doffin-dekning regnes ut på nytt, og tallene eksporteres.
+  3. Helseforetakene i site-data/helseforetak.csv: underenheter fra Enhetsregisteret for nye
+     foretak og årsregnskapene fra Regnskapsregisteret (src/collectors/foretak.py).
+  4. Kjente feil i Doffin rettes etter site-data/rettinger.csv (f.eks. feil orgnr på kjøperen).
+  5. Årsfordeling, avvik og Doffin-dekning regnes ut på nytt, og tallene eksporteres.
 
 Oppdateringen holder seg til virksomhetene som allerede er på nettsiden. Nye virksomheter trenger
 Doffin-historikk og underenheter fra Enhetsregisteret og legges til med scripts/run_phase1.py.
@@ -42,12 +44,14 @@ from src.collectors.doffin import (  # noqa: E402
     DoffinClient, DoffinError, buyer_list, init_db, iter_search_hits, month_ranges, normalize,
     save_buyers, save_contracts, save_winners, winners,
 )
-from src.collectors.brreg import main_units  # noqa: E402
+from src.collectors import foretak  # noqa: E402
+from src.collectors.brreg import load_subunits, main_units  # noqa: E402
 from src.collectors.statsregnskap import load_raadata_xlsx, raadata_orgnrs  # noqa: E402
 from src.web.data import source_month  # noqa: E402
 
 log = logging.getLogger("oppdatering")
 CORRECTIONS = ROOT / "site-data" / "rettinger.csv"
+HEALTH = ROOT / "site-data" / "helseforetak.csv"
 CORRECTABLE = {"buyer_orgnr", "buyer_name", "value", "start_date", "end_date", "duration_months"}
 
 
@@ -56,8 +60,24 @@ def agencies(conn: sqlite3.Connection) -> set[str]:
 
 
 def buyers(conn: sqlite3.Connection) -> set[str]:
-    """Orgnr som kan stå som kjøper i Doffin: virksomhetene og underenhetene deres."""
-    return agencies(conn) | {r[0] for r in conn.execute("SELECT child FROM orgnr_parent")}
+    """Orgnr som kan stå som kjøper i Doffin: virksomhetene, helseforetakene og underenhetene deres."""
+    return agencies(conn) | foretak.orgnrs(conn) | {r[0] for r in conn.execute("SELECT child FROM orgnr_parent")}
+
+
+def load_health(conn: sqlite3.Connection, path: Path = HEALTH) -> list[str]:
+    """Last helseforetakslisten, underenhetene til foretak som er nye i listen, og årsregnskapene."""
+    if not path.exists():
+        return []
+    orgs = foretak.load_list(conn, path)
+    have = {r[0] for r in conn.execute("SELECT DISTINCT parent FROM orgnr_parent")}
+    new = sorted(set(orgs) - have)
+    out = []
+    if new:
+        n = load_subunits(conn, new, replace=False)
+        out.append(f"Helseforetak: {n} underenheter for {len(new)} foretak uten underenheter fra før.")
+    n = foretak.fetch_accounts(conn, orgs)
+    out.append(f"Helseforetak: {len(orgs)} foretak, {n} årsregnskap fra Regnskapsregisteret.")
+    return out
 
 
 def ledger_period(conn: sqlite3.Connection) -> dict[int, int]:
@@ -208,6 +228,7 @@ def main() -> int:
         if dropped:
             log.info("%d virksomheter i rådata er ikke på nettsiden og er holdt utenfor", dropped)
 
+        report += load_health(conn)
         n_new = fetch_new_contracts(conn, years, DoffinClient(cache_dir=a.cache_dir), a.max_new)
         report.append(f"Doffin: {n_new} nye kontrakter ({', '.join(map(str, years))}).")
 

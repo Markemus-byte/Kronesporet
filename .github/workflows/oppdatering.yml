@@ -18,6 +18,7 @@ on:
     paths:
       - "site-data/raadata/*.xlsx"
       - "site-data/rettinger.csv"
+      - "site-data/helseforetak.csv"
   pull_request:
     paths:
       - "scripts/update_site_data.py"
