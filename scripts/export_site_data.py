@@ -36,6 +36,17 @@ TABLES: list[tuple[str, str]] = [
 ]
 
 
+HIDDEN = ROOT / "site-data" / "skjulte_leverandorer.txt"
+HIDDEN_NAME = "Enkeltpersonforetak (skjult)"
+
+
+def hidden_suppliers(path: Path = HIDDEN) -> set[str]:
+    """Orgnr til enkeltpersonforetak som har bedt om å ikke vises med navn (en per linje, # er kommentar)."""
+    if not path.exists():
+        return set()
+    return {line.split("#")[0].strip() for line in path.read_text(encoding="utf-8").splitlines()} - {""}
+
+
 def _contracts_filter(present: set[str]) -> str:
     buyers = UNITS if "orgnr_parent" in present else BUYERS
     where = f"buyer_orgnr IN ({buyers})"
@@ -65,6 +76,10 @@ def export(src: Path, dest: Path) -> dict[str, int]:
                                 + f" ORDER BY {', '.join(cols[:2])}").fetchall()
             out.executemany(f"INSERT INTO {table} VALUES ({', '.join('?' for _ in cols)})", rows)
             counts[table] = len(rows)
+        hidden = hidden_suppliers()
+        if hidden and "doffin_winners" in counts:
+            out.execute(f"UPDATE doffin_winners SET name = ?, orgnr = NULL "
+                        f"WHERE orgnr IN ({', '.join('?' for _ in hidden)})", [HIDDEN_NAME, *sorted(hidden)])
         out.commit()
         dest.parent.mkdir(parents=True, exist_ok=True)
         with dest.open("w", encoding="utf-8", newline="\n") as f:

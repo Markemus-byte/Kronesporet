@@ -4,6 +4,7 @@ Sider:
   index.html                 forside med alle virksomhetene
   virksomhet/<orgnr>.html    én side per virksomhet med Doffin-kontraktene
   om.html                    om dataene og metoden
+  vilkar.html                vilkår, forbehold og personvern
   404.html                   «fant ikke siden» (GitHub Pages viser den for ukjente adresser)
   data/virksomheter.csv|json nedlastbare tall (NLOD)
 """
@@ -35,6 +36,8 @@ ROW_CURRENT = ' aria-current="true"'
 # og sidekart) og datoen dataene sist ble hentet (vises i bunnteksten).
 _SITE: dict[str, str] = {"base_url": "", "data_date": "", "years": "", "statsregnskap": "", "units": ""}
 COPYRIGHT = "© 2026 Markemus-byte / Kronesporet. Alle rettigheter forbeholdt."
+REPO_URL = "https://github.com/Markemus-byte/Kronesporet"
+CONTACT_EMAIL = ""  # e-postadresse for personvernhenvendelser; tom = henvendelser via GitHub
 
 PERIOD_SOURCES = {
     "datoer": "start- og sluttdato i kunngjøringen",
@@ -176,7 +179,8 @@ def page(title: str, body: str, root: str = "", active: str = "", description: s
     <p>Data: {sources}, lisensiert under
     <a href="https://data.norge.no/nlod/no/2.0">Norsk lisens for offentlige data (NLOD 2.0)</a>.
     Kronesporet er ikke tilknyttet DFØ, Digdir eller Brønnøysundregistrene.</p>
-    <p>{data_date}<a href="{root}om.html">Om dataene og metoden</a>.</p>
+    <p>{data_date}<a href="{root}om.html">Om dataene og metoden</a> ·
+    <a href="{root}vilkar.html">Vilkår og personvern</a>.</p>
     <p>{COPYRIGHT}</p>
   </div>
 </footer>
@@ -1217,6 +1221,63 @@ underlagt NLOD 2.0; oppgi kildene ved gjenbruk.</p>
 
 # --- nedlastbare data ---------------------------------------------------------
 
+def terms_page() -> str:
+    """Vilkår for bruk, forbehold, retting og personvern."""
+    issue = f"{REPO_URL}/issues/new"
+    contact = (f'Send en e-post til <a href="mailto:{escape(CONTACT_EMAIL)}">{escape(CONTACT_EMAIL)}</a>.'
+               if CONTACT_EMAIL else
+               f'Opprett en <a href="{issue}">sak på GitHub</a> og be om kontakt. Ikke skriv personopplysninger i '
+               "saken, for den er offentlig.")
+    body = f"""<section class="hero">
+  <h1>Vilkår og personvern</h1>
+  <p class="lede">Kronesporet er gratis å bruke. Tallene kommer fra åpne offentlige kilder og er satt sammen av
+  Kronesporet. Her står hva du kan bruke dem til, hvilke forbehold som gjelder, og hvordan vi behandler
+  opplysninger om personer.</p>
+</section>
+<div class="prose">
+<h2 id="hvem">Hvem står bak</h2>
+<p>Kronesporet drives av Markemus-byte og er ikke tilknyttet DFØ, Digdir eller Brønnøysundregistrene.
+Kildekoden og endringsloggen ligger på <a href="{REPO_URL}">GitHub</a>.</p>
+
+<h2 id="bruk">Bruk av tallene</h2>
+<p>Dataene fra kildene er lisensiert under <a href="https://data.norge.no/nlod/no/2.0">Norsk lisens for offentlige
+data (NLOD 2.0)</a>. Du kan bruke dem fritt, også kommersielt, så lenge du oppgir kildene: Doffin (Digdir),
+statsregnskapet og Kudos (DFØ) og Enhetsregisteret (Brønnøysundregistrene). Bruker du sammenstillingen, flaggene
+eller dekningsgraden, ber vi om at du nevner Kronesporet. Tekst, design og kode på nettsiden: {COPYRIGHT}</p>
+
+<h2 id="forbehold">Ingen garanti</h2>
+<p>Tallene vises slik de står i kildene, og koblingene og beregningene er beskrevet på
+<a href="om.html">metodesiden</a>. Det kan være feil både i kildene og i koblingen mellom dem. Et flagg betyr
+«verdt å se nærmere på», ikke at noe er galt. Kronesporet tar ikke ansvar for beslutninger som tas på grunnlag
+av tallene. Sjekk mot kilden før du bruker et tall; hver kontrakt lenker til kunngjøringen i Doffin.</p>
+
+<h2 id="retting">Feil i tallene</h2>
+<p>Mener du at tallene for en virksomhet eller leverandør er feil, kan du <a href="{issue}">melde det på
+GitHub</a>. Skriv hvilken side det gjelder og hva som er feil. Rettelser står i
+<a href="{REPO_URL}/blob/main/CHANGELOG.md">endringsloggen</a>.</p>
+
+<h2 id="personvern">Personvern</h2>
+<ul>
+<li><strong>Besøk på nettsiden.</strong> Siden har ingen innlogging, ingen informasjonskapsler og ingen analyse-
+eller sporingsverktøy, og den henter ikke noe fra andre nettsteder. Siden ligger på GitHub Pages, og GitHub
+<a href="https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages#data-collection">lagrer
+IP-adressen til besøkende av sikkerhetshensyn</a>.</li>
+<li><strong>Leverandører som er enkeltpersonforetak.</strong> Noen leverandører er enkeltpersonforetak, og
+navnet på foretaket kan være innehaverens navn. Vi viser navn og organisasjonsnummer slik de står i Doffin og
+Enhetsregisteret, og bare sammen med kontrakter med staten. Grunnlaget er berettiget interesse
+(personvernforordningen artikkel 6 nr. 1 bokstav f): allmennheten har interesse av å se hvem som får offentlige
+kontrakter.</li>
+<li><strong>Du kan be om å bli skjult.</strong> Har du et enkeltpersonforetak og vil ikke vises med navn, viser
+vi foretaket som «Enkeltpersonforetak (skjult)» uten organisasjonsnummer, og leverandørsiden fjernes. Kontraktene
+står fortsatt i Doffin. {contact}</li>
+<li><strong>Klage.</strong> Du kan klage til <a href="https://www.datatilsynet.no">Datatilsynet</a>.</li>
+</ul>
+</div>
+"""
+    return page("Vilkår og personvern", body, path="vilkar.html",
+                description="Vilkår for bruk av Kronesporet, forbehold, retting av feil og personvern.")
+
+
 def not_found_page() -> str:
     """404-siden. Den vises på vilkårlige adresser, så lenkene må være absolutte når adressen er kjent."""
     root = _SITE["base_url"]
@@ -1359,6 +1420,8 @@ def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "",
     (out / "index.html").write_text(index_page(latest, years=years, breadth=breadth), encoding="utf-8")
     (out / "om.html").write_text(about_page(latest), encoding="utf-8")
     (out / "404.html").write_text(not_found_page(), encoding="utf-8")
+    (out / "vilkar.html").write_text(terms_page(), encoding="utf-8")
+    pages += 1
     if len(datasets) > 1:
         (out / "ar").mkdir()
         for ds in (d for d in datasets if d is not latest):

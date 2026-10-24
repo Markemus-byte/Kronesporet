@@ -2,6 +2,10 @@
 
 ## Ikke utgitt
 
+- **Vilkår og personvern:** ny side `vilkar.html`, lenket fra bunnteksten. Den beskriver hvem som står bak, bruk
+  av tallene under NLOD 2.0, forbehold, hvordan man melder feil, og personvern. Enkeltpersonforetak kan be om å bli
+  skjult: orgnr i `site-data/skjulte_leverandorer.txt` vises som «Enkeltpersonforetak (skjult)» uten orgnr og
+  leverandørside.
 - **Felles anskaffelser:** alle kjøperne i en kunngjøring lagres nå (`doffin_buyers`), ikke bare den første.
   145 kunngjøringer har flere statlige kjøpere. Virksomhetssidene viser dem under «Felles anskaffelser» der
   virksomheten ikke står først (81 virksomheter, f.eks. 16 for Tolletaten og 45 for PST), og listen over
