@@ -2,6 +2,19 @@
 
 ## Ikke utgitt
 
+- **KOSTRA 2020–2023:** kommunene har nå kjøpstall for seks år (2020–2025) i stedet for to. Kommuner som fikk nytt
+  nummer i 2024 (som Halden, 3001 til 3101), kobles til de gamle numrene med SSBs klassifikasjon (KLASS 131). 355
+  kommuner og 7 fylkeskommuner har tall for 2020–2023; Ålesund og Haram (delt i 2024) og de sju nye
+  fylkeskommunene har tall fra 2024. Utviklingstabellen på kommunesidene og på `kommuner.html` går tilbake til
+  2020, og 2023 er sammenligningsår for 2024, så 7 kommuner har uvanlig dekning to år på rad i 2024 (8 i 2025).
+- **Kommuner og fylkeskommuner:** alle 357 kommuner og 14 fylkeskommuner er med. Kjøpene hentes fra KOSTRA (SSB)
+  for 2024 og 2025 (345 og 352 mrd. kr), og 11 755 nye Doffin-kontrakter for 2017–2026 er hentet (24 235 i alt,
+  6 253 leverandører). 128 etater, bydeler og kommunale foretak som kunngjør med eget orgnr, er funnet ved å slå opp
+  kjøperne oppover i Enhetsregisteret, og de regnes til kommunen sin. Ny side `kommuner.html` i menyen med søk og
+  filter, og én side per kommune. Dekningen sammenlignes med kommuner av lignende størrelse (tredeling etter kjøp;
+  fylkeskommunene er én gruppe). Avvik over z = 2 merkes, og avvik to år på rad merkes som uvanlig (8 kommuner i
+  2025). Dekning over 100 % merkes som «avtaler for andre» (vertskommuner i innkjøpssamarbeid). Kontraktene er også
+  med på leverandørsidene, i `kontrakter.csv` og i den nye `kommuner.csv`. Forsiden har KOSTRA som sjuende kilde.
 - **Helseforetakene:** de fire regionale helseforetakene og 32 helseforetak (`site-data/helseforetak.csv`) er
   med. De er statlige, men ikke i statsregnskapet. 1 221 sykehus og avdelinger fra Enhetsregisteret regnes til
   foretaket sitt, og 2 158 nye Doffin-kontrakter for 2017–2026 er hentet (12 480 i alt). Årsregnskapene for
