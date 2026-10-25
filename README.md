@@ -104,11 +104,13 @@ Kommunene og fylkeskommunene hentes også av `scripts/update_site_data.py` (`src
 kjøpene fra KOSTRA (SSB-tabell 13551, 13552, 13547 og 13548, konserntall: kjøp av varer og tjenester, kjøp
 som erstatter egen produksjon og investeringer) fra 2020, og orgnr fra Enhetsregisteret. For årene før 2024
 hentes de gamle kommunenumrene fra SSBs klassifikasjon (KLASS 131); Ålesund og Haram (delt i 2024) og de
-sju nye fylkeskommunene har tall fra 2024. Kjøpere i Doffin som ikke er kjent, slås opp oppover i Enhetsregisteret
+sju nye fylkeskommunene har tall fra 2024. Fylkeskommunene som ble delt i 2024 (Viken, Vestfold og Telemark,
+Troms og Finnmark), er med for 2020–2023 (`kostra.HISTORICAL_FYLKER`, kolonnen `until_year` i `kommuner`). Kjøpere i Doffin som ikke er kjent, slås opp oppover i Enhetsregisteret
 (`brreg.resolve_upward`), og etater, bydeler og kommunale foretak føres på kommunen. Tidligere kommuner og
 fylkeskommuner og nedlagte kommunale foretak føres på kommunen de ble en del av (`kostra.successors`, ut fra
-navnet og kommuneendringene i KLASS). Orgnr som er slått opp uten treff, huskes i tabellen `orgnr_checked`;
-`--recheck-buyers` slår dem opp på nytt etter nye regler. Nettsiden viser dem på `kommuner.html` og
+navnet og kommuneendringene i KLASS); fylkeskommunene før 2020 som ble en del av Viken, Vestfold og Telemark
+eller Troms og Finnmark, føres på dem. Orgnr som er slått opp uten treff, huskes i tabellen `orgnr_checked`;
+`--recheck-buyers` slår dem og forgjengerne opp på nytt etter nye regler. Nettsiden viser dem på `kommuner.html` og
 `docs/kommune/<orgnr>.html`, med dekningen sammenlignet med kommuner av lignende størrelse.
 
 Statlige selskaper (statsforetak, statlig eide aksjeselskaper, Norges Bank og andre enheter SSB regner til

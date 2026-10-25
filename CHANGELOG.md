@@ -2,6 +2,13 @@
 
 ## Ikke utgitt
 
+- **Viken, Vestfold og Telemark og Troms og Finnmark:** fylkeskommunene som ble delt i 2024, er med for
+  2020–2023 med KOSTRA-tallene og kontraktene sine (342 nye kontrakter, 30 716 i alt). Kunngjøringer fra
+  fylkeskommunene før 2020 som ble en del av dem (som Akershus, Buskerud og Østfold), regnes nå til dem i stedet
+  for til de nye fylkeskommunene fra 2024. Alle fylkeskommunene har dermed tall for 2020–2023. Hver av dem har en
+  egen side med en merknad om delingen, og `kommuner.html` har en ny tabell over dem. Dekningen for alle kommunene
+  og fylkeskommunene i 2020 er 12,2 % (var 12,8 %), fordi de delte fylkeskommunene har få kontrakter fra før 2020 i
+  Doffin-tallene. `kommuner` har en ny kolonne `until_year`.
 - **Kommunale og interkommunale selskaper:** 352 selskaper som kommunene eier, alene eller sammen (som Ruter,
   Kolumbus, BIR, ROAF, IVAR og Sirkula), er med. De finnes blant kjøperne i Doffin ut fra sektorene for kommunale
   foretak, kommunalt eide aksjeselskaper og kommuneforvaltningen i Enhetsregisteret, på samme måte som de statlige
@@ -20,8 +27,7 @@
   Omsorgsbygg Oslo KF og Renovasjonsetaten i Oslo), regnes nå til kommunen de ble en del av. 90 slike enheter er
   koblet ut fra navnet i Enhetsregisteret og SSBs kommuneendringer (KLASS 131 og 104), og 1 423 nye kontrakter er
   hentet (25 658 i alt, 6 549 leverandører). Dekningen for kommunene øker mest i de første årene (2020: 9,2 % til
-  12,8 %; 2025: 18,3 % til 18,6 %). Viken, Vestfold og Telemark og Troms og Finnmark ble delt i 2024 og er ikke
-  med. Ny valgfri `--recheck-buyers` i `update_site_data.py` slår opp igjen kjøpere som er sjekket før.
+  12,8 %; 2025: 18,3 % til 18,6 %). Ny valgfri `--recheck-buyers` i `update_site_data.py` slår opp igjen kjøpere som er sjekket før.
 - **KOSTRA 2020–2023:** kommunene har nå kjøpstall for seks år (2020–2025) i stedet for to. Kommuner som fikk nytt
   nummer i 2024 (som Halden, 3001 til 3101), kobles til de gamle numrene med SSBs klassifikasjon (KLASS 131). 355
   kommuner og 7 fylkeskommuner har tall for 2020–2023; Ålesund og Haram (delt i 2024) og de sju nye

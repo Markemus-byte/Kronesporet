@@ -298,6 +298,7 @@ def main() -> int:
         if a.recheck_buyers:
             conn.execute(CHECKED_SCHEMA)
             conn.execute("DELETE FROM orgnr_checked")
+            conn.execute("DELETE FROM orgnr_parent WHERE kind = 'forgjenger'")  # kobles på nytt med dagens regler
         n_new = fetch_new_contracts(conn, years, DoffinClient(cache_dir=a.cache_dir), a.max_new)
         report.append(f"Doffin: {n_new} nye kontrakter ({', '.join(map(str, years))}).")
         report += load_companies(conn)

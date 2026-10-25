@@ -1271,6 +1271,26 @@ def municipal_index_page(datasets: list[Dataset], front: Dataset,
     n_none = sum(1 for a in front.municipal if not a.contract_count)
     n_contracts = len({c.id for d in datasets for a in d.municipal for c in a.contracts})
     n_k = sum(1 for a in front.municipal if a.owner == "kommune")
+    split = {a.orgnr: a for d in datasets for a in d.municipal if a.until_year and d.year == a.until_year}
+    split_html = ""
+    if split:
+        srows = "".join(
+            f'<tr><td><a href="{a.path}">{escape(a.name)}</a></td><td>2020–{a.until_year}</td>'
+            f'<td class="num">{a.contract_count}</td>'
+            f'<td class="num" title="{kr_full(a.spend_sum)}">{kr(a.spend_sum) if a.spend_sum else "–"}</td>'
+            f'<td class="num">{pct(a.contract_sum / a.spend_sum) if a.spend_sum else "–"}</td></tr>'
+            for a in sorted(split.values(), key=lambda a: a.name))
+        last = max(a.until_year for a in split.values())
+        split_html = f"""
+<section>
+  <h2>Fylkeskommuner som ble delt i {last + 1}</h2>
+  <p>Viken, Vestfold og Telemark og Troms og Finnmark ble delt i sju fylkeskommuner i {last + 1}. De er med for årene
+  de fantes, med kontraktene sine og KOSTRA-tallene til og med {last}.</p>
+  <div class="table-scroll"><table class="history"><thead><tr><th scope="col">Fylkeskommune</th><th scope="col">År</th>
+  <th scope="col" data-type="num">Kontrakter {last}</th><th scope="col" data-type="num">Kjøp {last} (KOSTRA)</th>
+  <th scope="col" data-type="num">Dekning {last}</th></tr></thead>
+  <tbody>{srows}</tbody></table></div>
+</section>"""
     body = f"""
 <section class="hero">
   <h1>Kommuner og fylker</h1>
@@ -1295,8 +1315,8 @@ def municipal_index_page(datasets: list[Dataset], front: Dataset,
   <th scope="col" data-type="num">Kjøp (KOSTRA)</th><th scope="col" data-type="num">Dekning</th>
   <th scope="col" data-type="num">Med KOSTRA</th></tr></thead>
   <tbody>{"".join(totals)}</tbody></table></div>
-  <p class="muted small">Før 2024 mangler Ålesund og Haram (delt i 2024) og de sju fylkeskommunene som ble opprettet
-  i 2024. Dekningen regnes bare for kommunene og fylkeskommunene med KOSTRA-tall i året. Doffin-tallene går
+  <p class="muted small">Før 2024 er Viken, Vestfold og Telemark og Troms og Finnmark med i stedet for de sju
+  fylkeskommunene som ble opprettet i 2024, og Ålesund og Haram (delt i 2024) mangler. Dekningen regnes bare for kommunene og fylkeskommunene med KOSTRA-tall i året. Doffin-tallene går
   tilbake til 2017, så eldre kontrakter som fortsatt løpte i 2020 og 2021, mangler, og dekningen de første årene er
   derfor lavere.</p>
   {_municipal_missing(missing, [d.year for d in datasets if any(a.spend_source for a in d.municipal)])}
@@ -1326,6 +1346,7 @@ def municipal_index_page(datasets: list[Dataset], front: Dataset,
   <th scope="col" data-type="text"><button type="button">Merknad</button></th></tr></thead>
   <tbody>{"".join(rows)}</tbody></table></div>
 </section>
+{split_html}
 """
     return page("Kommuner og fylker", body, active="kommuner", path="kommuner.html",
                 description=f"Doffin-kontraktene og kjøpene til {n_k} kommuner og fylkeskommunene i {year}.")
@@ -1376,6 +1397,12 @@ def municipal_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]], li
     hnote = (f'<p class="muted small">{MUNICIPAL_KIND.get(a.owner, a.owner)}n ble opprettet ved kommune- og '
              f'fylkesendringene i {MUNICIPAL_REFORM}, så KOSTRA har ikke sammenlignbare tall for årene før.</p>'
              if early else "")
+    if a.until_year:
+        notes.insert(0, f"<li><strong>Delt i {a.until_year + 1}.</strong> {escape(a.name)} fantes fra 2020 til "
+                        f"{a.until_year} og ble delt da fylkene ble delt. Siden viser {a.until_year}, det siste året. "
+                        "Kontraktene fylkeskommunen og forgjengerne før 2020 inngikk, står her også når de løper "
+                        "videre, og ikke hos fylkeskommunene som tok over.</li>")
+        notes_html = f'<ul class="notes">{"".join(notes)}</ul>'
     suppliers_html, contracts_html, joint_html = _contract_parts(ds, a, linked)
     body = f"""
 <p class="crumbs"><a href="../kommuner.html">Alle kommuner og fylker</a></p>
@@ -1729,14 +1756,16 @@ erstatter egen tjenesteproduksjon (som private barnehager) og investeringer i va
 omtrent kjøp av varer og tjenester i statsregnskapet. Tallene går tilbake til 2020. Mange kommuner fikk nytt
 kommunenummer da fylkene ble delt i 2024, og de gamle numrene kobles til dagens kommuner med SSBs klassifikasjon.
 Ålesund og Haram ble delt i 2024 og har bare tall fra da. Det samme gjelder de sju fylkeskommunene som ble
-opprettet i 2024, fordi forgjengerne (Viken, Vestfold og Telemark, Troms og Finnmark) ikke finnes lenger.</p>
+opprettet i 2024. Forgjengerne deres, Viken, Vestfold og Telemark og Troms og Finnmark, er med som egne
+fylkeskommuner for 2020–2023 med kontraktene sine.</p>
 <p>Kontraktene kobles på kjøperen i Doffin. Etater, bydeler og kommunale foretak som kunngjør med eget
 organisasjonsnummer, slås opp i Enhetsregisteret og regnes til kommunen de hører til. Kunngjøringer fra kommuner og
 fylkeskommuner som er slått sammen med andre (som Skedsmo, nå Lillestrøm, og Hordaland, nå Vestland), og fra
 kommunale foretak og etater som er lagt ned (som Omsorgsbygg Oslo KF), regnes til kommunen de ble en del av. Det
 går på navnet og SSBs oversikt over kommuneendringer, fordi Enhetsregisteret fjerner koblingen når en enhet slettes.
-Viken, Vestfold og Telemark og Troms og Finnmark ble delt i 2024 og kan ikke regnes til én fylkeskommune, så
-kontraktene deres er ikke med. Interkommunale selskaper og innkjøpssamarbeid har flere eiere og regnes ikke til
+Kunngjøringer fra fylkeskommunene før 2020 som ble en del av Viken, Vestfold og Telemark eller Troms og Finnmark
+(som Akershus og Buskerud), regnes til dem. Kontraktene til de delte fylkeskommunene som løper etter 2023, kan ikke
+fordeles på fylkeskommunene som tok over, og står derfor bare på sidene til de delte. Interkommunale selskaper og innkjøpssamarbeid har flere eiere og regnes ikke til
 én kommune.</p>
 <p>Dekningen sammenlignes med kommuner av lignende størrelse: kommunene deles i tre like store grupper etter kjøp,
 og fylkeskommunene er én gruppe. En kommune merkes når dekningen avviker tydelig fra gruppen (robust z-verdi over
@@ -2246,12 +2275,15 @@ def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "",
                                            encoding="utf-8")
         pages += 1
         m_history: dict[str, list[tuple[int, Agency]]] = {}
+        m_newest: dict[str, tuple[Dataset, Agency]] = {}
         for ds in datasets:
             for a in ds.municipal:
                 m_history.setdefault(a.slug, []).append((ds.year, a))
-        for a in latest.municipal:
-            history = m_history[a.slug] + (municipal_history or {}).get(a.orgnr, [])
-            (out / a.path).write_text(municipal_page(latest, a, history, linked), encoding="utf-8")
+                if a.until_year or ds is latest:  # de delte fylkeskommunene får siden fra siste år de fantes
+                    m_newest[a.slug] = (ds, a)
+        for slug, (ds, a) in m_newest.items():
+            history = m_history[slug] + (municipal_history or {}).get(a.orgnr, [])
+            (out / a.path).write_text(municipal_page(ds, a, history, linked), encoding="utf-8")
             pages += 1
 
     rows = [r for ds in datasets for r in export_rows(ds)]

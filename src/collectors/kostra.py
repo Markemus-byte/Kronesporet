@@ -18,12 +18,13 @@ Regionkodene er dagens kommunenummer. Mange kommuner fikk nytt nummer da fylkene
 (Halden 3001 -> 3101); de gamle numrene for 2020–2023 hentes fra SSBs klassifikasjon (KLASS 131).
 En kommune som ble delt (Ålesund og Haram i 2024), har ikke tall for årene før delingen. Det
 samme gjelder fylkeskommunene som ble opprettet i 2024 (Østfold, Akershus, Buskerud, Vestfold,
-Telemark, Troms og Finnmark): forgjengerne Viken, Vestfold og Telemark og Troms og Finnmark er
-ikke med.
+Telemark, Troms og Finnmark). Forgjengerne Viken, Vestfold og Telemark og Troms og Finnmark er med
+som egne fylkeskommuner for 2020–2023 (HISTORICAL_FYLKER), med `until_year` 2023.
 
 Kjøpere i Doffin som er tidligere kommuner og fylkeskommuner (Skedsmo, Hordaland) eller nedlagte kommunale
 foretak og etater (Omsorgsbygg Oslo KF), føres på kommunen de ble en del av (`successors`), ut fra navnet i
-Enhetsregisteret og kommuneendringene i KLASS (131 for kommuner, 104 for fylker).
+Enhetsregisteret og kommuneendringene i KLASS (131 for kommuner, 104 for fylker). Fylkeskommunene før 2020 som
+ble en del av en fylkeskommune som er delt (Akershus i Viken), føres på den delte.
 """
 from __future__ import annotations
 
@@ -51,13 +52,20 @@ TABLES = {  # (nivå, tabell, regionvariabel, arter)
     "fylke": [("13547", "KOKfylkesregion0000", ("AG17", "AGD51")), ("13548", "KOKfylkesregion0000", ("AGI39",))],
 }
 PAUSE_S = 1.0
+# Fylkeskommuner som ble delt i 2024 og er slettet i Enhetsregisteret: orgnr -> (navn, regionkode i KOSTRA, siste år)
+HISTORICAL_FYLKER = {
+    "921693230": ("Viken fylkeskommune", "3000", 2023),
+    "821227062": ("Vestfold og Telemark fylkeskommune", "3800", 2023),
+    "922420866": ("Troms og Finnmark fylkeskommune", "5400", 2023),
+}
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS kommuner (
     orgnr   TEXT PRIMARY KEY,
     name    TEXT,
     kind    TEXT,               -- 'kommune' | 'fylke'
-    region  TEXT                -- KOSTRA-regionkoden (kommunenummer, eller fylkesnummer + '00')
+    region  TEXT,               -- KOSTRA-regionkoden (kommunenummer, eller fylkesnummer + '00')
+    until_year INTEGER          -- siste år for en kommune eller fylkeskommune som ikke finnes lenger, ellers NULL
 );
 CREATE TABLE IF NOT EXISTS kommune_regnskap (
     orgnr   TEXT,
@@ -201,24 +209,31 @@ def load(conn: sqlite3.Connection, session: requests.Session | None = None,
 
     session = session or requests.Session()
     conn.executescript(SCHEMA)
+    if "until_year" not in {r[1] for r in conn.execute("PRAGMA table_info(kommuner)")}:
+        conn.execute("ALTER TABLE kommuner ADD COLUMN until_year INTEGER")
     kreg = _regions(session, "13551", "KOKkommuneregion0000")
     freg = _regions(session, "13547", "KOKfylkesregion0000")
     units = match_regions(fetch_units(session), kreg, freg)
     available = sorted(int(y) for y in _regions(session, "13551", "Tid"))
     years = years or [y for y in available if y >= FIRST_YEAR]
+    historical = [(o, name, "fylke", code, last) for o, (name, code, last) in HISTORICAL_FYLKER.items() if code in freg]
     conn.execute("DELETE FROM kommuner")
-    conn.executemany("INSERT INTO kommuner VALUES (?, ?, ?, ?)", units)
-    orgnr = {(kind, code): o for o, _, kind, code in units}
+    conn.executemany("INSERT INTO kommuner VALUES (?, ?, ?, ?, NULL)", units)
+    conn.executemany("INSERT INTO kommuner VALUES (?, ?, ?, ?, ?)", historical)
+    orgnr = {(kind, code): o for o, _, kind, code, *_ in units + historical}
     renumbered = old_codes(session) if min(years) < REFORM_YEAR else {}
     rows = []
     for kind, tables in TABLES.items():
-        current = sorted(code for k, code in orgnr if k == kind)
+        current = sorted(code for k, code in orgnr if k == kind and orgnr[(k, code)] not in HISTORICAL_FYLKER)
         # (år, regionkode i SSB -> dagens kode): kommunene har andre numre før 2024, fylkeskommunene samme
         groups = [([y for y in years if y >= REFORM_YEAR], {c: c for c in current})]
         before = [y for y in years if y < REFORM_YEAR]
         if before:
             groups.append((before, {renumbered.get(c, c): c for c in current if renumbered.get(c, c)}
                            if kind == "kommune" else {c: c for c in current}))
+        for o, _, k, code, last in historical:  # de delte fylkeskommunene fram til delingen
+            if k == kind and [y for y in years if y <= last]:
+                groups.append(([y for y in years if y <= last], {code: code}))
         for group_years, codes in groups:
             if not group_years:
                 continue
@@ -232,7 +247,7 @@ def load(conn: sqlite3.Connection, session: requests.Session | None = None,
     conn.execute(f"DELETE FROM kommune_regnskap WHERE year IN ({', '.join('?' for _ in years)})", years)
     conn.executemany("INSERT OR REPLACE INTO kommune_regnskap VALUES (?, ?, ?, ?)", rows)
     conn.commit()
-    return len(units), len(rows)
+    return len(units) + len(historical), len(rows)
 
 
 def orgnrs(conn: sqlite3.Connection) -> set[str]:
@@ -260,12 +275,13 @@ def _keys(name: str) -> set[str]:
 
 
 def _history(session: requests.Session, kind: str) -> tuple[dict[str, set[str]], list[tuple[str, str, str]],
-                                                            dict[str, set[str]]]:
+                                                            dict[str, set[str]], dict[str, int]]:
     """Kommune- eller fylkesinndelingen fra HISTORY_FROM: (navnenøkkel -> koder, endringer (dato, gammel, ny)
-    sortert på dato, kode -> navnenøkler)."""
+    sortert på dato, kode -> navnenøkler, kode -> første år)."""
     cid = KLASS_IDS[kind]
     by_key: dict[str, set[str]] = {}
     keys_of: dict[str, set[str]] = {}
+    first: dict[str, int] = {}
     for year in range(HISTORY_FROM, date.today().year + 1):
         resp = session.get(KLASS.format(cid, "codesAt"), params={"date": f"{year}-01-02"},
                            headers={"Accept": "application/json"}, timeout=60)
@@ -274,21 +290,26 @@ def _history(session: requests.Session, kind: str) -> tuple[dict[str, set[str]],
             for key in _keys(c["name"]):
                 by_key.setdefault(key, set()).add(c["code"])
                 keys_of.setdefault(c["code"], set()).add(key)
+            first.setdefault(c["code"], year)
     resp = session.get(KLASS.format(cid, "changes"), params={"from": f"{HISTORY_FROM}-01-02", "to": date.today().isoformat()},
                        headers={"Accept": "application/json"}, timeout=60)
     resp.raise_for_status()
     changes = sorted((c["changeOccurred"], c["oldCode"], c["newCode"]) for c in resp.json().get("codeChanges", []))
-    return by_key, changes, keys_of
+    return by_key, changes, keys_of, first
 
 
 def _forward(code: str, key: str, changes: list[tuple[str, str, str]], keys_of: dict[str, set[str]],
-             current: set[str]) -> set[str]:
+             current: set[str], stop: set[str] = frozenset()) -> set[str]:
     """Dagens koder en eldre kode ble til. Ved en deling velges delen med samme navn (Buskerud ut av Viken);
-    uten den er det ikke én etterfølger. Beholder kommunen koden (en grensejustering), er den samme kommune."""
+    uten den er det ikke én etterfølger. Beholder kommunen koden (en grensejustering), er den samme kommune.
+    Koder i `stop` (de delte fylkeskommunene) er endestasjon: Akershus før 2020 blir Viken, ikke Akershus i dag."""
     out: set[str] = set()
     todo = [(code, "")]
     while todo:
         c, since = todo.pop()
+        if c in stop:
+            out.add(c)
+            continue
         later = [w for w, old, new in changes if old == c and w > since]
         if not later:
             if c in current:
@@ -315,8 +336,8 @@ def successors(conn: sqlite3.Connection, orgnrs: Iterable[str], session: request
     eller en etat med kommunen i navnet (Omsorgsbygg Oslo KF, Oslo kommune Renovasjonsetaten).
 
     Enhetsregisteret fjerner koblingen til kommunen når en enhet slettes, så det går på navnet. Navn som
-    finnes i flere kommuner (Sande, Herøy), og fylkeskommuner som ble delt uten en del med samme navn
-    (Viken, Vestfold og Telemark), kobles ikke.
+    finnes i flere kommuner (Sande, Herøy), kobles ikke. Etatene til fylkeskommunene som ble delt i 2024
+    (Viken kollektivterminaler FKF), føres på den delte fylkeskommunen (HISTORICAL_FYLKER).
     """
     import requests
 
@@ -326,25 +347,30 @@ def successors(conn: sqlite3.Connection, orgnrs: Iterable[str], session: request
         return {}
     current_names: dict[tuple[str, str], set[str]] = {}
     by_code: dict[tuple[str, str], str] = {}
+    stop = {"kommune": set(), "fylke": {code[:2] for _, code, _ in HISTORICAL_FYLKER.values()}}
     for orgnr, name, kind, region in units:
         current_names.setdefault((kind, _name_key(name)), set()).add(orgnr)
         by_code[(kind, region if kind == "kommune" else region[:2])] = orgnr
     history = {kind: _history(session, kind) for kind in KLASS_IDS}
     current = {kind: {code for k, code in by_code if k == kind} for kind in KLASS_IDS}
 
-    def resolve(kind: str, key: str) -> str | None:
+    def resolve(kind: str, key: str, deleted: int | None = None) -> str | None:
         # Historikken først: «Sande kommune» kan være Sande i Vestfold (nå Holmestrand) eller i Møre og Romsdal.
-        by_key, changes, keys_of = history[kind]
-        found = {by_code[(kind, c)] for code in by_key.get(key, set())
-                 for c in _forward(code, key, changes, keys_of, current[kind])}
+        by_key, changes, keys_of, first = history[kind]
+        codes = by_key.get(key, set())
+        if deleted:  # «Akershus fylkeskommune» slettet i 2020 er Akershus før 2020, ikke den nye fra 2024
+            codes = {c for c in codes if first[c] < deleted} or codes
+        found = {by_code[(kind, c)] for code in codes
+                 for c in _forward(code, key, changes, keys_of, current[kind], stop[kind])}
         found = found or current_names.get((kind, key), set())
         return next(iter(found)) if len(found) == 1 else None
 
-    def by_word(kind: str, name: str) -> str | None:
+    def by_word(kind: str, name: str, deleted: int | None = None) -> str | None:
         text = name.lower()
         keys = {k for (kd, k) in current_names if kd == kind} | set(history[kind][0])
         hits = {k for k in keys if len(k) > 2 and re.search(rf"(?<![\wæøå]){re.escape(k)}(?![\wæøå])", text)}
-        found = {r for r in (resolve(kind, k) for k in hits) if r}
+        hits = {k for k in hits if not any(k != o and k in o for o in hits)}  # «Vestfold og Telemark», ikke «Vestfold»
+        found = {r for r in (resolve(kind, k, deleted) for k in hits) if r}
         return next(iter(found)) if len(found) == 1 else None
 
     out: dict[str, tuple[str, str, str]] = {}
@@ -360,15 +386,18 @@ def successors(conn: sqlite3.Connection, orgnrs: Iterable[str], session: request
         data = resp.json()
         form = (data.get("organisasjonsform") or {}).get("kode")
         name = _DELETED.sub("", data.get("navn") or "")
+        since = re.search(r"under sletting fra \d\d\.\d\d\.(\d{4})", data.get("navn") or "", re.I)
+        deleted = int(since.group(1)) if since else int(data["slettedato"][:4]) if data.get("slettedato") else None
         root = None
         if form in PREDECESSOR_FORMS:
-            root = resolve(PREDECESSOR_FORMS[form], _name_key(re.sub(r"\s+herad$", "", name, flags=re.I)))
+            root = resolve(PREDECESSOR_FORMS[form], _name_key(re.sub(r"\s+herad$", "", name, flags=re.I)), deleted)
         elif form in PART_FORMS:
             m = _OWNER.match(name)
             if m:
-                root = resolve("fylke" if m.group(2).lower() == "fylkeskommune" else "kommune", _name_key(m.group(1)))
+                root = resolve("fylke" if m.group(2).lower() == "fylkeskommune" else "kommune", _name_key(m.group(1)),
+                               deleted)
             elif PART_FORMS[form]:
-                root = by_word(PART_FORMS[form], name)
+                root = by_word(PART_FORMS[form], name, deleted)
         if root and root != orgnr:
             out[orgnr] = (root, data.get("navn") or "", "forgjenger" if form in PREDECESSOR_FORMS else "enhet")
     return out
