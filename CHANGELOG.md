@@ -2,6 +2,13 @@
 
 ## Ikke utgitt
 
+- **Statlige selskaper:** 65 statsforetak, statlig eide selskaper og andre statlige enheter utenfor
+  statsregnskapet (som Bane NOR, Avinor, Nye Veier, NRK, Norsk Helsenett, Vinmonopolet og Norges Bank) er med.
+  De finnes blant kjøperne i Doffin ut fra institusjonell sektor i Enhetsregisteret (`src/collectors/selskaper.py`),
+  så nye kjøpere kommer med av seg selv. 2 430 nye kontrakter for 2017–2026 (28 088 i alt). Ny side
+  `selskaper.html` i menyen og én side per selskap, med driftskostnader utenom lønn fra Regnskapsregisteret som
+  sammenligningstall og uten flagg. Kontraktene er med på leverandørsidene, i `kontrakter.csv` og i den nye
+  `selskaper.csv`, og selskapene teller med blant de statlige kjøperne på forsiden.
 - **Tidligere kommuner og fylkeskommuner:** kunngjøringer fra kommuner og fylkeskommuner som er slått sammen
   (som Skedsmo, nå Lillestrøm, og Hordaland, nå Vestland), og fra nedlagte kommunale foretak og etater (som
   Omsorgsbygg Oslo KF og Renovasjonsetaten i Oslo), regnes nå til kommunen de ble en del av. 90 slike enheter er

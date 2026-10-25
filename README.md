@@ -111,6 +111,12 @@ navnet og kommuneendringene i KLASS). Orgnr som er slått opp uten treff, huskes
 `--recheck-buyers` slår dem opp på nytt etter nye regler. Nettsiden viser dem på `kommuner.html` og
 `docs/kommune/<orgnr>.html`, med dekningen sammenlignet med kommuner av lignende størrelse.
 
+Statlige selskaper (statsforetak, statlig eide aksjeselskaper, Norges Bank og andre enheter SSB regner til
+staten) finnes blant kjøperne i Doffin ut fra institusjonell sektor i Enhetsregisteret
+(`src/collectors/selskaper.py`, tabellen `selskaper`). Underenhetene kobles som for virksomhetene, og
+årsregnskapene hentes fra Regnskapsregisteret til `foretak_regnskap`. Nettsiden viser dem på `selskaper.html`
+og `docs/selskap/<orgnr>.html`.
+
 Med leverandører i databasen får nettsiden også en leverandøroversikt (`leverandorer.html`) og én
 side per leverandør med organisasjonsnummer (`docs/leverandor/<orgnr>.html`) med kontraktene på
 tvers av statlige kjøpere.
