@@ -1738,7 +1738,8 @@ hos dem, fordi Doffin ikke viser hvor stor del hver kjøper står for.</p>"""
         enhetsregisteret += (
             '\n<dt><a href="https://www.brreg.no/om-oss/registrene-vare/om-regnskapsregisteret/">Regnskapsregisteret</a> '
             "(Brønnøysundregistrene)</dt>\n<dd>Årsregnskapene til helseforetakene"
-            + (" og de statlige selskapene" if ds.companies else "") + ", som ikke er med i statsregnskapet. "
+            + (" og de statlige og kommunale selskapene" if ds.municipal_companies else
+               " og de statlige selskapene" if ds.companies else "") + ", som ikke er med i statsregnskapet. "
             "Vi bruker driftskostnadene og lønnskostnadene for de siste tre årene.</dd>")
     if ds.municipal:
         enhetsregisteret += (
@@ -1765,8 +1766,8 @@ kommunale foretak og etater som er lagt ned (som Omsorgsbygg Oslo KF), regnes ti
 går på navnet og SSBs oversikt over kommuneendringer, fordi Enhetsregisteret fjerner koblingen når en enhet slettes.
 Kunngjøringer fra fylkeskommunene før 2020 som ble en del av Viken, Vestfold og Telemark eller Troms og Finnmark
 (som Akershus og Buskerud), regnes til dem. Kontraktene til de delte fylkeskommunene som løper etter 2023, kan ikke
-fordeles på fylkeskommunene som tok over, og står derfor bare på sidene til de delte. Interkommunale selskaper og innkjøpssamarbeid har flere eiere og regnes ikke til
-én kommune.</p>
+fordeles på fylkeskommunene som tok over, og står derfor bare på sidene til de delte. Interkommunale selskaper og
+innkjøpssamarbeid har flere eiere og regnes ikke til én kommune.</p>
 <p>Dekningen sammenlignes med kommuner av lignende størrelse: kommunene deles i tre like store grupper etter kjøp,
 og fylkeskommunene er én gruppe. En kommune merkes når dekningen avviker tydelig fra gruppen (robust z-verdi over
 2 på logaritmen til dekningen), og som uvanlig når avviket går samme vei to år på rad. Kommuner uten kontrakter i
@@ -1780,8 +1781,9 @@ lav.</p>"""
 <h3 id="helseforetak">Helseforetakene</h3>
 <p>De fire regionale helseforetakene og de {len(ds.health) - 4} helseforetakene som eies av dem, er statlige,
 men står ikke i statsregnskapet. Kontraktene deres hentes i Doffin på samme måte som for virksomhetene, og
-sykehusene og avdelingene som kunngjør med eget organisasjonsnummer, regnes til foretaket de hører til
-({n_units} av kontraktene i {ds.year}). Listen over foretakene ligger i
+sykehusene og avdelingene som kunngjør med eget organisasjonsnummer, regnes til foretaket de hører til{
+f" ({n_units} av kontraktene i {ds.year})" if n_units else
+", men i praksis står nesten alle kunngjøringene på foretaket selv"}. Listen over foretakene ligger i
 <a href="{REPO_URL}/blob/main/site-data/helseforetak.csv">helseforetak.csv</a>.</p>
 <p>Årsregnskapet skiller ikke ut kjøp av varer og tjenester. Nærmeste tall er driftskostnadene utenom lønn, som
 også tar med avskrivninger, gjestepasientoppgjør og kjøp av helsetjenester fra private. Doffin-andelen for
@@ -1813,7 +1815,8 @@ ut fra sektorene for kommunale foretak, kommunalt eide aksjeselskaper og kommune
 interkommunale selskaper (IKS), kommunale oppgavefellesskap og aksjeselskaper som Ruter, BIR og Kolumbus, som
 kjøper kollektivtransport, renovasjon og vann og avløp. De regnes ikke til én kommune, fordi mange har flere
 eiere. KOSTRA tar med kommunenes andel av IKS-ene, men ikke aksjeselskapene, så kontraktene deres er heller ikke
-med i dekningen for kommunene.</p>"""
+med i dekningen for kommunene. Nedlagte IKS og kommunale foretak har mistet sektorkoden i Enhetsregisteret og tas
+med ut fra organisasjonsformen.</p>"""
     ledger = "Statsregnskapet" if _SITE["statsregnskap"] else "Årsrapportene"
     compare_rows = [
         ("Kunngjorte kontrakter med verdi og vinnere", "Ja", "Nei", "Nei"),
@@ -1823,7 +1826,7 @@ med i dekningen for kommunene.</p>"""
         ("Kontraktsverdi fordelt på årene kontrakten løper", "Nei", "Nei", "Nei"),
         ("Hvor stor del av kjøpene som er kunngjort", "Nei", "Nei", "Nei"),
         ("Sammenligning med lignende virksomheter, flere år på rad", "Nei", "Nei", "Nei"),
-        ("Hver leverandørs andel hos alle statlige kjøpere, år for år", "Nei", "Nei", "Nei"),
+        (f"Hver leverandørs andel hos alle {_public()} kjøpere, år for år", "Nei", "Nei", "Nei"),
     ] + ([("Helseforetakenes kontrakter sammen med årsregnskapet", "Nei", "Nei", "Nei")] if ds.health else []) + (
         [("Statlige selskapers kontrakter sammen med årsregnskapet", "Nei", "Nei", "Nei")] if ds.companies else []) + (
         [("Kommunenes kontrakter mot kjøpene i KOSTRA", "Nei", "Nei", "Nei")] if ds.municipal else [])
@@ -1833,7 +1836,7 @@ med i dekningen for kommunene.</p>"""
     body = f"""
 <section class="hero"><h1>Om dataene og metoden</h1>
 <p class="lede">Kronesporet er et åpenhetsverktøy for offentlig pengebruk. Vi henter inn kunngjorte kontrakter
-fra Doffin, regnskapstall fra {"statsregnskapet" if _SITE["statsregnskap"] else "årsrapportene"}{" og virksomhetsstrukturen fra Enhetsregisteret" if _SITE["units"] else ""},
+fra Doffin, regnskapstall fra {"statsregnskapet" if _SITE["statsregnskap"] else "årsrapportene"}{", KOSTRA og Regnskapsregisteret" if ds.municipal and ds.health else ""}{" og virksomhetsstrukturen fra Enhetsregisteret" if _SITE["units"] else ""},
 kobler dem på organisasjonsnummer og viser resultatet virksomhet for virksomhet og leverandør for leverandør.</p></section>
 <div class="prose">
 <h2 id="hvorfor">Hvorfor Kronesporet</h2>
@@ -1857,7 +1860,7 @@ er mulig å regne ut fra dem.</p>
 <dt><a href="https://doffin.no">Doffin</a></dt>
 <dd>Den nasjonale kunngjøringsdatabasen for offentlige anskaffelser, drevet av Digdir. Vi henter
 kunngjøringer om tildelte kontrakter, med kjøperens organisasjonsnummer, tittel og tildelt verdi.
-Mangler tildelt verdi, brukes anslått verdi (merket «anslått verdi»).{" Leverandørene er vinnerne slik de står i kunngjøringen, med organisasjonsnummer når det er oppgitt." if ds.has_suppliers else ""}</dd>
+Mangler tildelt verdi, brukes anslått verdi (merket «anslått verdi»).{" Leverandørene er vinnerne slik de står i kunngjøringen, med organisasjonsnummer når det er oppgitt." if ds.has_suppliers else ""} Noen kunngjøringer, mest fra 2017–2022, mangler kjøperens organisasjonsnummer. Da kjennes kjøperen igjen på navnet, når navnet bare har vært brukt av ett organisasjonsnummer.</dd>
 <dt><a href="https://kudos.dfo.no">Kudos</a> (DFØ)</dt>
 <dd>Kunnskapsdatabasen for offentlige utredninger, der statlige virksomheter publiserer årsrapportene sine.
 Fra den standardiserte «Oppstilling av artskontorapportering» bruker vi
@@ -1898,7 +1901,7 @@ Andre kjente feil, som at en kunngjøring står med feil organisasjonsnummer på
 <h2>Last ned dataene</h2>
 <p>Tallene bak forsiden kan lastes ned som
 <a href="data/virksomheter.csv">CSV</a> eller <a href="data/virksomheter.json">JSON</a>, og alle kontraktene
-med leverandører som <a href="data/kontrakter.csv">kontrakter.csv</a>{', helseforetakene som <a href="data/helseforetak.csv">helseforetak.csv</a>' if ds.health else ""}{', de statlige selskapene som <a href="data/selskaper.csv">selskaper.csv</a>' if ds.companies else ""}{' og kommunene som <a href="data/kommuner.csv">kommuner.csv</a>' if ds.municipal else ""}. Dataene fra kildene er fortsatt
+med leverandører som <a href="data/kontrakter.csv">kontrakter.csv</a>{', helseforetakene som <a href="data/helseforetak.csv">helseforetak.csv</a>' if ds.health else ""}{', selskapene som <a href="data/selskaper.csv">selskaper.csv</a>' if ds.companies else ""}{' og kommunene som <a href="data/kommuner.csv">kommuner.csv</a>' if ds.municipal else ""}. Dataene fra kildene er fortsatt
 underlagt NLOD 2.0; oppgi kildene ved gjenbruk.</p>
 </div>
 """
