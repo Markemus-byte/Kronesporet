@@ -118,6 +118,7 @@ staten) finnes blant kjøperne i Doffin ut fra institusjonell sektor i Enhetsreg
 (`src/collectors/selskaper.py`, tabellen `selskaper`). Underenhetene kobles som for virksomhetene, og
 årsregnskapene hentes fra Regnskapsregisteret til `foretak_regnskap`. Kommunale og interkommunale selskaper
 (IKS, kommunalt eide aksjeselskaper som Ruter og BIR) finnes på samme måte ut fra sektorene 1510, 1520 og 6500.
+Nedlagte IKS og kommunale foretak har ingen sektorkode og tas med ut fra organisasjonsformen.
 Nettsiden viser dem på `selskaper.html`, `kommunale-selskaper.html` og `docs/selskap/<orgnr>.html`.
 
 Med leverandører i databasen får nettsiden også en leverandøroversikt (`leverandorer.html`) og én
