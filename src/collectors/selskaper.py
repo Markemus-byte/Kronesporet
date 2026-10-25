@@ -18,6 +18,9 @@ Kommunale og interkommunale selskaper (Ruter, BIR, IVAR, Kolumbus) finnes på sa
 
 De regnes ikke til én kommune, fordi de ofte har flere eiere, og KOSTRA tar ikke med aksjeselskapene.
 
+Nedlagte IKS og kommunale foretak har mistet sektorkoden i Enhetsregisteret og tas med ut fra
+organisasjonsformen (MUNICIPAL_FORMS), når de ikke kan føres på en kommune.
+
 Etater (organisasjonsledd) og enheter som allerede hører til en virksomhet, et helseforetak eller
 en kommune, er ikke med. Årsregnskapene hentes fra Regnskapsregisteret som for helseforetakene
 (src/collectors/foretak.py), og underenhetene fra Enhetsregisteret.
@@ -25,6 +28,7 @@ en kommune, er ikke med. Årsregnskapene hentes fra Regnskapsregisteret som for 
 from __future__ import annotations
 
 import logging
+import re
 import sqlite3
 import time
 from collections.abc import Iterable
@@ -49,6 +53,7 @@ MUNICIPAL_SECTORS = {
 }
 SKIP_FORMS = {"ORGL", "STAT", "KOMM", "FYLK", "OPMV"}  # etater og kommunene selv
 STATE_SKIP_FORMS = SKIP_FORMS | {"KF", "FKF", "IKS"}  # kommunale former med feil sektorkode
+MUNICIPAL_FORMS = {"IKS", "KF", "FKF"}  # alltid kommunale; slettede enheter har ingen sektorkode
 PAUSE_S = 0.1
 
 SCHEMA = """
@@ -97,11 +102,13 @@ def find(conn: sqlite3.Connection, candidates: Iterable[str], session: requests.
         data = resp.json()
         form = (data.get("organisasjonsform") or {}).get("kode") or ""
         sector = (data.get("institusjonellSektorkode") or {}).get("kode") or ""
-        if data.get("slettedato") or not (
-                (sector in STATE_SECTORS and form not in STATE_SKIP_FORMS)
-                or (sector in MUNICIPAL_SECTORS and form not in SKIP_FORMS)):
+        if data.get("slettedato"):
+            if form not in MUNICIPAL_FORMS:  # nedlagte IKS og foretak (Envina IKS, Askerbadet KF) er med
+                continue
+        elif not ((sector in STATE_SECTORS and form not in STATE_SKIP_FORMS)
+                  or (sector in MUNICIPAL_SECTORS and form not in SKIP_FORMS)):
             continue
-        name = data.get("navn") or orgnr
+        name = re.sub(r"\s+under (sletting|avvikling).*$", "", data.get("navn") or orgnr, flags=re.I)
         conn.execute("INSERT OR REPLACE INTO selskaper VALUES (?, ?, ?, ?)", (orgnr, _display(name), form, sector))
         found.append(orgnr)
     conn.commit()

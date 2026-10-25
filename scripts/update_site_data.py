@@ -31,6 +31,7 @@ import argparse
 import csv
 import logging
 import os
+import re
 import sqlite3
 import sys
 import tempfile
@@ -140,6 +141,49 @@ def ledger_period(conn: sqlite3.Connection) -> dict[int, int]:
     return out
 
 
+def _name_key(name: str) -> str:
+    return re.sub(r"\s*/\s*", "/", re.sub(r"\s+", " ", (name or "").lower())).strip(" .,-")
+
+
+def name_index(conn: sqlite3.Connection) -> dict[str, str]:
+    """Navn -> orgnr for kjøpere, fra tidligere kunngjøringer og registrene. Navn som har vært brukt av flere
+    orgnr (Sande kommune i Vestfold og i Møre og Romsdal), er utelatt."""
+    queries = ["SELECT orgnr, name FROM doffin_buyers WHERE orgnr IS NOT NULL",
+               "SELECT DISTINCT buyer_orgnr, buyer_name FROM doffin_contracts WHERE buyer_orgnr IS NOT NULL",
+               "SELECT DISTINCT orgnr, virksomhet FROM statsregnskap WHERE orgnr IS NOT NULL",
+               "SELECT child, child_name FROM orgnr_parent", "SELECT orgnr, name FROM kommuner",
+               "SELECT orgnr, name FROM foretak", "SELECT orgnr, name FROM selskaper"]
+    seen: dict[str, set[str]] = {}
+    for q in queries:
+        try:
+            rows = conn.execute(q).fetchall()
+        except sqlite3.OperationalError:
+            continue
+        for orgnr, name in rows:
+            if name:
+                seen.setdefault(_name_key(name), set()).add(orgnr)
+    return {k: next(iter(v)) for k, v in seen.items() if len(v) == 1}
+
+
+def fill_missing_orgnr(hits: list[dict], index: dict[str, str], wanted: set[str]) -> int:
+    """Noen kunngjøringer (mest 2017–2022) har kjøpere uten orgnr. Kjenner vi navnet, eller navnet foran
+    «v/» eller komma («Oslo kommune v/ Bymiljøetaten»), og hører orgnr til en kjøper på nettsiden, fylles det
+    inn. Returnerer antall kjøpere som fikk orgnr."""
+    filled = 0
+    for hit in hits:
+        for b in hit.get("buyer") or []:
+            if re.fullmatch(r"\d{9}", re.sub(r"\D", "", str(b.get("organizationId") or ""))):
+                continue
+            name = str(b.get("name") or "")
+            for candidate in (name, re.split(r"\s*\bv/|,", name)[0]):
+                orgnr = index.get(_name_key(candidate))
+                if orgnr in wanted:
+                    b["organizationId"] = orgnr
+                    filled += 1
+                    break
+    return filled
+
+
 def fetch_new_contracts(conn: sqlite3.Connection, years: list[int], client: DoffinClient,
                         max_new: int | None = None) -> int:
     """Hent tildelinger publisert i `years` som ikke ligger i databasen, med detaljer og vinnere.
@@ -161,6 +205,9 @@ def fetch_new_contracts(conn: sqlite3.Connection, years: list[int], client: Doff
     if n_units or n_companies:
         log.info("%d nye kjøpere under kommuner og fylker, %d nye selskaper", n_units, n_companies)
     wanted = buyers(conn)
+    n_named = fill_missing_orgnr(hits, name_index(conn), wanted)
+    if n_named:
+        log.info("Doffin: %d kjøpere uten orgnr er kjent igjen på navnet", n_named)
     new: dict[str, dict] = {}
     for hit in hits:
         found = buyer_list(hit)
