@@ -54,12 +54,12 @@ Statskog SF;966056258;Statsforetak;staten;2023;0;0;157536000;0.0
 Stavanger symfoniorkester stiftelse;874247502;Stiftelse;staten;2023;0;0;58159718;0.0
 Stiftelsen musikkselskapet harmonien;976619005;Stiftelse;staten;2023;0;0;70074000;0.0
 Stiftelsen nasjonalmuseet for kunst;985686092;Stiftelse;staten;2023;4;21666448;729983328;3.0
-Stiftelsen oslo-filharmonien;976944143;Stiftelse;staten;2023;1;732877;81343000;0.9
+Stiftelsen Oslo-filharmonien;976944143;Stiftelse;staten;2023;1;732877;81343000;0.9
 Trondheim symfoniorkester & opera STI;971434023;Stiftelse;staten;2023;0;0;47135784;0.0
 Unifond AS;995200090;Aksjeselskap;staten;2023;0;0;263653;0.0
 Universitetssenteret på svalbard AS;985204454;Aksjeselskap;staten;2023;0;0;122661386;0.0
-Veas AS;920171400;Aksjeselskap;staten;2023;0;0;969950;0.0
-Veas selvkost AS;920171540;Aksjeselskap;staten;2023;2;1580976;330952539;0.5
+VEAS AS;920171400;Aksjeselskap;staten;2023;0;0;969950;0.0
+VEAS selvkost AS;920171540;Aksjeselskap;staten;2023;2;1580976;330952539;0.5
 Vegamot AS;935162718;Aksjeselskap;staten;2023;0;0;127880606;0.0
 Vegfinans AS;983149499;Aksjeselskap;staten;2023;6;24939037;35896566;69.5
 Vy buss AS;976948394;Aksjeselskap;staten;2023;0;0;2771204000;0.0
@@ -67,6 +67,7 @@ Vy tog AS;917374988;Aksjeselskap;staten;2023;0;0;754539000;0.0
 Vygruppen AS;984661177;Aksjeselskap;staten;2023;27;370042269;4583000000;8.1
 Abakus AS;983335543;Aksjeselskap;kommunene;2023;10;12809610;1627385;787.1
 Afiber AS;920050719;Aksjeselskap;kommunene;2023;0;0;86218711;0.0
+AFK eiendom FKF;996331202;Fylkeskommunalt foretak;kommunene;2023;0;0;;
 Agder kollektivtrafikk AS;991776524;Aksjeselskap;kommunene;2023;5;333574524;1017320233;32.8
 Agder renovasjon IKS;997765494;Interkommunalt selskap;kommunene;2023;5;15933161;121627000;13.1
 Agenda aktiv AS;872414762;Aksjeselskap;kommunene;2023;0;0;20202499;0.0
@@ -76,14 +77,15 @@ Anno museum AS;994933272;Aksjeselskap;kommunene;2023;0;0;62131000;0.0
 Arktisk filharmoni AS;994387693;Aksjeselskap;kommunene;2023;0;0;47705830;0.0
 Arva AS;979151950;Aksjeselskap;kommunene;2023;1;28600000;627342949;4.6
 Asker nett AS;917743193;Aksjeselskap;kommunene;2023;0;0;37586364;0.0
-Asker og bærum brann og redning IKS;980358380;Interkommunalt selskap;kommunene;2023;3;6663646;;
-Asker og bærum vannverk IKS;974636972;Interkommunalt selskap;kommunene;2023;1;17488022;43855648;39.9
+Asker og Bærum brann og redning IKS;980358380;Interkommunalt selskap;kommunene;2023;3;6663646;;
+Asker og Bærum vannverk IKS;974636972;Interkommunalt selskap;kommunene;2023;1;17488022;43855648;39.9
+Askerbadet KF;916284128;Kommunalt foretak;kommunene;2023;0;0;;
 Askvoll sokn;976996267;Kirkelig enhet;kommunene;2023;0;0;;
-Atb AS;994686011;Aksjeselskap;kommunene;2023;13;1358027478;2717746000;50.0
+AtB AS;994686011;Aksjeselskap;kommunene;2023;13;1358027478;2717746000;50.0
 Attvin AS;922025096;Aksjeselskap;kommunene;2023;7;12230199;30422809;40.2
 Attvin næring AS;923030891;Aksjeselskap;kommunene;2023;0;0;58087211;0.0
 Attvin produksjon AS;923030913;Aksjeselskap;kommunene;2023;4;3089847;186153982;1.7
-Aust-agder museum og arkiv IKS;986088695;Interkommunalt selskap;kommunene;2023;0;0;;
+Aust-Agder museum og arkiv IKS;986088695;Interkommunalt selskap;kommunene;2023;0;0;;
 Avfall sør AS;986296042;Aksjeselskap;kommunene;2023;0;0;1297043;0.0
 Avfall sør husholdning AS;995646137;Aksjeselskap;kommunene;2023;13;30509311;186658194;16.3
 Avfallsmegling nord AS;925117706;Aksjeselskap;kommunene;2023;1;1323631;933848;141.7
@@ -91,7 +93,7 @@ Avfallsservice AS;964180644;Aksjeselskap;kommunene;2023;3;4518329;50323354;9.0
 Barents nett AS;971058854;Aksjeselskap;kommunene;2023;0;0;164770000;0.0
 Bergen havn AS;918404635;Aksjeselskap;kommunene;2023;0;0;112950907;0.0
 Bergen kirkelige fellesråd;976994434;Kirkelig enhet;kommunene;2023;0;0;;
-BIR AS;983495400;Aksjeselskap;kommunene;2023;39;216626027;578695000;37.4
+BIR AS;983495400;Aksjeselskap;kommunene;2023;41;224495636;578695000;38.8
 BIR infrastruktur AS;990766665;Aksjeselskap;kommunene;2023;4;17272010;69331706;24.9
 BIR nyverdi AS;984504942;Aksjeselskap;kommunene;2023;4;10516874;70085050;15.0
 BIR ressurs AS;985825408;Aksjeselskap;kommunene;2023;4;1038100;339202384;0.3
@@ -100,12 +102,14 @@ Bjørvika infrastruktur AS;985010110;Aksjeselskap;kommunene;2023;1;3150000;42080
 Bkk AS;976944801;Aksjeselskap;kommunene;2023;2;94740499;1049923762;9.0
 Bodø kirkelige fellesråd;976999800;Kirkelig enhet;kommunene;2023;2;891205;;
 Bodø spektrum AS;946028614;Aksjeselskap;kommunene;2023;0;0;18079207;0.0
+Bodø2024 IKS;925047686;Interkommunalt selskap;kommunene;2023;2;3978809;;
 Bop5 AS;923617035;Aksjeselskap;kommunene;2023;0;0;80744;0.0
 Borg havn IKS;970937099;Interkommunalt selskap;kommunene;2023;0;0;70801446;0.0
 Brakar AS;995082454;Aksjeselskap;kommunene;2023;15;112716953;881289267;12.8
 Brannvesenet sør IKS;969952890;Interkommunalt selskap;kommunene;2023;1;0;;
 Bredbåndsfylket AS;986358013;Aksjeselskap;kommunene;2023;2;10878980;37829853;28.8
-Bustadstiftinga ved sentral sjukehuset i sogn og fjordane;874979392;Stiftelse;kommunene;2023;0;0;9613317;0.0
+Brevik fergeselskap IKS;912617750;Interkommunalt selskap;kommunene;2023;0;0;;
+Bustadstiftinga ved sentral sjukehuset i Sogn og Fjordane;874979392;Stiftelse;kommunene;2023;0;0;9613317;0.0
 Bybanen AS;977511402;Aksjeselskap;kommunene;2023;3;13370654;299340790;4.5
 Bysykkelen AS;914000475;Aksjeselskap;kommunene;2023;1;2443532;13355564;18.3
 Bømlo kommunale eigedomsselskap AS;993002631;Aksjeselskap;kommunene;2023;3;7888016;7105645;111.0
@@ -113,12 +117,14 @@ Bømlo kyrkjelege fellesråd;976994647;Kirkelig enhet;kommunene;2023;0;0;;
 Bømlo vatn og avløpsselskap AS;985228825;Aksjeselskap;kommunene;2023;0;0;35122367;0.0
 Dalane energi AS;917368007;Aksjeselskap;kommunene;2023;0;0;15452180;0.0
 Dalane miljøverk AS;922169063;Aksjeselskap;kommunene;2023;3;5194521;28773942;18.1
+Dalane miljøverk IKS;979719345;Interkommunalt selskap;kommunene;2023;0;0;;
 Ddv IKS;930654914;Interkommunalt selskap;kommunene;2023;0;0;;
 Digitale gardermoen KO;915498582;Annen juridisk person;kommunene;2023;4;201112252;;
-Digitale innherred kommunale oppgavefellesskap;930457485;Annen juridisk person;kommunene;2023;0;0;;
-Divtasvuona ja hábmera tjoaggulvisráde/tysfjord og hamarøy menighetsråd;877000532;Kirkelig enhet;kommunene;2023;0;0;;
+Digitale Innherred kommunale oppgavefellesskap;930457485;Annen juridisk person;kommunene;2023;0;0;;
+Divtasvuona ja Hábmera tjoaggulvisráde/tysfjord og Hamarøy menighetsråd;877000532;Kirkelig enhet;kommunene;2023;0;0;;
 Drammen scener AS;894922672;Aksjeselskap;kommunene;2023;0;0;34317065;0.0
 Drammensregionens brannvesen IKS;984054408;Interkommunalt selskap;kommunene;2023;0;0;45630235;0.0
+Driftsassistansen i Hordaland - vann og avløp IKS;987701390;Interkommunalt selskap;kommunene;2023;0;0;;
 Ecopro AS;984853998;Aksjeselskap;kommunene;2023;0;0;50621135;0.0
 Eidos eiendomsutvikling AS;830078312;Aksjeselskap;kommunene;2023;0;0;6777338;0.0
 Eidsiva bioenergi AS;980258165;Aksjeselskap;kommunene;2023;0;0;476043187;0.0
@@ -129,6 +135,7 @@ Elvenett AS;979497482;Aksjeselskap;kommunene;2023;0;0;53264084;0.0
 Elvia AS;980489698;Aksjeselskap;kommunene;2023;0;0;5183342000;0.0
 Endra AS;929347560;Aksjeselskap;kommunene;2023;0;0;5630281;0.0
 Enida AS;918312730;Aksjeselskap;kommunene;2023;1;755647;94085127;0.8
+Envina IKS;986790594;Interkommunalt selskap;kommunene;2023;0;0;;
 Eviny AS;880309102;Aksjeselskap;kommunene;2023;0;0;364000000;0.0
 Eviny termo AS;979427697;Aksjeselskap;kommunene;2023;1;46652977;339658353;13.7
 Fagne AS;915635857;Aksjeselskap;kommunene;2023;2;555890411;574113471;96.8
@@ -146,7 +153,7 @@ Forus energigjenvinning 2 AS;993465224;Aksjeselskap;kommunene;2023;0;0;80950780;
 Fosen renovasjon IKS;978669360;Interkommunalt selskap;kommunene;2023;5;4365559;63043638;6.9
 Frid IKS;931388975;Interkommunalt selskap;kommunene;2023;0;0;;
 Fusa kraftlag sa;858837162;Samvirkeforetak;kommunene;2023;0;0;1310542;0.0
-Fylkeshuset sarpsborg AS;844311532;Aksjeselskap;kommunene;2023;0;0;4167441;0.0
+Fylkeshuset Sarpsborg AS;844311532;Aksjeselskap;kommunene;2023;0;0;4167441;0.0
 Føie AS;971589752;Aksjeselskap;kommunene;2023;0;0;98675547;0.0
 Gauldal brann og redning IKS;989516191;Interkommunalt selskap;kommunene;2023;0;0;12764966;0.0
 Givas IKS;989016245;Interkommunalt selskap;kommunene;2023;7;13669044;;
@@ -158,7 +165,7 @@ Grenland havn IKS;970940510;Interkommunalt selskap;kommunene;2023;0;0;50315000;0
 Greve biogass AS;912716635;Aksjeselskap;kommunene;2023;1;9993155;2499619;399.8
 Grimstad kirkelige fellesråd;976992059;Kirkelig enhet;kommunene;2023;0;0;;
 Grønt hjerte AS;925535974;Aksjeselskap;kommunene;2023;0;0;1784964;0.0
-Hadeland og ringerike avfallsselskap AS;966494816;Aksjeselskap;kommunene;2023;4;5700951;125962685;4.5
+Hadeland og Ringerike avfallsselskap AS;966494816;Aksjeselskap;kommunene;2023;4;5700951;125962685;4.5
 Hafslund AS;920596509;Aksjeselskap;kommunene;2023;0;0;105000000;0.0
 Hafslund celsio AS;977296919;Aksjeselskap;kommunene;2023;2;66220759;2556390000;2.6
 Halden arbeid og vekst AS;917715378;Aksjeselskap;kommunene;2023;0;0;16253368;0.0
@@ -186,21 +193,22 @@ Hovden prosjektutvikling AS;945765747;Aksjeselskap;kommunene;2023;0;0;2456632;0.
 Hå kyrkjelege fellesråd;976993543;Kirkelig enhet;kommunene;2023;0;0;;
 Hålogaland ressursselskap IKS;959019126;Interkommunalt selskap;kommunene;2023;1;674538;18040310;3.7
 Hålogaland teater AS;920093914;Aksjeselskap;kommunene;2023;4;2992423;35211368;8.5
-Hægebostad og åseral renovasjonsselskap-hår IKS;979361475;Interkommunalt selskap;kommunene;2023;1;421233;11809762;3.6
+Hægebostad og Åseral renovasjonsselskap-hår IKS;979361475;Interkommunalt selskap;kommunene;2023;1;421233;11809762;3.6
 Ikomm AS;991335846;Aksjeselskap;kommunene;2023;0;0;203191809;0.0
-IKT agder IKS;985359385;Interkommunalt selskap;kommunene;2023;1;7801370;;
-IKT nordhordland kommunalt oppgåvefellesskap;923971890;Annen juridisk person;kommunene;2023;19;47403365;;
-IKT valdres IKS;995607409;Interkommunalt selskap;kommunene;2023;8;9926042;;
+IKT Agder IKS;985359385;Interkommunalt selskap;kommunene;2023;1;7801370;;
+IKT Nordhordland kommunalt oppgåvefellesskap;923971890;Annen juridisk person;kommunene;2023;19;47403365;;
+IKT Valdres IKS;995607409;Interkommunalt selskap;kommunene;2023;8;9926042;;
 Indigo IKT IKS;930283487;Interkommunalt selskap;kommunene;2023;0;0;;
-Indre agder og telemark avfallsselskap IKS;977500303;Interkommunalt selskap;kommunene;2023;0;0;36034365;0.0
-Indre hordaland kraftnett AS;919415096;Aksjeselskap;kommunene;2023;0;0;69318784;0.0
-Indre østfold renovasjon IKS;974642239;Interkommunalt selskap;kommunene;2023;4;111749188;79357401;140.8
+Indre Agder og Telemark avfallsselskap IKS;977500303;Interkommunalt selskap;kommunene;2023;0;0;36034365;0.0
+Indre Hordaland kraftnett AS;919415096;Aksjeselskap;kommunene;2023;0;0;69318784;0.0
+Indre Hordaland miljøverk IKS;971155876;Interkommunalt selskap;kommunene;2023;1;713727;;
+Indre Østfold renovasjon IKS;974642239;Interkommunalt selskap;kommunene;2023;4;111749188;79357401;140.8
 Innherred renovasjon IKS;971217391;Interkommunalt selskap;kommunene;2023;16;50499890;180003605;28.1
 Inspiria science center AS;893980482;Aksjeselskap;kommunene;2023;0;0;28869938;0.0
-Interkommunalt arkiv troms IKS;989532960;Interkommunalt selskap;kommunene;2023;0;0;3306349;0.0
-Interkommunalt arkiv trøndelag IKS;971375965;Interkommunalt selskap;kommunene;2023;0;0;;
-Interkommunalt politisk råd for nord-gudbrandsdal;976634845;Annen juridisk person;kommunene;2023;0;0;;
-Iris salten IKS;967518190;Interkommunalt selskap;kommunene;2023;4;4380699;141450000;3.1
+Interkommunalt arkiv Troms IKS;989532960;Interkommunalt selskap;kommunene;2023;0;0;3306349;0.0
+Interkommunalt arkiv Trøndelag IKS;971375965;Interkommunalt selskap;kommunene;2023;0;0;;
+Interkommunalt politisk råd for Nord-Gudbrandsdal;976634845;Annen juridisk person;kommunene;2023;0;0;;
+Iris Salten IKS;967518190;Interkommunalt selskap;kommunene;2023;4;4380699;141450000;3.1
 Iris service AS;984019327;Aksjeselskap;kommunene;2023;3;4364748;83346536;5.2
 Irmat AS;984364458;Aksjeselskap;kommunene;2023;6;28494107;62486038;45.6
 Irs miljø IKS;995055244;Interkommunalt selskap;kommunene;2023;5;13708953;51063367;26.8
@@ -212,8 +220,8 @@ Karmøy kirkelig fellesråd;876994062;Kirkelig enhet;kommunene;2023;0;0;;
 Kilden teater og konserthus IKS;986471839;Interkommunalt selskap;kommunene;2023;6;10641097;;
 Kinoalliansen AS;917630518;Aksjeselskap;kommunene;2023;1;7494867;1783602;420.2
 Kinonor AS;914726441;Aksjeselskap;kommunene;2023;1;5650000;189120;2987.5
-Kirkelig fellesråd i oslo;976987608;Kirkelig enhet;kommunene;2023;5;37550890;;
-Kirkelig fellesråd i trondheim;976998294;Kirkelig enhet;kommunene;2023;1;1033539;;
+Kirkelig fellesråd i Oslo;976987608;Kirkelig enhet;kommunene;2023;5;37550890;;
+Kirkelig fellesråd i Trondheim;976998294;Kirkelig enhet;kommunene;2023;1;1033539;;
 Klepp energi AS;826294442;Aksjeselskap;kommunene;2023;0;0;59017000;0.0
 Klubben i røverstaden AS;919058579;Aksjeselskap;kommunene;2023;0;0;6798070;0.0
 Kode kunstmuseer og komponisthjem STI;990269343;Stiftelse;kommunene;2023;2;13006027;105293458;12.4
@@ -222,13 +230,14 @@ Kraftia energi AS;980283976;Aksjeselskap;kommunene;2023;4;60074318;3113135;1929.
 Kristiansand havn IKS;926180711;Interkommunalt selskap;kommunene;2023;1;1998631;98750000;2.0
 Kristiansand kirkelig fellesråd;876992612;Kirkelig enhet;kommunene;2023;0;0;;
 Kristiansandsregionen brann og redning IKS;993470244;Interkommunalt selskap;kommunene;2023;0;0;;
-Kristiansund og nordmøre havn IKS;986712720;Interkommunalt selskap;kommunene;2023;0;0;18926402;0.0
+Kristiansund og Nordmøre havn IKS;986712720;Interkommunalt selskap;kommunene;2023;0;0;18926402;0.0
 Krossobanen AS;958759819;Aksjeselskap;kommunene;2023;0;0;2177152;0.0
-Lillesand og birkenes interkommunale renovasjonsselskap libir IKS;870934432;Interkommunalt selskap;kommunene;2023;0;0;28583118;0.0
+Legevakta i Drammensregionen IKS;986390456;Interkommunalt selskap;kommunene;2023;0;0;;
+Lillesand og Birkenes interkommunale renovasjonsselskap LIBIR IKS;870934432;Interkommunalt selskap;kommunene;2023;0;0;28583118;0.0
 Lillestrøm kirkelige fellesråd;922052271;Kirkelig enhet;kommunene;2023;0;0;;
 Lillestrøm parkering AS;986304185;Aksjeselskap;kommunene;2023;0;0;8132274;0.0
 Linea AS;917424799;Aksjeselskap;kommunene;2023;1;4107;373330000;0.0
-Lister og dalane avfallsservice AS;922566771;Aksjeselskap;kommunene;2023;0;0;2541245;0.0
+Lister og Dalane avfallsservice AS;922566771;Aksjeselskap;kommunene;2023;0;0;2541245;0.0
 Lnett AS;980038408;Aksjeselskap;kommunene;2023;8;592566743;849966546;69.7
 Lofoten avfallsselskap IKS;971014407;Interkommunalt selskap;kommunene;2023;2;2718829;66414278;4.1
 Lofotkraft AS;886347782;Aksjeselskap;kommunene;2023;0;0;12751000;0.0
@@ -242,53 +251,55 @@ Maren AS;883369882;Aksjeselskap;kommunene;2023;0;0;3191097;0.0
 Maren kommuneservice AS;983564836;Aksjeselskap;kommunene;2023;0;0;39047113;0.0
 Marvika senter butikk 5 AS;995557010;Aksjeselskap;kommunene;2023;0;0;1261257;0.0
 Maskintråkk AS;981616634;Aksjeselskap;kommunene;2023;0;0;2572065;0.0
-Mia - museene i akershus STI;974235390;Stiftelse;kommunene;2023;0;0;47298992;0.0
-Midt-agder friluftsråd kommunalt oppgavefellesskap;975641716;Annen juridisk person;kommunene;2023;0;0;;
+MIA - museene i Akershus STI;974235390;Stiftelse;kommunene;2023;0;0;47298992;0.0
+Midt-Agder friluftsråd kommunalt oppgavefellesskap;975641716;Annen juridisk person;kommunene;2023;0;0;;
 Midtnett AS;917856222;Aksjeselskap;kommunene;2023;0;0;102548900;0.0
-Midtre namdal avfallsselskap IKS;957387969;Interkommunalt selskap;kommunene;2023;4;3328437;109823000;3.0
-Midtre romerike avløpsselskap IKS;911808005;Interkommunalt selskap;kommunene;2023;0;0;;
+Midtre Namdal avfallsselskap IKS;957387969;Interkommunalt selskap;kommunene;2023;4;3328437;109823000;3.0
+Midtre Romerike avløpsselskap IKS;911808005;Interkommunalt selskap;kommunene;2023;0;0;;
 Mitra AS;971178671;Aksjeselskap;kommunene;2023;0;0;31441084;0.0
 Mjøsanlegget AS;987916346;Aksjeselskap;kommunene;2023;1;0;43245500;0.0
 Mjøsmuseet AS;987828293;Aksjeselskap;kommunene;2023;0;0;11729382;0.0
 MOVAR IKS;959272204;Interkommunalt selskap;kommunene;2023;20;109916502;164737000;66.7
 Munkedamsveien 15 AS;936009107;Aksjeselskap;kommunene;2023;0;0;;
-Musea i sogn og fjordane STI;994179136;Stiftelse;kommunene;2023;0;0;30926175;0.0
+Musea i Sogn og Fjordane STI;994179136;Stiftelse;kommunene;2023;0;0;30926175;0.0
 Museene arven AS;956298660;Aksjeselskap;kommunene;2023;0;0;42731123;0.0
-Museene i sør-trøndelag AS;993595675;Aksjeselskap;kommunene;2023;0;0;140488999;0.0
+Museene i Sør-Trøndelag AS;993595675;Aksjeselskap;kommunene;2023;0;0;140488999;0.0
 Museet midt IKS;991500502;Interkommunalt selskap;kommunene;2023;0;0;19693009;0.0
-Museum stavanger AS;995642034;Aksjeselskap;kommunene;2023;1;143836;100831619;0.1
+Museum Stavanger AS;995642034;Aksjeselskap;kommunene;2023;1;143836;100831619;0.1
 Namdal rehabilitering IKS;986923845;Interkommunalt selskap;kommunene;2023;1;1498973;11340984;13.2
 Narvik kirkelige fellesråd;976999851;Kirkelig enhet;kommunene;2023;0;0;;
 Nasjonalt kommunesamarbeid for 110-sentralene IKS;927056453;Interkommunalt selskap;kommunene;2023;2;3108588;;
-Nedre romerike brann- og redningsvesen IKS;976634438;Interkommunalt selskap;kommunene;2023;4;8179521;;
-Nedre romerike vann- og avløpsselskap IKS;892110972;Interkommunalt selskap;kommunene;2023;9;30212591;;
+Nedre Romerike brann- og redningsvesen IKS;976634438;Interkommunalt selskap;kommunene;2023;4;8179521;;
+Nedre Romerike vann- og avløpsselskap IKS;892110972;Interkommunalt selskap;kommunene;2023;9;30212591;;
+Nedre Romerike vannverk IKS;992110996;Interkommunalt selskap;kommunene;2023;1;31262066;;
 Ngir drift AS;932316943;Aksjeselskap;kommunene;2023;0;0;;
-Noranett andøy AS;921680554;Aksjeselskap;kommunene;2023;0;0;16500016;0.0
+Noranett Andøy AS;921680554;Aksjeselskap;kommunene;2023;0;0;16500016;0.0
 Noranett AS;985411131;Aksjeselskap;kommunene;2023;0;0;168792124;0.0
-Noranett hadsel AS;917983550;Aksjeselskap;kommunene;2023;0;0;19715610;0.0
+Noranett Hadsel AS;917983550;Aksjeselskap;kommunene;2023;0;0;19715610;0.0
 Norasondegruppen AS;914671965;Aksjeselskap;kommunene;2023;0;0;6987394;0.0
-Nord-gudbrandsdal renovasjonsselskap IKS;992549394;Interkommunalt selskap;kommunene;2023;3;5621919;;
-Nord-salten kraft AS;995114666;Aksjeselskap;kommunene;2023;0;0;85353222;0.0
+Nord-Gudbrandsdal renovasjonsselskap IKS;992549394;Interkommunalt selskap;kommunene;2023;3;5621919;;
+Nord-Salten kraft AS;995114666;Aksjeselskap;kommunene;2023;0;0;85353222;0.0
 Nordfjord havn IKS;884276012;Interkommunalt selskap;kommunene;2023;0;0;18215689;0.0
 Nordfjord miljøverk IKS;977549833;Interkommunalt selskap;kommunene;2023;1;17316906;66428211;26.1
-Nordhordland og gulen interkommunale renovasjonsselskap IKS;856167402;Interkommunalt selskap;kommunene;2023;12;60184918;95713681;62.9
-Nordre follo renseanlegg IKS;971521570;Interkommunalt selskap;kommunene;2023;5;13155853;26353660;49.9
+Nordhordland og Gulen interkommunale renovasjonsselskap IKS;856167402;Interkommunalt selskap;kommunene;2023;12;60184918;95713681;62.9
+Nordmøre interkommunale renovasjonsselskap;971143436;Interkommunalt selskap;kommunene;2023;1;9693319;;
+Nordre Follo renseanlegg IKS;971521570;Interkommunalt selskap;kommunene;2023;5;13155853;26353660;49.9
 Norefjell vann- og avløpsselskap AS;935803713;Aksjeselskap;kommunene;2023;0;0;15509427;0.0
 Novari IKS;998283914;Interkommunalt selskap;kommunene;2023;17;68138647;;
 Ofa IKS;931832336;Interkommunalt selskap;kommunene;2023;0;0;;
 Olavshallen AS;951615390;Aksjeselskap;kommunene;2023;0;0;26131966;0.0
-Opera østfold AS;923724826;Aksjeselskap;kommunene;2023;0;0;6578584;0.0
+Opera Østfold AS;923724826;Aksjeselskap;kommunene;2023;0;0;6578584;0.0
 Opplevelsessenteret østfoldbadet AS;979932790;Aksjeselskap;kommunene;2023;0;0;26547223;0.0
 Oslo konserthus AS;981175328;Aksjeselskap;kommunene;2023;0;0;50803553;0.0
 Oslo nye teater AS;915065805;Aksjeselskap;kommunene;2023;0;0;44435726;0.0
 Oslo produksjon & tjenester AS;961528135;Aksjeselskap;kommunene;2023;0;0;31261125;0.0
 Oslo&co AS;912588114;Aksjeselskap;kommunene;2023;0;0;10912907;0.0
 Personalpartner arbeid og inkludering AS;927359472;Aksjeselskap;kommunene;2023;0;0;18360185;0.0
-Plug ålesund AS;925788228;Aksjeselskap;kommunene;2023;1;8726712;9357825;93.3
+Plug Ålesund AS;925788228;Aksjeselskap;kommunene;2023;1;8726712;9357825;93.3
 Ramfoss kraftlag kommunalt oppgavefellesskap;971030690;Annen juridisk person;kommunene;2023;0;0;;
 Randsfjordmuseet AS;987107022;Aksjeselskap;kommunene;2023;0;0;6735237;0.0
-Region nordhordland helsehus IKS;915031579;Interkommunalt selskap;kommunene;2023;2;4153375;;
-Region nordhordland IKS;971361514;Interkommunalt selskap;kommunene;2023;0;0;;
+Region Nordhordland helsehus IKS;915031579;Interkommunalt selskap;kommunene;2023;2;4153375;;
+Region Nordhordland IKS;971361514;Interkommunalt selskap;kommunene;2023;0;0;;
 Reit AS;993474118;Aksjeselskap;kommunene;2023;0;0;8004156;0.0
 Reknes næringseiendom AS;930591114;Aksjeselskap;kommunene;2023;0;0;31497792;0.0
 Remidt IKS;975936333;Interkommunalt selskap;kommunene;2023;2;3497604;323825397;1.1
@@ -296,22 +307,22 @@ Remiks husholdning AS;994900579;Aksjeselskap;kommunene;2023;3;16027807;155971994
 Remiks miljøpark AS;894462132;Aksjeselskap;kommunene;2023;0;0;41987302;0.0
 Reno-vest IKS;971037202;Interkommunalt selskap;kommunene;2023;3;3841370;20177310;19.0
 Reno-vest produksjon AS;912209571;Aksjeselskap;kommunene;2023;0;0;77655140;0.0
-Renovasjon i grenland IKS;913482778;Interkommunalt selskap;kommunene;2023;22;317051811;;
+Renovasjon i Grenland IKS;913482778;Interkommunalt selskap;kommunene;2023;22;317051811;;
 Renovasjonen IKS;989111736;Interkommunalt selskap;kommunene;2023;6;40088068;58786667;68.2
-Renovasjonsselskapet for drammensregionen IKS;984459947;Interkommunalt selskap;kommunene;2023;16;64874068;220345748;29.4
-Renovasjonsselskapet for farsund og lyngdal AS;987517999;Aksjeselskap;kommunene;2023;1;191781;46046493;0.4
+Renovasjonsselskapet for Drammensregionen IKS;984459947;Interkommunalt selskap;kommunene;2023;16;64874068;220345748;29.4
+Renovasjonsselskapet for Farsund og Lyngdal AS;987517999;Aksjeselskap;kommunene;2023;1;191781;46046493;0.4
 Renovasjonsselskapet glør IKS;971041692;Interkommunalt selskap;kommunene;2023;17;2880004;84396515;3.4
 Renovest IKS;980018725;Interkommunalt selskap;kommunene;2023;4;484932;48099330;1.0
 Retrans midt AS;920321941;Aksjeselskap;kommunene;2023;0;0;66125654;0.0
 Retura iris AS;984019351;Aksjeselskap;kommunene;2023;0;0;49071448;0.0
 Retura nt AS;986850821;Aksjeselskap;kommunene;2023;0;0;76718318;0.0
-Retura søre sunnmøre AS;987578602;Aksjeselskap;kommunene;2023;0;0;22841525;0.0
+Retura Søre Sunnmøre AS;987578602;Aksjeselskap;kommunene;2023;0;0;22841525;0.0
 Retura trv AS;988517054;Aksjeselskap;kommunene;2023;0;0;199766357;0.0
 Returkraft AS;991590463;Aksjeselskap;kommunene;2023;15;28337168;180299671;15.7
 Rir næring AS;887670552;Aksjeselskap;kommunene;2023;0;0;30742172;0.0
 Rir transport AS;919546018;Aksjeselskap;kommunene;2023;0;0;14024923;0.0
 Risør kirkelige fellesråd;976992008;Kirkelig enhet;kommunene;2023;0;0;;
-Risør tvedestrand regionens avfallsselskap rta AS;877540332;Aksjeselskap;kommunene;2023;0;0;42413676;0.0
+Risør Tvedestrand regionens avfallsselskap RTA AS;877540332;Aksjeselskap;kommunene;2023;0;0;42413676;0.0
 Rogaland brann og redning IKS;886884702;Interkommunalt selskap;kommunene;2023;10;16991306;110770617;15.3
 Romerike avfallsforedling IKS;965075364;Interkommunalt selskap;kommunene;2023;52;164100852;257901834;63.6
 Romerike krisesenter IKS;997597575;Interkommunalt selskap;kommunene;2023;0;0;;
@@ -320,6 +331,7 @@ Romsdalshalvøya interkommunale renovasjonsselskap IKS;971042656;Interkommunalt 
 Ruter AS;991609407;Aksjeselskap;kommunene;2023;41;865087806;11853352000;7.3
 Ryfylke friluftsråd kommunalt oppgavefelleskap;974247178;Annen juridisk person;kommunene;2023;0;0;;
 Ryfylke it-samarbeid kommunalt oppgavefellesskap;929371763;Annen juridisk person;kommunene;2023;0;0;;
+Ryfylke miljøverk IKS;975372189;Interkommunalt selskap;kommunene;2023;1;3960301;;
 Ryfylkemuseet STI;970916482;Stiftelse;kommunene;2023;0;0;1567639;0.0
 Rå biopark AS;929464842;Aksjeselskap;kommunene;2023;0;0;1478657;0.0
 Røyken eiendom AS;982201489;Aksjeselskap;kommunene;2023;0;0;14032077;0.0
@@ -337,7 +349,8 @@ Sirkulær bestiller AS;924332050;Aksjeselskap;kommunene;2023;2;135693610;451242;
 Skien kirkelige fellesråd;976991273;Kirkelig enhet;kommunene;2023;0;0;;
 Skøyen sokn;945766530;Kirkelig enhet;kommunene;2023;0;0;;
 Sogn brann og redning IKS;996629880;Interkommunalt selskap;kommunene;2023;1;0;;
-Sogn og fjordane energi AS;984882092;Aksjeselskap;kommunene;2023;0;0;37293000;0.0
+Sogn og Fjordane energi AS;984882092;Aksjeselskap;kommunene;2023;0;0;37293000;0.0
+Sogn og Fjordane revisjon IKS;987803223;Interkommunalt selskap;kommunene;2023;0;0;;
 Sognekraft produksjon AS;916069634;Aksjeselskap;kommunene;2023;0;0;294427000;0.0
 Sola kirkelige fellesråd;976993691;Kirkelig enhet;kommunene;2023;1;252863;;
 Solør bioenergi tranby AS;916598017;Aksjeselskap;kommunene;2023;0;0;12021285;0.0
@@ -350,13 +363,13 @@ Sporveien vognmateriell AS;991005226;Aksjeselskap;kommunene;2023;0;0;525155000;0
 Stavanger kirkelige fellesråd;976993403;Kirkelig enhet;kommunene;2023;0;0;;
 Stavanger konserthus IKS;989887823;Interkommunalt selskap;kommunene;2023;9;10902469;87157162;12.5
 Stiftelsen buskerudmuseene;913084705;Stiftelse;kommunene;2023;0;0;26494180;0.0
-Stiftelsen bymuseet i bergen;988212024;Stiftelse;kommunene;2023;1;104240;37388105;0.3
+Stiftelsen bymuseet i Bergen;988212024;Stiftelse;kommunene;2023;1;104240;37388105;0.3
 Stiftelsen kunstsilo;976215834;Stiftelse;kommunene;2023;1;1832660;33116557;5.5
-Stiftelsen lillehammer museum;955378024;Stiftelse;kommunene;2023;0;0;49171508;0.0
+Stiftelsen Lillehammer museum;955378024;Stiftelse;kommunene;2023;0;0;49171508;0.0
 Stiftelsen museum vest;987669586;Stiftelse;kommunene;2023;0;0;38435456;0.0
-Stiftelsen trondheim pirbad;976741315;Stiftelse;kommunene;2023;0;0;38125126;0.0
-Stiftinga hardanger og voss museum;987927704;Stiftelse;kommunene;2023;1;16308178;32103000;50.8
-Stiftinga museumssenteret i hordaland;971349743;Stiftelse;kommunene;2023;0;0;16132389;0.0
+Stiftelsen Trondheim pirbad;976741315;Stiftelse;kommunene;2023;0;0;38125126;0.0
+Stiftinga Hardanger og Voss museum;987927704;Stiftelse;kommunene;2023;1;16308178;32103000;50.8
+Stiftinga museumssenteret i Hordaland;971349743;Stiftelse;kommunene;2023;0;0;16132389;0.0
 Stord vatn og avløp AS;934602900;Aksjeselskap;kommunene;2023;0;0;;
 Storfjorden kyrkjelege fellesråd;997535820;Kirkelig enhet;kommunene;2023;0;0;;
 Sunnfjord kyrkjelege fellesråd;921865686;Kirkelig enhet;kommunene;2023;0;0;;
@@ -366,14 +379,15 @@ Sunnhordland interkommunale miljøverk IKS;958284837;Interkommunalt selskap;komm
 Sunnhordland kraftlag AS;916435711;Aksjeselskap;kommunene;2023;0;0;667299000;0.0
 Sysikt kommunalt oppgavefellesskap;995501872;Annen juridisk person;kommunene;2023;2;41399333;;
 Søir husholdning AS;989018043;Aksjeselskap;kommunene;2023;3;55662721;54767536;101.6
-Søndre follo renseanlegg IKS;970964584;Interkommunalt selskap;kommunene;2023;3;1472946;;
-Søndre helgeland miljøverk;975824845;Interkommunalt selskap;kommunene;2023;2;1226438;91508000;1.3
+Sølvberget KF;982766184;Kommunalt foretak;kommunene;2023;0;0;;
+Søndre Follo renseanlegg IKS;970964584;Interkommunalt selskap;kommunene;2023;3;1472946;;
+Søndre Helgeland miljøverk;975824845;Interkommunalt selskap;kommunene;2023;2;1226438;91508000;1.3
 Sør-østerdal interkommunale renovasjonsselskap;977041341;Interkommunalt selskap;kommunene;2023;0;0;11962571;0.0
-Søre sunnmøre IKT kommunalt oppgåvefellesskap;919824573;Annen juridisk person;kommunene;2023;2;1;;
-Søre sunnmøre reinhaldsverk IKS;987570970;Interkommunalt selskap;kommunene;2023;0;0;37916996;0.0
+Søre Sunnmøre IKT kommunalt oppgåvefellesskap;919824573;Annen juridisk person;kommunene;2023;2;1;;
+Søre Sunnmøre reinhaldsverk IKS;987570970;Interkommunalt selskap;kommunene;2023;0;0;37916996;0.0
 Sørmarka flerbrukshall IKS;991422560;Interkommunalt selskap;kommunene;2023;1;115038;20048284;0.6
 Tafjord kraftvarme AS;977461804;Aksjeselskap;kommunene;2023;2;19438398;169702054;11.5
-Teater vestland AS;929181557;Aksjeselskap;kommunene;2023;1;3001370;14928958;20.1
+Teater Vestland AS;929181557;Aksjeselskap;kommunene;2023;1;3001370;14928958;20.1
 Tempevegen 25 AS;921956452;Aksjeselskap;kommunene;2023;0;0;5280655;0.0
 Tendranett AS;918999361;Aksjeselskap;kommunene;2023;1;214332;75033006;0.3
 Tensio AS;922828172;Aksjeselskap;kommunene;2023;2;296804637;151754000;195.6
@@ -397,27 +411,29 @@ Validér AS;912061159;Aksjeselskap;kommunene;2023;0;0;11792707;0.0
 Vann vest AS;924367148;Aksjeselskap;kommunene;2023;2;4631880;7176429;64.5
 Vaterland bussterminal AS;943180555;Aksjeselskap;kommunene;2023;0;0;15121550;0.0
 Vennesla kirkelige fellesråd;976992814;Kirkelig enhet;kommunene;2023;0;0;;
-Vest-agder-museet IKS;989072048;Interkommunalt selskap;kommunene;2023;5;8974637;;
-Vest-finnmark avfallsselskap, oarje-finnmarkku rihpafitnodat vefas IKS;977079403;Interkommunalt selskap;kommunene;2023;0;0;50078355;0.0
-Vest-telemark interkommunalt politisk råd;975476588;Annen juridisk person;kommunene;2023;0;0;;
+Vest-Agder-museet IKS;989072048;Interkommunalt selskap;kommunene;2023;5;8974637;;
+Vest-Finnmark avfallsselskap, oarje-finnmarkku rihpafitnodat vefas IKS;977079403;Interkommunalt selskap;kommunene;2023;0;0;50078355;0.0
+Vest-Telemark interkommunalt politisk råd;975476588;Annen juridisk person;kommunene;2023;0;0;;
 Vestfold avfall og ressurs AS;979281536;Aksjeselskap;kommunene;2023;5;23175673;232598685;10.0
 Vestfold interkommunale brannvesen IKS;982847796;Interkommunalt selskap;kommunene;2023;1;0;;
 Vestfold krematorium IKS;988100226;Interkommunalt selskap;kommunene;2023;1;187721;;
 Vestfold vann IKS;962351409;Interkommunalt selskap;kommunene;2023;0;0;77671601;0.0
 Vestfoldmuseene IKS;993871184;Interkommunalt selskap;kommunene;2023;0;0;;
+Vestviken interkommunale vei-, vann- og avløpsselskap IKS;913716922;Interkommunalt selskap;kommunene;2023;0;0;;
 Viermie AS;919884452;Aksjeselskap;kommunene;2023;0;0;25514110;0.0
 Vindafjord kyrkjelege fellesråd;976994132;Kirkelig enhet;kommunene;2023;0;0;;
-Volda og ørsta reinhaldsverk IKS;984068085;Interkommunalt selskap;kommunene;2023;5;11290828;31362185;36.0
+Volda og Ørsta reinhaldsverk IKS;984068085;Interkommunalt selskap;kommunene;2023;5;11290828;31362185;36.0
 Å energi AS;981952324;Aksjeselskap;kommunene;2023;0;0;404795339;0.0
+Ålesundregionen interkommunale miljøselskap IKS;994717286;Interkommunalt selskap;kommunene;2023;8;27514578;;
 Ålesundregionens havnevesen IKS;933239098;Interkommunalt selskap;kommunene;2023;0;0;;
 Øfas husholdning AS;888321942;Aksjeselskap;kommunene;2023;1;4023723;35801000;11.2
-Øst-finnmark avfallsselskap AS;921473346;Aksjeselskap;kommunene;2023;2;1522346;56922000;2.7
+Øst-Finnmark avfallsselskap AS;921473346;Aksjeselskap;kommunene;2023;2;1522346;56922000;2.7
 Østfold avfallssortering IKS;924961821;Interkommunalt selskap;kommunene;2023;0;0;1791568;0.0
 Østfoldmuseene STI;994963910;Stiftelse;kommunene;2023;0;0;39034426;0.0
-Øvre eiker kirkelige fellesråd;976990218;Kirkelig enhet;kommunene;2023;0;0;;
-Øvre romerike brann og redning IKS;987615516;Interkommunalt selskap;kommunene;2023;0;0;;
+Øvre Eiker kirkelige fellesråd;976990218;Kirkelig enhet;kommunene;2023;0;0;;
+Øvre Romerike brann og redning IKS;987615516;Interkommunalt selskap;kommunene;2023;0;0;;
 Øyvar AS;985345899;Aksjeselskap;kommunene;2023;4;4216284;178492371;2.4
-Aktieselskapet Vinmonopolet;817209882;Aksjeselskap;staten;2024;17;6776872647;16969000000;39.9
+Aktieselskapet Vinmonopolet;817209882;Aksjeselskap;staten;2024;18;6778502784;16969000000;39.9
 Andøya space AS;979122721;Aksjeselskap;staten;2024;4;19333515;50058968;38.6
 Andøya space defence AS;879122392;Aksjeselskap;staten;2024;0;0;51232034;0.0
 Andøya space education AS;982222559;Aksjeselskap;staten;2024;1;1565753;18809124;8.3
@@ -472,12 +488,12 @@ Statskog SF;966056258;Statsforetak;staten;2024;0;0;153086000;0.0
 Stavanger symfoniorkester stiftelse;874247502;Stiftelse;staten;2024;0;0;62609547;0.0
 Stiftelsen musikkselskapet harmonien;976619005;Stiftelse;staten;2024;0;0;183280000;0.0
 Stiftelsen nasjonalmuseet for kunst;985686092;Stiftelse;staten;2024;7;23193638;738572500;3.1
-Stiftelsen oslo-filharmonien;976944143;Stiftelse;staten;2024;1;2506849;94369000;2.7
+Stiftelsen Oslo-filharmonien;976944143;Stiftelse;staten;2024;1;2506849;94369000;2.7
 Trondheim symfoniorkester & opera STI;971434023;Stiftelse;staten;2024;0;0;43365836;0.0
 Unifond AS;995200090;Aksjeselskap;staten;2024;0;0;280464;0.0
 Universitetssenteret på svalbard AS;985204454;Aksjeselskap;staten;2024;0;0;124118117;0.0
-Veas AS;920171400;Aksjeselskap;staten;2024;0;0;1002318;0.0
-Veas selvkost AS;920171540;Aksjeselskap;staten;2024;2;5422230;338378314;1.6
+VEAS AS;920171400;Aksjeselskap;staten;2024;0;0;1002318;0.0
+VEAS selvkost AS;920171540;Aksjeselskap;staten;2024;2;5422230;338378314;1.6
 Vegamot AS;935162718;Aksjeselskap;staten;2024;0;0;122638488;0.0
 Vegfinans AS;983149499;Aksjeselskap;staten;2024;5;37566693;38187801;98.4
 Vy buss AS;976948394;Aksjeselskap;staten;2024;0;0;2862530000;0.0
@@ -485,6 +501,7 @@ Vy tog AS;917374988;Aksjeselskap;staten;2024;2;90349;779881000;0.0
 Vygruppen AS;984661177;Aksjeselskap;staten;2024;24;620534140;4516000000;13.7
 Abakus AS;983335543;Aksjeselskap;kommunene;2024;7;36247753;1915192;1892.6
 Afiber AS;920050719;Aksjeselskap;kommunene;2024;0;0;94830713;0.0
+AFK eiendom FKF;996331202;Fylkeskommunalt foretak;kommunene;2024;0;0;;
 Agder kollektivtrafikk AS;991776524;Aksjeselskap;kommunene;2024;3;19818068;1102622394;1.8
 Agder renovasjon IKS;997765494;Interkommunalt selskap;kommunene;2024;7;15077856;140014000;10.8
 Agenda aktiv AS;872414762;Aksjeselskap;kommunene;2024;0;0;21646413;0.0
@@ -494,14 +511,15 @@ Anno museum AS;994933272;Aksjeselskap;kommunene;2024;0;0;61215000;0.0
 Arktisk filharmoni AS;994387693;Aksjeselskap;kommunene;2024;0;0;49216017;0.0
 Arva AS;979151950;Aksjeselskap;kommunene;2024;1;23585205;779810403;3.0
 Asker nett AS;917743193;Aksjeselskap;kommunene;2024;0;0;44413218;0.0
-Asker og bærum brann og redning IKS;980358380;Interkommunalt selskap;kommunene;2024;5;20869145;;
-Asker og bærum vannverk IKS;974636972;Interkommunalt selskap;kommunene;2024;1;4168378;42807430;9.7
+Asker og Bærum brann og redning IKS;980358380;Interkommunalt selskap;kommunene;2024;5;20869145;;
+Asker og Bærum vannverk IKS;974636972;Interkommunalt selskap;kommunene;2024;1;4168378;42807430;9.7
+Askerbadet KF;916284128;Kommunalt foretak;kommunene;2024;0;0;;
 Askvoll sokn;976996267;Kirkelig enhet;kommunene;2024;0;0;;
-Atb AS;994686011;Aksjeselskap;kommunene;2024;11;1116734843;2953070000;37.8
+AtB AS;994686011;Aksjeselskap;kommunene;2024;11;1116734843;2953070000;37.8
 Attvin AS;922025096;Aksjeselskap;kommunene;2024;12;13085791;40063947;32.7
 Attvin næring AS;923030891;Aksjeselskap;kommunene;2024;0;0;68891564;0.0
 Attvin produksjon AS;923030913;Aksjeselskap;kommunene;2024;4;5485390;187075747;2.9
-Aust-agder museum og arkiv IKS;986088695;Interkommunalt selskap;kommunene;2024;0;0;;
+Aust-Agder museum og arkiv IKS;986088695;Interkommunalt selskap;kommunene;2024;0;0;;
 Avfall sør AS;986296042;Aksjeselskap;kommunene;2024;0;0;1819466;0.0
 Avfall sør husholdning AS;995646137;Aksjeselskap;kommunene;2024;9;25264891;211931048;11.9
 Avfallsmegling nord AS;925117706;Aksjeselskap;kommunene;2024;1;2972080;820052;362.4
@@ -509,7 +527,7 @@ Avfallsservice AS;964180644;Aksjeselskap;kommunene;2024;5;5040749;52095305;9.7
 Barents nett AS;971058854;Aksjeselskap;kommunene;2024;0;0;162360000;0.0
 Bergen havn AS;918404635;Aksjeselskap;kommunene;2024;0;0;125640742;0.0
 Bergen kirkelige fellesråd;976994434;Kirkelig enhet;kommunene;2024;0;0;;
-BIR AS;983495400;Aksjeselskap;kommunene;2024;38;264123889;765805000;34.5
+BIR AS;983495400;Aksjeselskap;kommunene;2024;40;272015060;765805000;35.5
 BIR infrastruktur AS;990766665;Aksjeselskap;kommunene;2024;3;9139560;83567871;10.9
 BIR nyverdi AS;984504942;Aksjeselskap;kommunene;2024;3;9231390;67787872;13.6
 BIR ressurs AS;985825408;Aksjeselskap;kommunene;2024;1;1002053;415517514;0.2
@@ -518,12 +536,14 @@ Bjørvika infrastruktur AS;985010110;Aksjeselskap;kommunene;2024;1;267534;604608
 Bkk AS;976944801;Aksjeselskap;kommunene;2024;2;71052048;1339998629;5.3
 Bodø kirkelige fellesråd;976999800;Kirkelig enhet;kommunene;2024;2;913723;;
 Bodø spektrum AS;946028614;Aksjeselskap;kommunene;2024;1;824093;26272837;3.1
+Bodø2024 IKS;925047686;Interkommunalt selskap;kommunene;2024;2;6591348;;
 Bop5 AS;923617035;Aksjeselskap;kommunene;2024;0;0;180401;0.0
 Borg havn IKS;970937099;Interkommunalt selskap;kommunene;2024;0;0;72446036;0.0
 Brakar AS;995082454;Aksjeselskap;kommunene;2024;11;107834046;883163194;12.2
 Brannvesenet sør IKS;969952890;Interkommunalt selskap;kommunene;2024;1;0;;
 Bredbåndsfylket AS;986358013;Aksjeselskap;kommunene;2024;0;0;34473328;0.0
-Bustadstiftinga ved sentral sjukehuset i sogn og fjordane;874979392;Stiftelse;kommunene;2024;0;0;7010204;0.0
+Brevik fergeselskap IKS;912617750;Interkommunalt selskap;kommunene;2024;0;0;;
+Bustadstiftinga ved sentral sjukehuset i Sogn og Fjordane;874979392;Stiftelse;kommunene;2024;0;0;7010204;0.0
 Bybanen AS;977511402;Aksjeselskap;kommunene;2024;5;10587550;323902618;3.3
 Bysykkelen AS;914000475;Aksjeselskap;kommunene;2024;1;2505133;14556422;17.2
 Bømlo kommunale eigedomsselskap AS;993002631;Aksjeselskap;kommunene;2024;2;8917965;6686591;133.4
@@ -531,12 +551,14 @@ Bømlo kyrkjelege fellesråd;976994647;Kirkelig enhet;kommunene;2024;0;0;;
 Bømlo vatn og avløpsselskap AS;985228825;Aksjeselskap;kommunene;2024;0;0;33604489;0.0
 Dalane energi AS;917368007;Aksjeselskap;kommunene;2024;0;0;20036490;0.0
 Dalane miljøverk AS;922169063;Aksjeselskap;kommunene;2024;2;2603425;33612294;7.7
+Dalane miljøverk IKS;979719345;Interkommunalt selskap;kommunene;2024;0;0;;
 Ddv IKS;930654914;Interkommunalt selskap;kommunene;2024;0;0;;
 Digitale gardermoen KO;915498582;Annen juridisk person;kommunene;2024;4;93045859;;
-Digitale innherred kommunale oppgavefellesskap;930457485;Annen juridisk person;kommunene;2024;0;0;;
-Divtasvuona ja hábmera tjoaggulvisráde/tysfjord og hamarøy menighetsråd;877000532;Kirkelig enhet;kommunene;2024;0;0;;
+Digitale Innherred kommunale oppgavefellesskap;930457485;Annen juridisk person;kommunene;2024;0;0;;
+Divtasvuona ja Hábmera tjoaggulvisráde/tysfjord og Hamarøy menighetsråd;877000532;Kirkelig enhet;kommunene;2024;0;0;;
 Drammen scener AS;894922672;Aksjeselskap;kommunene;2024;0;0;37087729;0.0
 Drammensregionens brannvesen IKS;984054408;Interkommunalt selskap;kommunene;2024;0;0;46912639;0.0
+Driftsassistansen i Hordaland - vann og avløp IKS;987701390;Interkommunalt selskap;kommunene;2024;0;0;;
 Ecopro AS;984853998;Aksjeselskap;kommunene;2024;1;237808;60711151;0.4
 Eidos eiendomsutvikling AS;830078312;Aksjeselskap;kommunene;2024;0;0;6250899;0.0
 Eidsiva bioenergi AS;980258165;Aksjeselskap;kommunene;2024;0;0;426506039;0.0
@@ -547,6 +569,7 @@ Elvenett AS;979497482;Aksjeselskap;kommunene;2024;0;0;63789510;0.0
 Elvia AS;980489698;Aksjeselskap;kommunene;2024;0;0;6172614000;0.0
 Endra AS;929347560;Aksjeselskap;kommunene;2024;0;0;9706731;0.0
 Enida AS;918312730;Aksjeselskap;kommunene;2024;0;0;90577569;0.0
+Envina IKS;986790594;Interkommunalt selskap;kommunene;2024;0;0;;
 Eviny AS;880309102;Aksjeselskap;kommunene;2024;0;0;371000000;0.0
 Eviny termo AS;979427697;Aksjeselskap;kommunene;2024;1;60123203;254088847;23.7
 Fagne AS;915635857;Aksjeselskap;kommunene;2024;3;622298630;693897563;89.7
@@ -564,7 +587,7 @@ Forus energigjenvinning 2 AS;993465224;Aksjeselskap;kommunene;2024;0;0;112127717
 Fosen renovasjon IKS;978669360;Interkommunalt selskap;kommunene;2024;4;51329244;70537061;72.8
 Frid IKS;931388975;Interkommunalt selskap;kommunene;2024;0;0;;
 Fusa kraftlag sa;858837162;Samvirkeforetak;kommunene;2024;0;0;3794428;0.0
-Fylkeshuset sarpsborg AS;844311532;Aksjeselskap;kommunene;2024;0;0;8456699;0.0
+Fylkeshuset Sarpsborg AS;844311532;Aksjeselskap;kommunene;2024;0;0;8456699;0.0
 Føie AS;971589752;Aksjeselskap;kommunene;2024;0;0;294477089;0.0
 Gauldal brann og redning IKS;989516191;Interkommunalt selskap;kommunene;2024;0;0;14175734;0.0
 Givas IKS;989016245;Interkommunalt selskap;kommunene;2024;6;21827525;;
@@ -576,7 +599,7 @@ Grenland havn IKS;970940510;Interkommunalt selskap;kommunene;2024;0;0;86242887;0
 Greve biogass AS;912716635;Aksjeselskap;kommunene;2024;1;8569473;715580;1197.6
 Grimstad kirkelige fellesråd;976992059;Kirkelig enhet;kommunene;2024;1;2838904;;
 Grønt hjerte AS;925535974;Aksjeselskap;kommunene;2024;1;4414784;2723271;162.1
-Hadeland og ringerike avfallsselskap AS;966494816;Aksjeselskap;kommunene;2024;4;11811957;129659862;9.1
+Hadeland og Ringerike avfallsselskap AS;966494816;Aksjeselskap;kommunene;2024;4;11811957;129659862;9.1
 Hafslund AS;920596509;Aksjeselskap;kommunene;2024;0;0;158000000;0.0
 Hafslund celsio AS;977296919;Aksjeselskap;kommunene;2024;3;29573258;1870527000;1.6
 Halden arbeid og vekst AS;917715378;Aksjeselskap;kommunene;2024;0;0;26736590;0.0
@@ -604,21 +627,22 @@ Hovden prosjektutvikling AS;945765747;Aksjeselskap;kommunene;2024;0;0;2926720;0.
 Hå kyrkjelege fellesråd;976993543;Kirkelig enhet;kommunene;2024;0;0;;
 Hålogaland ressursselskap IKS;959019126;Interkommunalt selskap;kommunene;2024;2;260440;15010876;1.7
 Hålogaland teater AS;920093914;Aksjeselskap;kommunene;2024;4;2696289;41312764;6.5
-Hægebostad og åseral renovasjonsselskap-hår IKS;979361475;Interkommunalt selskap;kommunene;2024;1;1880137;11241743;16.7
+Hægebostad og Åseral renovasjonsselskap-hår IKS;979361475;Interkommunalt selskap;kommunene;2024;1;1880137;11241743;16.7
 Ikomm AS;991335846;Aksjeselskap;kommunene;2024;0;0;270608235;0.0
-IKT agder IKS;985359385;Interkommunalt selskap;kommunene;2024;0;0;;
-IKT nordhordland kommunalt oppgåvefellesskap;923971890;Annen juridisk person;kommunene;2024;19;64467798;;
-IKT valdres IKS;995607409;Interkommunalt selskap;kommunene;2024;6;14393066;;
+IKT Agder IKS;985359385;Interkommunalt selskap;kommunene;2024;0;0;;
+IKT Nordhordland kommunalt oppgåvefellesskap;923971890;Annen juridisk person;kommunene;2024;19;64467798;;
+IKT Valdres IKS;995607409;Interkommunalt selskap;kommunene;2024;6;14393066;;
 Indigo IKT IKS;930283487;Interkommunalt selskap;kommunene;2024;3;8873699;;
-Indre agder og telemark avfallsselskap IKS;977500303;Interkommunalt selskap;kommunene;2024;0;0;39045922;0.0
-Indre hordaland kraftnett AS;919415096;Aksjeselskap;kommunene;2024;0;0;69681310;0.0
-Indre østfold renovasjon IKS;974642239;Interkommunalt selskap;kommunene;2024;3;111374867;87758922;126.9
+Indre Agder og Telemark avfallsselskap IKS;977500303;Interkommunalt selskap;kommunene;2024;0;0;39045922;0.0
+Indre Hordaland kraftnett AS;919415096;Aksjeselskap;kommunene;2024;0;0;69681310;0.0
+Indre Hordaland miljøverk IKS;971155876;Interkommunalt selskap;kommunene;2024;1;93860;;
+Indre Østfold renovasjon IKS;974642239;Interkommunalt selskap;kommunene;2024;3;111374867;87758922;126.9
 Innherred renovasjon IKS;971217391;Interkommunalt selskap;kommunene;2024;13;54487269;198541514;27.4
 Inspiria science center AS;893980482;Aksjeselskap;kommunene;2024;0;0;30317751;0.0
-Interkommunalt arkiv troms IKS;989532960;Interkommunalt selskap;kommunene;2024;0;0;3864598;0.0
-Interkommunalt arkiv trøndelag IKS;971375965;Interkommunalt selskap;kommunene;2024;0;0;;
-Interkommunalt politisk råd for nord-gudbrandsdal;976634845;Annen juridisk person;kommunene;2024;0;0;;
-Iris salten IKS;967518190;Interkommunalt selskap;kommunene;2024;3;1781314;141959000;1.3
+Interkommunalt arkiv Troms IKS;989532960;Interkommunalt selskap;kommunene;2024;0;0;3864598;0.0
+Interkommunalt arkiv Trøndelag IKS;971375965;Interkommunalt selskap;kommunene;2024;0;0;;
+Interkommunalt politisk råd for Nord-Gudbrandsdal;976634845;Annen juridisk person;kommunene;2024;0;0;;
+Iris Salten IKS;967518190;Interkommunalt selskap;kommunene;2024;3;1781314;141959000;1.3
 Iris service AS;984019327;Aksjeselskap;kommunene;2024;3;18233581;80571414;22.6
 Irmat AS;984364458;Aksjeselskap;kommunene;2024;6;16418984;66496912;24.7
 Irs miljø IKS;995055244;Interkommunalt selskap;kommunene;2024;3;12046454;56903724;21.2
@@ -630,8 +654,8 @@ Karmøy kirkelig fellesråd;876994062;Kirkelig enhet;kommunene;2024;0;0;;
 Kilden teater og konserthus IKS;986471839;Interkommunalt selskap;kommunene;2024;5;10034751;;
 Kinoalliansen AS;917630518;Aksjeselskap;kommunene;2024;1;5092402;1844060;276.2
 Kinonor AS;914726441;Aksjeselskap;kommunene;2024;1;2708904;159148;1702.1
-Kirkelig fellesråd i oslo;976987608;Kirkelig enhet;kommunene;2024;9;38536875;;
-Kirkelig fellesråd i trondheim;976998294;Kirkelig enhet;kommunene;2024;1;860274;;
+Kirkelig fellesråd i Oslo;976987608;Kirkelig enhet;kommunene;2024;9;38536875;;
+Kirkelig fellesråd i Trondheim;976998294;Kirkelig enhet;kommunene;2024;1;860274;;
 Klepp energi AS;826294442;Aksjeselskap;kommunene;2024;0;0;63084000;0.0
 Klubben i røverstaden AS;919058579;Aksjeselskap;kommunene;2024;0;0;4558416;0.0
 Kode kunstmuseer og komponisthjem STI;990269343;Stiftelse;kommunene;2024;4;62034758;108872894;57.0
@@ -640,13 +664,14 @@ Kraftia energi AS;980283976;Aksjeselskap;kommunene;2024;1;5511294;4806071;114.7
 Kristiansand havn IKS;926180711;Interkommunalt selskap;kommunene;2024;2;5708553;90829091;6.3
 Kristiansand kirkelig fellesråd;876992612;Kirkelig enhet;kommunene;2024;0;0;;
 Kristiansandsregionen brann og redning IKS;993470244;Interkommunalt selskap;kommunene;2024;0;0;;
-Kristiansund og nordmøre havn IKS;986712720;Interkommunalt selskap;kommunene;2024;0;0;20980085;0.0
+Kristiansund og Nordmøre havn IKS;986712720;Interkommunalt selskap;kommunene;2024;0;0;20980085;0.0
 Krossobanen AS;958759819;Aksjeselskap;kommunene;2024;0;0;7425435;0.0
-Lillesand og birkenes interkommunale renovasjonsselskap libir IKS;870934432;Interkommunalt selskap;kommunene;2024;0;0;30019574;0.0
+Legevakta i Drammensregionen IKS;986390456;Interkommunalt selskap;kommunene;2024;0;0;;
+Lillesand og Birkenes interkommunale renovasjonsselskap LIBIR IKS;870934432;Interkommunalt selskap;kommunene;2024;0;0;30019574;0.0
 Lillestrøm kirkelige fellesråd;922052271;Kirkelig enhet;kommunene;2024;0;0;;
 Lillestrøm parkering AS;986304185;Aksjeselskap;kommunene;2024;0;0;8421398;0.0
 Linea AS;917424799;Aksjeselskap;kommunene;2024;1;75154;505730000;0.0
-Lister og dalane avfallsservice AS;922566771;Aksjeselskap;kommunene;2024;0;0;2883653;0.0
+Lister og Dalane avfallsservice AS;922566771;Aksjeselskap;kommunene;2024;0;0;2883653;0.0
 Lnett AS;980038408;Aksjeselskap;kommunene;2024;7;314075541;1001852000;31.3
 Lofoten avfallsselskap IKS;971014407;Interkommunalt selskap;kommunene;2024;3;2398395;72698646;3.3
 Lofotkraft AS;886347782;Aksjeselskap;kommunene;2024;0;0;14413000;0.0
@@ -660,53 +685,55 @@ Maren AS;883369882;Aksjeselskap;kommunene;2024;0;0;3418654;0.0
 Maren kommuneservice AS;983564836;Aksjeselskap;kommunene;2024;0;0;43275516;0.0
 Marvika senter butikk 5 AS;995557010;Aksjeselskap;kommunene;2024;0;0;1205204;0.0
 Maskintråkk AS;981616634;Aksjeselskap;kommunene;2024;0;0;3035436;0.0
-Mia - museene i akershus STI;974235390;Stiftelse;kommunene;2024;0;0;50139528;0.0
-Midt-agder friluftsråd kommunalt oppgavefellesskap;975641716;Annen juridisk person;kommunene;2024;0;0;;
+MIA - museene i Akershus STI;974235390;Stiftelse;kommunene;2024;0;0;50139528;0.0
+Midt-Agder friluftsråd kommunalt oppgavefellesskap;975641716;Annen juridisk person;kommunene;2024;0;0;;
 Midtnett AS;917856222;Aksjeselskap;kommunene;2024;0;0;114341665;0.0
-Midtre namdal avfallsselskap IKS;957387969;Interkommunalt selskap;kommunene;2024;4;10593192;119294000;8.9
-Midtre romerike avløpsselskap IKS;911808005;Interkommunalt selskap;kommunene;2024;0;0;;
+Midtre Namdal avfallsselskap IKS;957387969;Interkommunalt selskap;kommunene;2024;5;10772248;119294000;9.0
+Midtre Romerike avløpsselskap IKS;911808005;Interkommunalt selskap;kommunene;2024;0;0;;
 Mitra AS;971178671;Aksjeselskap;kommunene;2024;0;0;27357040;0.0
 Mjøsanlegget AS;987916346;Aksjeselskap;kommunene;2024;2;536302;49899395;1.1
 Mjøsmuseet AS;987828293;Aksjeselskap;kommunene;2024;0;0;15570140;0.0
 MOVAR IKS;959272204;Interkommunalt selskap;kommunene;2024;17;83568112;255270000;32.7
 Munkedamsveien 15 AS;936009107;Aksjeselskap;kommunene;2024;0;0;;
-Musea i sogn og fjordane STI;994179136;Stiftelse;kommunene;2024;0;0;32693354;0.0
+Musea i Sogn og Fjordane STI;994179136;Stiftelse;kommunene;2024;0;0;32693354;0.0
 Museene arven AS;956298660;Aksjeselskap;kommunene;2024;0;0;46080240;0.0
-Museene i sør-trøndelag AS;993595675;Aksjeselskap;kommunene;2024;0;0;125981683;0.0
+Museene i Sør-Trøndelag AS;993595675;Aksjeselskap;kommunene;2024;0;0;125981683;0.0
 Museet midt IKS;991500502;Interkommunalt selskap;kommunene;2024;0;0;19683591;0.0
-Museum stavanger AS;995642034;Aksjeselskap;kommunene;2024;0;0;107035231;0.0
+Museum Stavanger AS;995642034;Aksjeselskap;kommunene;2024;0;0;107035231;0.0
 Namdal rehabilitering IKS;986923845;Interkommunalt selskap;kommunene;2024;1;1503080;10955616;13.7
 Narvik kirkelige fellesråd;976999851;Kirkelig enhet;kommunene;2024;0;0;;
 Nasjonalt kommunesamarbeid for 110-sentralene IKS;927056453;Interkommunalt selskap;kommunene;2024;3;26885706;;
-Nedre romerike brann- og redningsvesen IKS;976634438;Interkommunalt selskap;kommunene;2024;2;8901929;;
-Nedre romerike vann- og avløpsselskap IKS;892110972;Interkommunalt selskap;kommunene;2024;9;35271980;;
+Nedre Romerike brann- og redningsvesen IKS;976634438;Interkommunalt selskap;kommunene;2024;2;8901929;;
+Nedre Romerike vann- og avløpsselskap IKS;892110972;Interkommunalt selskap;kommunene;2024;9;35271980;;
+Nedre Romerike vannverk IKS;992110996;Interkommunalt selskap;kommunene;2024;1;29377777;;
 Ngir drift AS;932316943;Aksjeselskap;kommunene;2024;0;0;79560679;0.0
-Noranett andøy AS;921680554;Aksjeselskap;kommunene;2024;0;0;33149051;0.0
+Noranett Andøy AS;921680554;Aksjeselskap;kommunene;2024;0;0;33149051;0.0
 Noranett AS;985411131;Aksjeselskap;kommunene;2024;0;0;239036449;0.0
-Noranett hadsel AS;917983550;Aksjeselskap;kommunene;2024;0;0;37557870;0.0
+Noranett Hadsel AS;917983550;Aksjeselskap;kommunene;2024;0;0;37557870;0.0
 Norasondegruppen AS;914671965;Aksjeselskap;kommunene;2024;0;0;10489408;0.0
-Nord-gudbrandsdal renovasjonsselskap IKS;992549394;Interkommunalt selskap;kommunene;2024;4;12627668;;
-Nord-salten kraft AS;995114666;Aksjeselskap;kommunene;2024;0;0;72415813;0.0
+Nord-Gudbrandsdal renovasjonsselskap IKS;992549394;Interkommunalt selskap;kommunene;2024;4;12627668;;
+Nord-Salten kraft AS;995114666;Aksjeselskap;kommunene;2024;0;0;72415813;0.0
 Nordfjord havn IKS;884276012;Interkommunalt selskap;kommunene;2024;0;0;20903487;0.0
 Nordfjord miljøverk IKS;977549833;Interkommunalt selskap;kommunene;2024;1;28809035;65786815;43.8
-Nordhordland og gulen interkommunale renovasjonsselskap IKS;856167402;Interkommunalt selskap;kommunene;2024;7;68448488;117139366;58.4
-Nordre follo renseanlegg IKS;971521570;Interkommunalt selskap;kommunene;2024;6;22567181;27038249;83.5
+Nordhordland og Gulen interkommunale renovasjonsselskap IKS;856167402;Interkommunalt selskap;kommunene;2024;7;68448488;117139366;58.4
+Nordmøre interkommunale renovasjonsselskap;971143436;Interkommunalt selskap;kommunene;2024;0;0;;
+Nordre Follo renseanlegg IKS;971521570;Interkommunalt selskap;kommunene;2024;6;22567181;27038249;83.5
 Norefjell vann- og avløpsselskap AS;935803713;Aksjeselskap;kommunene;2024;0;0;14851930;0.0
 Novari IKS;998283914;Interkommunalt selskap;kommunene;2024;22;105271285;;
 Ofa IKS;931832336;Interkommunalt selskap;kommunene;2024;2;6099175;;
 Olavshallen AS;951615390;Aksjeselskap;kommunene;2024;0;0;29002407;0.0
-Opera østfold AS;923724826;Aksjeselskap;kommunene;2024;0;0;10552818;0.0
+Opera Østfold AS;923724826;Aksjeselskap;kommunene;2024;0;0;10552818;0.0
 Opplevelsessenteret østfoldbadet AS;979932790;Aksjeselskap;kommunene;2024;0;0;27466588;0.0
 Oslo konserthus AS;981175328;Aksjeselskap;kommunene;2024;0;0;56958277;0.0
 Oslo nye teater AS;915065805;Aksjeselskap;kommunene;2024;0;0;24838358;0.0
 Oslo produksjon & tjenester AS;961528135;Aksjeselskap;kommunene;2024;0;0;31791433;0.0
 Oslo&co AS;912588114;Aksjeselskap;kommunene;2024;0;0;10143849;0.0
 Personalpartner arbeid og inkludering AS;927359472;Aksjeselskap;kommunene;2024;0;0;16561058;0.0
-Plug ålesund AS;925788228;Aksjeselskap;kommunene;2024;0;0;13944718;0.0
+Plug Ålesund AS;925788228;Aksjeselskap;kommunene;2024;0;0;13944718;0.0
 Ramfoss kraftlag kommunalt oppgavefellesskap;971030690;Annen juridisk person;kommunene;2024;0;0;;
 Randsfjordmuseet AS;987107022;Aksjeselskap;kommunene;2024;0;0;4569367;0.0
-Region nordhordland helsehus IKS;915031579;Interkommunalt selskap;kommunene;2024;1;558904;;
-Region nordhordland IKS;971361514;Interkommunalt selskap;kommunene;2024;0;0;;
+Region Nordhordland helsehus IKS;915031579;Interkommunalt selskap;kommunene;2024;1;558904;;
+Region Nordhordland IKS;971361514;Interkommunalt selskap;kommunene;2024;0;0;;
 Reit AS;993474118;Aksjeselskap;kommunene;2024;0;0;13884995;0.0
 Reknes næringseiendom AS;930591114;Aksjeselskap;kommunene;2024;1;392120;35627431;1.1
 Remidt IKS;975936333;Interkommunalt selskap;kommunene;2024;2;3507187;354913538;1.0
@@ -714,22 +741,22 @@ Remiks husholdning AS;994900579;Aksjeselskap;kommunene;2024;1;14711553;187892081
 Remiks miljøpark AS;894462132;Aksjeselskap;kommunene;2024;0;0;44148914;0.0
 Reno-vest IKS;971037202;Interkommunalt selskap;kommunene;2024;4;7721096;25350748;30.5
 Reno-vest produksjon AS;912209571;Aksjeselskap;kommunene;2024;1;715068;89325658;0.8
-Renovasjon i grenland IKS;913482778;Interkommunalt selskap;kommunene;2024;19;167718488;;
+Renovasjon i Grenland IKS;913482778;Interkommunalt selskap;kommunene;2024;19;167718488;;
 Renovasjonen IKS;989111736;Interkommunalt selskap;kommunene;2024;5;46867484;66240466;70.8
-Renovasjonsselskapet for drammensregionen IKS;984459947;Interkommunalt selskap;kommunene;2024;12;87160368;211459440;41.2
-Renovasjonsselskapet for farsund og lyngdal AS;987517999;Aksjeselskap;kommunene;2024;0;0;51537025;0.0
+Renovasjonsselskapet for Drammensregionen IKS;984459947;Interkommunalt selskap;kommunene;2024;12;87160368;211459440;41.2
+Renovasjonsselskapet for Farsund og Lyngdal AS;987517999;Aksjeselskap;kommunene;2024;0;0;51537025;0.0
 Renovasjonsselskapet glør IKS;971041692;Interkommunalt selskap;kommunene;2024;14;3706744;98479012;3.8
 Renovest IKS;980018725;Interkommunalt selskap;kommunene;2024;2;3008220;53931839;5.6
 Retrans midt AS;920321941;Aksjeselskap;kommunene;2024;0;0;68118382;0.0
 Retura iris AS;984019351;Aksjeselskap;kommunene;2024;0;0;53682889;0.0
 Retura nt AS;986850821;Aksjeselskap;kommunene;2024;0;0;83654592;0.0
-Retura søre sunnmøre AS;987578602;Aksjeselskap;kommunene;2024;0;0;25186322;0.0
+Retura Søre Sunnmøre AS;987578602;Aksjeselskap;kommunene;2024;0;0;25186322;0.0
 Retura trv AS;988517054;Aksjeselskap;kommunene;2024;0;0;218752275;0.0
 Returkraft AS;991590463;Aksjeselskap;kommunene;2024;13;29297619;231193595;12.7
 Rir næring AS;887670552;Aksjeselskap;kommunene;2024;0;0;30410341;0.0
 Rir transport AS;919546018;Aksjeselskap;kommunene;2024;0;0;15193128;0.0
 Risør kirkelige fellesråd;976992008;Kirkelig enhet;kommunene;2024;0;0;;
-Risør tvedestrand regionens avfallsselskap rta AS;877540332;Aksjeselskap;kommunene;2024;0;0;43781716;0.0
+Risør Tvedestrand regionens avfallsselskap RTA AS;877540332;Aksjeselskap;kommunene;2024;0;0;43781716;0.0
 Rogaland brann og redning IKS;886884702;Interkommunalt selskap;kommunene;2024;8;14915723;121376553;12.3
 Romerike avfallsforedling IKS;965075364;Interkommunalt selskap;kommunene;2024;52;120681323;276624295;43.6
 Romerike krisesenter IKS;997597575;Interkommunalt selskap;kommunene;2024;0;0;;
@@ -738,6 +765,7 @@ Romsdalshalvøya interkommunale renovasjonsselskap IKS;971042656;Interkommunalt 
 Ruter AS;991609407;Aksjeselskap;kommunene;2024;23;1198816551;12437215000;9.6
 Ryfylke friluftsråd kommunalt oppgavefelleskap;974247178;Annen juridisk person;kommunene;2024;0;0;;
 Ryfylke it-samarbeid kommunalt oppgavefellesskap;929371763;Annen juridisk person;kommunene;2024;0;0;;
+Ryfylke miljøverk IKS;975372189;Interkommunalt selskap;kommunene;2024;0;0;;
 Ryfylkemuseet STI;970916482;Stiftelse;kommunene;2024;0;0;8132327;0.0
 Rå biopark AS;929464842;Aksjeselskap;kommunene;2024;1;3534247;2357772;149.9
 Røyken eiendom AS;982201489;Aksjeselskap;kommunene;2024;0;0;11583058;0.0
@@ -755,7 +783,8 @@ Sirkulær bestiller AS;924332050;Aksjeselskap;kommunene;2024;1;78383219;394414;1
 Skien kirkelige fellesråd;976991273;Kirkelig enhet;kommunene;2024;0;0;;
 Skøyen sokn;945766530;Kirkelig enhet;kommunene;2024;0;0;;
 Sogn brann og redning IKS;996629880;Interkommunalt selskap;kommunene;2024;0;0;;
-Sogn og fjordane energi AS;984882092;Aksjeselskap;kommunene;2024;0;0;27830000;0.0
+Sogn og Fjordane energi AS;984882092;Aksjeselskap;kommunene;2024;0;0;27830000;0.0
+Sogn og Fjordane revisjon IKS;987803223;Interkommunalt selskap;kommunene;2024;0;0;;
 Sognekraft produksjon AS;916069634;Aksjeselskap;kommunene;2024;0;0;272434000;0.0
 Sola kirkelige fellesråd;976993691;Kirkelig enhet;kommunene;2024;1;734507;;
 Solør bioenergi tranby AS;916598017;Aksjeselskap;kommunene;2024;1;0;16691359;0.0
@@ -768,13 +797,13 @@ Sporveien vognmateriell AS;991005226;Aksjeselskap;kommunene;2024;0;0;560807000;0
 Stavanger kirkelige fellesråd;976993403;Kirkelig enhet;kommunene;2024;0;0;;
 Stavanger konserthus IKS;989887823;Interkommunalt selskap;kommunene;2024;6;20186151;86508144;23.3
 Stiftelsen buskerudmuseene;913084705;Stiftelse;kommunene;2024;0;0;39076735;0.0
-Stiftelsen bymuseet i bergen;988212024;Stiftelse;kommunene;2024;0;0;47679049;0.0
+Stiftelsen bymuseet i Bergen;988212024;Stiftelse;kommunene;2024;0;0;47679049;0.0
 Stiftelsen kunstsilo;976215834;Stiftelse;kommunene;2024;1;1069470;62244088;1.7
-Stiftelsen lillehammer museum;955378024;Stiftelse;kommunene;2024;0;0;50600038;0.0
+Stiftelsen Lillehammer museum;955378024;Stiftelse;kommunene;2024;0;0;50600038;0.0
 Stiftelsen museum vest;987669586;Stiftelse;kommunene;2024;0;0;37742234;0.0
-Stiftelsen trondheim pirbad;976741315;Stiftelse;kommunene;2024;0;0;40416803;0.0
-Stiftinga hardanger og voss museum;987927704;Stiftelse;kommunene;2024;1;37539580;27143987;138.3
-Stiftinga museumssenteret i hordaland;971349743;Stiftelse;kommunene;2024;0;0;17140102;0.0
+Stiftelsen Trondheim pirbad;976741315;Stiftelse;kommunene;2024;0;0;40416803;0.0
+Stiftinga Hardanger og Voss museum;987927704;Stiftelse;kommunene;2024;1;37539580;27143987;138.3
+Stiftinga museumssenteret i Hordaland;971349743;Stiftelse;kommunene;2024;0;0;17140102;0.0
 Stord vatn og avløp AS;934602900;Aksjeselskap;kommunene;2024;0;0;;
 Storfjorden kyrkjelege fellesråd;997535820;Kirkelig enhet;kommunene;2024;0;0;;
 Sunnfjord kyrkjelege fellesråd;921865686;Kirkelig enhet;kommunene;2024;1;2040411;;
@@ -784,14 +813,15 @@ Sunnhordland interkommunale miljøverk IKS;958284837;Interkommunalt selskap;komm
 Sunnhordland kraftlag AS;916435711;Aksjeselskap;kommunene;2024;0;0;530837000;0.0
 Sysikt kommunalt oppgavefellesskap;995501872;Annen juridisk person;kommunene;2024;2;39222276;;
 Søir husholdning AS;989018043;Aksjeselskap;kommunene;2024;3;20262286;58534262;34.6
-Søndre follo renseanlegg IKS;970964584;Interkommunalt selskap;kommunene;2024;5;5291066;;
-Søndre helgeland miljøverk;975824845;Interkommunalt selskap;kommunene;2024;3;5996750;113124000;5.3
+Sølvberget KF;982766184;Kommunalt foretak;kommunene;2024;0;0;;
+Søndre Follo renseanlegg IKS;970964584;Interkommunalt selskap;kommunene;2024;5;5291066;;
+Søndre Helgeland miljøverk;975824845;Interkommunalt selskap;kommunene;2024;3;5996750;113124000;5.3
 Sør-østerdal interkommunale renovasjonsselskap;977041341;Interkommunalt selskap;kommunene;2024;0;0;12882256;0.0
-Søre sunnmøre IKT kommunalt oppgåvefellesskap;919824573;Annen juridisk person;kommunene;2024;1;5373032;;
-Søre sunnmøre reinhaldsverk IKS;987570970;Interkommunalt selskap;kommunene;2024;0;0;39571483;0.0
+Søre Sunnmøre IKT kommunalt oppgåvefellesskap;919824573;Annen juridisk person;kommunene;2024;1;5373032;;
+Søre Sunnmøre reinhaldsverk IKS;987570970;Interkommunalt selskap;kommunene;2024;0;0;39571483;0.0
 Sørmarka flerbrukshall IKS;991422560;Interkommunalt selskap;kommunene;2024;1;375926;20343206;1.8
 Tafjord kraftvarme AS;977461804;Aksjeselskap;kommunene;2024;2;14278079;147832274;9.7
-Teater vestland AS;929181557;Aksjeselskap;kommunene;2024;1;3509589;20442724;17.2
+Teater Vestland AS;929181557;Aksjeselskap;kommunene;2024;1;3509589;20442724;17.2
 Tempevegen 25 AS;921956452;Aksjeselskap;kommunene;2024;0;0;5274798;0.0
 Tendranett AS;918999361;Aksjeselskap;kommunene;2024;1;2377135;83427908;2.8
 Tensio AS;922828172;Aksjeselskap;kommunene;2024;2;732229923;226645000;323.1
@@ -815,27 +845,29 @@ Validér AS;912061159;Aksjeselskap;kommunene;2024;0;0;13301899;0.0
 Vann vest AS;924367148;Aksjeselskap;kommunene;2024;2;1617464;6819492;23.7
 Vaterland bussterminal AS;943180555;Aksjeselskap;kommunene;2024;0;0;15614862;0.0
 Vennesla kirkelige fellesråd;976992814;Kirkelig enhet;kommunene;2024;0;0;;
-Vest-agder-museet IKS;989072048;Interkommunalt selskap;kommunene;2024;6;10700014;;
-Vest-finnmark avfallsselskap, oarje-finnmarkku rihpafitnodat vefas IKS;977079403;Interkommunalt selskap;kommunene;2024;2;97808;51974942;0.2
-Vest-telemark interkommunalt politisk råd;975476588;Annen juridisk person;kommunene;2024;0;0;;
+Vest-Agder-museet IKS;989072048;Interkommunalt selskap;kommunene;2024;6;10700014;;
+Vest-Finnmark avfallsselskap, oarje-finnmarkku rihpafitnodat vefas IKS;977079403;Interkommunalt selskap;kommunene;2024;2;97808;51974942;0.2
+Vest-Telemark interkommunalt politisk råd;975476588;Annen juridisk person;kommunene;2024;0;0;;
 Vestfold avfall og ressurs AS;979281536;Aksjeselskap;kommunene;2024;5;9828770;232972728;4.2
 Vestfold interkommunale brannvesen IKS;982847796;Interkommunalt selskap;kommunene;2024;2;13000000;;
 Vestfold krematorium IKS;988100226;Interkommunalt selskap;kommunene;2024;1;928456;;
 Vestfold vann IKS;962351409;Interkommunalt selskap;kommunene;2024;0;0;76558259;0.0
 Vestfoldmuseene IKS;993871184;Interkommunalt selskap;kommunene;2024;0;0;;
+Vestviken interkommunale vei-, vann- og avløpsselskap IKS;913716922;Interkommunalt selskap;kommunene;2024;0;0;;
 Viermie AS;919884452;Aksjeselskap;kommunene;2024;0;0;36031751;0.0
 Vindafjord kyrkjelege fellesråd;976994132;Kirkelig enhet;kommunene;2024;0;0;;
-Volda og ørsta reinhaldsverk IKS;984068085;Interkommunalt selskap;kommunene;2024;6;10003905;37885735;26.4
+Volda og Ørsta reinhaldsverk IKS;984068085;Interkommunalt selskap;kommunene;2024;6;10003905;37885735;26.4
 Å energi AS;981952324;Aksjeselskap;kommunene;2024;0;0;470910571;0.0
+Ålesundregionen interkommunale miljøselskap IKS;994717286;Interkommunalt selskap;kommunene;2024;4;10012262;;
 Ålesundregionens havnevesen IKS;933239098;Interkommunalt selskap;kommunene;2024;0;0;;
 Øfas husholdning AS;888321942;Aksjeselskap;kommunene;2024;1;0;37290000;0.0
-Øst-finnmark avfallsselskap AS;921473346;Aksjeselskap;kommunene;2024;2;3059688;62590000;4.9
+Øst-Finnmark avfallsselskap AS;921473346;Aksjeselskap;kommunene;2024;2;3059688;62590000;4.9
 Østfold avfallssortering IKS;924961821;Interkommunalt selskap;kommunene;2024;0;0;2589139;0.0
 Østfoldmuseene STI;994963910;Stiftelse;kommunene;2024;0;0;38600332;0.0
-Øvre eiker kirkelige fellesråd;976990218;Kirkelig enhet;kommunene;2024;0;0;;
-Øvre romerike brann og redning IKS;987615516;Interkommunalt selskap;kommunene;2024;0;0;;
+Øvre Eiker kirkelige fellesråd;976990218;Kirkelig enhet;kommunene;2024;0;0;;
+Øvre Romerike brann og redning IKS;987615516;Interkommunalt selskap;kommunene;2024;0;0;;
 Øyvar AS;985345899;Aksjeselskap;kommunene;2024;4;14961234;189194853;7.9
-Aktieselskapet Vinmonopolet;817209882;Aksjeselskap;staten;2025;12;1655094088;16916000000;9.8
+Aktieselskapet Vinmonopolet;817209882;Aksjeselskap;staten;2025;13;1660094088;16916000000;9.8
 Andøya space AS;979122721;Aksjeselskap;staten;2025;4;20279918;62990134;32.2
 Andøya space defence AS;879122392;Aksjeselskap;staten;2025;0;0;122780719;0.0
 Andøya space education AS;982222559;Aksjeselskap;staten;2025;0;0;16981379;0.0
@@ -885,17 +917,17 @@ Rogaland teater AS;915443990;Aksjeselskap;staten;2025;2;11265753;51988000;21.7
 Simula research laboratory AS;984648855;Aksjeselskap;staten;2025;0;0;70307509;0.0
 SIVA - selskapet for industrivekst SF;966703032;Statsforetak;staten;2025;0;0;33463000;0.0
 Skagerak energi AS;980495302;Aksjeselskap;staten;2025;0;0;266253000;0.0
-Statnett SF;962986633;Statsforetak;staten;2025;22;238725226;14640000000;1.6
+Statnett SF;962986633;Statsforetak;staten;2025;23;240213933;14640000000;1.6
 Statskog SF;966056258;Statsforetak;staten;2025;1;176667;159499000;0.1
 Stavanger symfoniorkester stiftelse;874247502;Stiftelse;staten;2025;0;0;64034322;0.0
 Stiftelsen musikkselskapet harmonien;976619005;Stiftelse;staten;2025;0;0;62991000;0.0
 Stiftelsen nasjonalmuseet for kunst;985686092;Stiftelse;staten;2025;6;29580698;765298461;3.9
-Stiftelsen oslo-filharmonien;976944143;Stiftelse;staten;2025;1;1760274;72555000;2.4
+Stiftelsen Oslo-filharmonien;976944143;Stiftelse;staten;2025;1;1760274;72555000;2.4
 Trondheim symfoniorkester & opera STI;971434023;Stiftelse;staten;2025;0;0;47141434;0.0
 Unifond AS;995200090;Aksjeselskap;staten;2025;0;0;272149;0.0
 Universitetssenteret på svalbard AS;985204454;Aksjeselskap;staten;2025;0;0;133434719;0.0
-Veas AS;920171400;Aksjeselskap;staten;2025;0;0;482006;0.0
-Veas selvkost AS;920171540;Aksjeselskap;staten;2025;4;10439022;349566376;3.0
+VEAS AS;920171400;Aksjeselskap;staten;2025;0;0;482006;0.0
+VEAS selvkost AS;920171540;Aksjeselskap;staten;2025;4;10439022;349566376;3.0
 Vegamot AS;935162718;Aksjeselskap;staten;2025;0;0;119471047;0.0
 Vegfinans AS;983149499;Aksjeselskap;staten;2025;6;87952880;42168246;208.6
 Vy buss AS;976948394;Aksjeselskap;staten;2025;0;0;3160528000;0.0
@@ -903,6 +935,7 @@ Vy tog AS;917374988;Aksjeselskap;staten;2025;2;249829;807440000;0.0
 Vygruppen AS;984661177;Aksjeselskap;staten;2025;25;516961160;4642000000;11.1
 Abakus AS;983335543;Aksjeselskap;kommunene;2025;6;58517013;2209770;2648.1
 Afiber AS;920050719;Aksjeselskap;kommunene;2025;0;0;103279437;0.0
+AFK eiendom FKF;996331202;Fylkeskommunalt foretak;kommunene;2025;0;0;;
 Agder kollektivtrafikk AS;991776524;Aksjeselskap;kommunene;2025;4;74517345;1188373606;6.3
 Agder renovasjon IKS;997765494;Interkommunalt selskap;kommunene;2025;5;17899284;140880000;12.7
 Agenda aktiv AS;872414762;Aksjeselskap;kommunene;2025;0;0;26888995;0.0
@@ -912,14 +945,15 @@ Anno museum AS;994933272;Aksjeselskap;kommunene;2025;2;1913951;72599000;2.6
 Arktisk filharmoni AS;994387693;Aksjeselskap;kommunene;2025;0;0;56424818;0.0
 Arva AS;979151950;Aksjeselskap;kommunene;2025;0;0;754444246;0.0
 Asker nett AS;917743193;Aksjeselskap;kommunene;2025;0;0;49957195;0.0
-Asker og bærum brann og redning IKS;980358380;Interkommunalt selskap;kommunene;2025;4;16321479;;
-Asker og bærum vannverk IKS;974636972;Interkommunalt selskap;kommunene;2025;0;0;31525489;0.0
+Asker og Bærum brann og redning IKS;980358380;Interkommunalt selskap;kommunene;2025;4;16321479;;
+Asker og Bærum vannverk IKS;974636972;Interkommunalt selskap;kommunene;2025;0;0;31525489;0.0
+Askerbadet KF;916284128;Kommunalt foretak;kommunene;2025;0;0;;
 Askvoll sokn;976996267;Kirkelig enhet;kommunene;2025;0;0;;
-Atb AS;994686011;Aksjeselskap;kommunene;2025;7;60218802;3200740000;1.9
+AtB AS;994686011;Aksjeselskap;kommunene;2025;7;60218802;3200740000;1.9
 Attvin AS;922025096;Aksjeselskap;kommunene;2025;14;40758017;34675270;117.5
 Attvin næring AS;923030891;Aksjeselskap;kommunene;2025;0;0;62630351;0.0
 Attvin produksjon AS;923030913;Aksjeselskap;kommunene;2025;3;3299123;188777950;1.7
-Aust-agder museum og arkiv IKS;986088695;Interkommunalt selskap;kommunene;2025;0;0;;
+Aust-Agder museum og arkiv IKS;986088695;Interkommunalt selskap;kommunene;2025;0;0;;
 Avfall sør AS;986296042;Aksjeselskap;kommunene;2025;0;0;4991671;0.0
 Avfall sør husholdning AS;995646137;Aksjeselskap;kommunene;2025;8;25287132;205972039;12.3
 Avfallsmegling nord AS;925117706;Aksjeselskap;kommunene;2025;1;2963960;616913;480.5
@@ -927,7 +961,7 @@ Avfallsservice AS;964180644;Aksjeselskap;kommunene;2025;4;17290805;52049663;33.2
 Barents nett AS;971058854;Aksjeselskap;kommunene;2025;0;0;151442000;0.0
 Bergen havn AS;918404635;Aksjeselskap;kommunene;2025;1;22655715;133387273;17.0
 Bergen kirkelige fellesråd;976994434;Kirkelig enhet;kommunene;2025;0;0;;
-BIR AS;983495400;Aksjeselskap;kommunene;2025;48;248297309;732081651;33.9
+BIR AS;983495400;Aksjeselskap;kommunene;2025;50;255817843;732081651;34.9
 BIR infrastruktur AS;990766665;Aksjeselskap;kommunene;2025;1;1498973;90579624;1.7
 BIR nyverdi AS;984504942;Aksjeselskap;kommunene;2025;2;8244353;69814389;11.8
 BIR ressurs AS;985825408;Aksjeselskap;kommunene;2025;1;999316;431818534;0.2
@@ -936,12 +970,14 @@ Bjørvika infrastruktur AS;985010110;Aksjeselskap;kommunene;2025;0;0;45982103;0.
 Bkk AS;976944801;Aksjeselskap;kommunene;2025;1;5215150;1347675785;0.4
 Bodø kirkelige fellesråd;976999800;Kirkelig enhet;kommunene;2025;1;649555;;
 Bodø spektrum AS;946028614;Aksjeselskap;kommunene;2025;1;999316;26636724;3.8
+Bodø2024 IKS;925047686;Interkommunalt selskap;kommunene;2025;1;4996578;;
 Bop5 AS;923617035;Aksjeselskap;kommunene;2025;1;29505479;310928;9489.5
 Borg havn IKS;970937099;Interkommunalt selskap;kommunene;2025;0;0;82699369;0.0
 Brakar AS;995082454;Aksjeselskap;kommunene;2025;6;61235135;;
 Brannvesenet sør IKS;969952890;Interkommunalt selskap;kommunene;2025;0;0;;
 Bredbåndsfylket AS;986358013;Aksjeselskap;kommunene;2025;0;0;35302620;0.0
-Bustadstiftinga ved sentral sjukehuset i sogn og fjordane;874979392;Stiftelse;kommunene;2025;0;0;9062829;0.0
+Brevik fergeselskap IKS;912617750;Interkommunalt selskap;kommunene;2025;0;0;;
+Bustadstiftinga ved sentral sjukehuset i Sogn og Fjordane;874979392;Stiftelse;kommunene;2025;0;0;9062829;0.0
 Bybanen AS;977511402;Aksjeselskap;kommunene;2025;11;46887205;387071348;12.1
 Bysykkelen AS;914000475;Aksjeselskap;kommunene;2025;1;2498289;12429957;20.1
 Bømlo kommunale eigedomsselskap AS;993002631;Aksjeselskap;kommunene;2025;2;1803086;7172841;25.1
@@ -949,12 +985,14 @@ Bømlo kyrkjelege fellesråd;976994647;Kirkelig enhet;kommunene;2025;0;0;;
 Bømlo vatn og avløpsselskap AS;985228825;Aksjeselskap;kommunene;2025;0;0;35893228;0.0
 Dalane energi AS;917368007;Aksjeselskap;kommunene;2025;0;0;28383824;0.0
 Dalane miljøverk AS;922169063;Aksjeselskap;kommunene;2025;0;0;36327565;0.0
+Dalane miljøverk IKS;979719345;Interkommunalt selskap;kommunene;2025;0;0;;
 Ddv IKS;930654914;Interkommunalt selskap;kommunene;2025;0;0;;
 Digitale gardermoen KO;915498582;Annen juridisk person;kommunene;2025;1;49965777;;
-Digitale innherred kommunale oppgavefellesskap;930457485;Annen juridisk person;kommunene;2025;0;0;;
-Divtasvuona ja hábmera tjoaggulvisráde/tysfjord og hamarøy menighetsråd;877000532;Kirkelig enhet;kommunene;2025;0;0;;
+Digitale Innherred kommunale oppgavefellesskap;930457485;Annen juridisk person;kommunene;2025;0;0;;
+Divtasvuona ja Hábmera tjoaggulvisráde/tysfjord og Hamarøy menighetsråd;877000532;Kirkelig enhet;kommunene;2025;0;0;;
 Drammen scener AS;894922672;Aksjeselskap;kommunene;2025;0;0;35300320;0.0
 Drammensregionens brannvesen IKS;984054408;Interkommunalt selskap;kommunene;2025;1;1849315;43322849;4.3
+Driftsassistansen i Hordaland - vann og avløp IKS;987701390;Interkommunalt selskap;kommunene;2025;0;0;;
 Ecopro AS;984853998;Aksjeselskap;kommunene;2025;5;11515025;73061790;15.8
 Eidos eiendomsutvikling AS;830078312;Aksjeselskap;kommunene;2025;0;0;4600625;0.0
 Eidsiva bioenergi AS;980258165;Aksjeselskap;kommunene;2025;0;0;405824315;0.0
@@ -965,6 +1003,7 @@ Elvenett AS;979497482;Aksjeselskap;kommunene;2025;0;0;69870187;0.0
 Elvia AS;980489698;Aksjeselskap;kommunene;2025;1;2633812;6226444000;0.0
 Endra AS;929347560;Aksjeselskap;kommunene;2025;0;0;12524167;0.0
 Enida AS;918312730;Aksjeselskap;kommunene;2025;0;0;91715641;0.0
+Envina IKS;986790594;Interkommunalt selskap;kommunene;2025;0;0;;
 Eviny AS;880309102;Aksjeselskap;kommunene;2025;0;0;340771307;0.0
 Eviny termo AS;979427697;Aksjeselskap;kommunene;2025;1;59958932;262635811;22.8
 Fagne AS;915635857;Aksjeselskap;kommunene;2025;3;66931507;759566631;8.8
@@ -982,7 +1021,7 @@ Forus energigjenvinning 2 AS;993465224;Aksjeselskap;kommunene;2025;0;0;114880243
 Fosen renovasjon IKS;978669360;Interkommunalt selskap;kommunene;2025;4;47570868;78555249;60.6
 Frid IKS;931388975;Interkommunalt selskap;kommunene;2025;0;0;;
 Fusa kraftlag sa;858837162;Samvirkeforetak;kommunene;2025;0;0;2173404;0.0
-Fylkeshuset sarpsborg AS;844311532;Aksjeselskap;kommunene;2025;0;0;6079121;0.0
+Fylkeshuset Sarpsborg AS;844311532;Aksjeselskap;kommunene;2025;0;0;6079121;0.0
 Føie AS;971589752;Aksjeselskap;kommunene;2025;2;63956869;290235182;22.0
 Gauldal brann og redning IKS;989516191;Interkommunalt selskap;kommunene;2025;0;0;12329854;0.0
 Givas IKS;989016245;Interkommunalt selskap;kommunene;2025;4;18551442;;
@@ -994,7 +1033,7 @@ Grenland havn IKS;970940510;Interkommunalt selskap;kommunene;2025;0;0;55552899;0
 Greve biogass AS;912716635;Aksjeselskap;kommunene;2025;0;0;406512;0.0
 Grimstad kirkelige fellesråd;976992059;Kirkelig enhet;kommunene;2025;1;3300000;;
 Grønt hjerte AS;925535974;Aksjeselskap;kommunene;2025;1;37474333;3685972;1016.7
-Hadeland og ringerike avfallsselskap AS;966494816;Aksjeselskap;kommunene;2025;6;29626435;134329158;22.1
+Hadeland og Ringerike avfallsselskap AS;966494816;Aksjeselskap;kommunene;2025;6;29626435;134329158;22.1
 Hafslund AS;920596509;Aksjeselskap;kommunene;2025;0;0;138000000;0.0
 Hafslund celsio AS;977296919;Aksjeselskap;kommunene;2025;7;144873487;1864800000;7.8
 Halden arbeid og vekst AS;917715378;Aksjeselskap;kommunene;2025;0;0;21657535;0.0
@@ -1022,21 +1061,22 @@ Hovden prosjektutvikling AS;945765747;Aksjeselskap;kommunene;2025;0;0;3355309;0.
 Hå kyrkjelege fellesråd;976993543;Kirkelig enhet;kommunene;2025;0;0;;
 Hålogaland ressursselskap IKS;959019126;Interkommunalt selskap;kommunene;2025;1;1300000;17389851;7.5
 Hålogaland teater AS;920093914;Aksjeselskap;kommunene;2025;3;840408;44008701;1.9
-Hægebostad og åseral renovasjonsselskap-hår IKS;979361475;Interkommunalt selskap;kommunene;2025;2;3185865;12324178;25.9
+Hægebostad og Åseral renovasjonsselskap-hår IKS;979361475;Interkommunalt selskap;kommunene;2025;2;3185865;12324178;25.9
 Ikomm AS;991335846;Aksjeselskap;kommunene;2025;0;0;310385676;0.0
-IKT agder IKS;985359385;Interkommunalt selskap;kommunene;2025;0;0;;
-IKT nordhordland kommunalt oppgåvefellesskap;923971890;Annen juridisk person;kommunene;2025;19;54084207;;
-IKT valdres IKS;995607409;Interkommunalt selskap;kommunene;2025;5;13617424;;
+IKT Agder IKS;985359385;Interkommunalt selskap;kommunene;2025;0;0;;
+IKT Nordhordland kommunalt oppgåvefellesskap;923971890;Annen juridisk person;kommunene;2025;19;54084207;;
+IKT Valdres IKS;995607409;Interkommunalt selskap;kommunene;2025;5;13617424;;
 Indigo IKT IKS;930283487;Interkommunalt selskap;kommunene;2025;6;52858249;;
-Indre agder og telemark avfallsselskap IKS;977500303;Interkommunalt selskap;kommunene;2025;1;2688584;36805621;7.3
-Indre hordaland kraftnett AS;919415096;Aksjeselskap;kommunene;2025;0;0;70251954;0.0
-Indre østfold renovasjon IKS;974642239;Interkommunalt selskap;kommunene;2025;2;6078469;101703936;6.0
+Indre Agder og Telemark avfallsselskap IKS;977500303;Interkommunalt selskap;kommunene;2025;1;2688584;36805621;7.3
+Indre Hordaland kraftnett AS;919415096;Aksjeselskap;kommunene;2025;0;0;70251954;0.0
+Indre Hordaland miljøverk IKS;971155876;Interkommunalt selskap;kommunene;2025;0;0;;
+Indre Østfold renovasjon IKS;974642239;Interkommunalt selskap;kommunene;2025;2;6078469;101703936;6.0
 Innherred renovasjon IKS;971217391;Interkommunalt selskap;kommunene;2025;10;41491669;210785712;19.7
 Inspiria science center AS;893980482;Aksjeselskap;kommunene;2025;0;0;31053179;0.0
-Interkommunalt arkiv troms IKS;989532960;Interkommunalt selskap;kommunene;2025;0;0;4083000;0.0
-Interkommunalt arkiv trøndelag IKS;971375965;Interkommunalt selskap;kommunene;2025;0;0;;
-Interkommunalt politisk råd for nord-gudbrandsdal;976634845;Annen juridisk person;kommunene;2025;0;0;;
-Iris salten IKS;967518190;Interkommunalt selskap;kommunene;2025;1;1249144;146367000;0.9
+Interkommunalt arkiv Troms IKS;989532960;Interkommunalt selskap;kommunene;2025;0;0;4083000;0.0
+Interkommunalt arkiv Trøndelag IKS;971375965;Interkommunalt selskap;kommunene;2025;0;0;;
+Interkommunalt politisk råd for Nord-Gudbrandsdal;976634845;Annen juridisk person;kommunene;2025;0;0;;
+Iris Salten IKS;967518190;Interkommunalt selskap;kommunene;2025;1;1249144;146367000;0.9
 Iris service AS;984019327;Aksjeselskap;kommunene;2025;3;16206811;83971635;19.3
 Irmat AS;984364458;Aksjeselskap;kommunene;2025;3;15482233;63730214;24.3
 Irs miljø IKS;995055244;Interkommunalt selskap;kommunene;2025;1;4247091;58873165;7.2
@@ -1048,8 +1088,8 @@ Karmøy kirkelig fellesråd;876994062;Kirkelig enhet;kommunene;2025;0;0;;
 Kilden teater og konserthus IKS;986471839;Interkommunalt selskap;kommunene;2025;4;841233;;
 Kinoalliansen AS;917630518;Aksjeselskap;kommunene;2025;0;0;1053956;0.0
 Kinonor AS;914726441;Aksjeselskap;kommunene;2025;0;0;164061;0.0
-Kirkelig fellesråd i oslo;976987608;Kirkelig enhet;kommunene;2025;8;111243841;;
-Kirkelig fellesråd i trondheim;976998294;Kirkelig enhet;kommunene;2025;1;1000000;;
+Kirkelig fellesråd i Oslo;976987608;Kirkelig enhet;kommunene;2025;8;111243841;;
+Kirkelig fellesråd i Trondheim;976998294;Kirkelig enhet;kommunene;2025;1;1000000;;
 Klepp energi AS;826294442;Aksjeselskap;kommunene;2025;0;0;66625000;0.0
 Klubben i røverstaden AS;919058579;Aksjeselskap;kommunene;2025;0;0;4424210;0.0
 Kode kunstmuseer og komponisthjem STI;990269343;Stiftelse;kommunene;2025;4;52448668;107864785;48.6
@@ -1058,13 +1098,14 @@ Kraftia energi AS;980283976;Aksjeselskap;kommunene;2025;1;3433265;4942228;69.5
 Kristiansand havn IKS;926180711;Interkommunalt selskap;kommunene;2025;3;9557230;97117347;9.8
 Kristiansand kirkelig fellesråd;876992612;Kirkelig enhet;kommunene;2025;0;0;;
 Kristiansandsregionen brann og redning IKS;993470244;Interkommunalt selskap;kommunene;2025;0;0;;
-Kristiansund og nordmøre havn IKS;986712720;Interkommunalt selskap;kommunene;2025;0;0;20452126;0.0
+Kristiansund og Nordmøre havn IKS;986712720;Interkommunalt selskap;kommunene;2025;0;0;20452126;0.0
 Krossobanen AS;958759819;Aksjeselskap;kommunene;2025;1;14246575;5436936;262.0
-Lillesand og birkenes interkommunale renovasjonsselskap libir IKS;870934432;Interkommunalt selskap;kommunene;2025;0;0;30442300;0.0
+Legevakta i Drammensregionen IKS;986390456;Interkommunalt selskap;kommunene;2025;0;0;;
+Lillesand og Birkenes interkommunale renovasjonsselskap LIBIR IKS;870934432;Interkommunalt selskap;kommunene;2025;0;0;30442300;0.0
 Lillestrøm kirkelige fellesråd;922052271;Kirkelig enhet;kommunene;2025;0;0;;
 Lillestrøm parkering AS;986304185;Aksjeselskap;kommunene;2025;0;0;10145202;0.0
 Linea AS;917424799;Aksjeselskap;kommunene;2025;1;74949;518330000;0.0
-Lister og dalane avfallsservice AS;922566771;Aksjeselskap;kommunene;2025;0;0;4239239;0.0
+Lister og Dalane avfallsservice AS;922566771;Aksjeselskap;kommunene;2025;0;0;4239239;0.0
 Lnett AS;980038408;Aksjeselskap;kommunene;2025;9;126666298;1060455000;11.9
 Lofoten avfallsselskap IKS;971014407;Interkommunalt selskap;kommunene;2025;5;77126295;73844707;104.4
 Lofotkraft AS;886347782;Aksjeselskap;kommunene;2025;0;0;16784000;0.0
@@ -1078,53 +1119,55 @@ Maren AS;883369882;Aksjeselskap;kommunene;2025;0;0;4643543;0.0
 Maren kommuneservice AS;983564836;Aksjeselskap;kommunene;2025;0;0;46629204;0.0
 Marvika senter butikk 5 AS;995557010;Aksjeselskap;kommunene;2025;0;0;1132703;0.0
 Maskintråkk AS;981616634;Aksjeselskap;kommunene;2025;0;0;3045297;0.0
-Mia - museene i akershus STI;974235390;Stiftelse;kommunene;2025;0;0;55308179;0.0
-Midt-agder friluftsråd kommunalt oppgavefellesskap;975641716;Annen juridisk person;kommunene;2025;0;0;;
+MIA - museene i Akershus STI;974235390;Stiftelse;kommunene;2025;0;0;55308179;0.0
+Midt-Agder friluftsråd kommunalt oppgavefellesskap;975641716;Annen juridisk person;kommunene;2025;0;0;;
 Midtnett AS;917856222;Aksjeselskap;kommunene;2025;0;0;131107273;0.0
-Midtre namdal avfallsselskap IKS;957387969;Interkommunalt selskap;kommunene;2025;2;18270945;129132000;14.1
-Midtre romerike avløpsselskap IKS;911808005;Interkommunalt selskap;kommunene;2025;0;0;;
+Midtre Namdal avfallsselskap IKS;957387969;Interkommunalt selskap;kommunene;2025;3;18570740;129132000;14.4
+Midtre Romerike avløpsselskap IKS;911808005;Interkommunalt selskap;kommunene;2025;0;0;;
 Mitra AS;971178671;Aksjeselskap;kommunene;2025;0;0;35460645;0.0
 Mjøsanlegget AS;987916346;Aksjeselskap;kommunene;2025;1;750000;57153248;1.3
 Mjøsmuseet AS;987828293;Aksjeselskap;kommunene;2025;0;0;14289913;0.0
 MOVAR IKS;959272204;Interkommunalt selskap;kommunene;2025;16;76201983;211604616;36.0
 Munkedamsveien 15 AS;936009107;Aksjeselskap;kommunene;2025;0;0;3312848;0.0
-Musea i sogn og fjordane STI;994179136;Stiftelse;kommunene;2025;0;0;31681349;0.0
+Musea i Sogn og Fjordane STI;994179136;Stiftelse;kommunene;2025;0;0;31681349;0.0
 Museene arven AS;956298660;Aksjeselskap;kommunene;2025;2;81918;38355676;0.2
-Museene i sør-trøndelag AS;993595675;Aksjeselskap;kommunene;2025;0;0;150890085;0.0
+Museene i Sør-Trøndelag AS;993595675;Aksjeselskap;kommunene;2025;0;0;150890085;0.0
 Museet midt IKS;991500502;Interkommunalt selskap;kommunene;2025;0;0;19637775;0.0
-Museum stavanger AS;995642034;Aksjeselskap;kommunene;2025;0;0;102997085;0.0
+Museum Stavanger AS;995642034;Aksjeselskap;kommunene;2025;0;0;102997085;0.0
 Namdal rehabilitering IKS;986923845;Interkommunalt selskap;kommunene;2025;1;1498973;13169813;11.4
 Narvik kirkelige fellesråd;976999851;Kirkelig enhet;kommunene;2025;0;0;;
 Nasjonalt kommunesamarbeid for 110-sentralene IKS;927056453;Interkommunalt selskap;kommunene;2025;8;123499081;;
-Nedre romerike brann- og redningsvesen IKS;976634438;Interkommunalt selskap;kommunene;2025;1;5348729;;
-Nedre romerike vann- og avløpsselskap IKS;892110972;Interkommunalt selskap;kommunene;2025;8;18288686;;
+Nedre Romerike brann- og redningsvesen IKS;976634438;Interkommunalt selskap;kommunene;2025;1;5348729;;
+Nedre Romerike vann- og avløpsselskap IKS;892110972;Interkommunalt selskap;kommunene;2025;8;18288686;;
+Nedre Romerike vannverk IKS;992110996;Interkommunalt selskap;kommunene;2025;0;0;;
 Ngir drift AS;932316943;Aksjeselskap;kommunene;2025;2;5669490;93052307;6.1
-Noranett andøy AS;921680554;Aksjeselskap;kommunene;2025;0;0;11495700;0.0
+Noranett Andøy AS;921680554;Aksjeselskap;kommunene;2025;0;0;11495700;0.0
 Noranett AS;985411131;Aksjeselskap;kommunene;2025;1;3493671;199652903;1.7
-Noranett hadsel AS;917983550;Aksjeselskap;kommunene;2025;0;0;29266508;0.0
+Noranett Hadsel AS;917983550;Aksjeselskap;kommunene;2025;0;0;29266508;0.0
 Norasondegruppen AS;914671965;Aksjeselskap;kommunene;2025;0;0;11309506;0.0
-Nord-gudbrandsdal renovasjonsselskap IKS;992549394;Interkommunalt selskap;kommunene;2025;3;8950960;12282756;72.9
-Nord-salten kraft AS;995114666;Aksjeselskap;kommunene;2025;0;0;63497130;0.0
+Nord-Gudbrandsdal renovasjonsselskap IKS;992549394;Interkommunalt selskap;kommunene;2025;3;8950960;12282756;72.9
+Nord-Salten kraft AS;995114666;Aksjeselskap;kommunene;2025;0;0;63497130;0.0
 Nordfjord havn IKS;884276012;Interkommunalt selskap;kommunene;2025;0;0;23226444;0.0
 Nordfjord miljøverk IKS;977549833;Interkommunalt selskap;kommunene;2025;1;28730322;65471231;43.9
-Nordhordland og gulen interkommunale renovasjonsselskap IKS;856167402;Interkommunalt selskap;kommunene;2025;6;18534954;115707268;16.0
-Nordre follo renseanlegg IKS;971521570;Interkommunalt selskap;kommunene;2025;3;20598905;29744086;69.3
+Nordhordland og Gulen interkommunale renovasjonsselskap IKS;856167402;Interkommunalt selskap;kommunene;2025;6;18534954;115707268;16.0
+Nordmøre interkommunale renovasjonsselskap;971143436;Interkommunalt selskap;kommunene;2025;0;0;;
+Nordre Follo renseanlegg IKS;971521570;Interkommunalt selskap;kommunene;2025;3;20598905;29744086;69.3
 Norefjell vann- og avløpsselskap AS;935803713;Aksjeselskap;kommunene;2025;0;0;13271199;0.0
 Novari IKS;998283914;Interkommunalt selskap;kommunene;2025;22;86818038;;
 Ofa IKS;931832336;Interkommunalt selskap;kommunene;2025;19;178474183;;
 Olavshallen AS;951615390;Aksjeselskap;kommunene;2025;0;0;31753904;0.0
-Opera østfold AS;923724826;Aksjeselskap;kommunene;2025;0;0;23926668;0.0
+Opera Østfold AS;923724826;Aksjeselskap;kommunene;2025;0;0;23926668;0.0
 Opplevelsessenteret østfoldbadet AS;979932790;Aksjeselskap;kommunene;2025;0;0;28677436;0.0
 Oslo konserthus AS;981175328;Aksjeselskap;kommunene;2025;0;0;54470621;0.0
 Oslo nye teater AS;915065805;Aksjeselskap;kommunene;2025;0;0;36986545;0.0
 Oslo produksjon & tjenester AS;961528135;Aksjeselskap;kommunene;2025;0;0;31528369;0.0
 Oslo&co AS;912588114;Aksjeselskap;kommunene;2025;0;0;14417525;0.0
 Personalpartner arbeid og inkludering AS;927359472;Aksjeselskap;kommunene;2025;0;0;17721311;0.0
-Plug ålesund AS;925788228;Aksjeselskap;kommunene;2025;0;0;15252131;0.0
+Plug Ålesund AS;925788228;Aksjeselskap;kommunene;2025;0;0;15252131;0.0
 Ramfoss kraftlag kommunalt oppgavefellesskap;971030690;Annen juridisk person;kommunene;2025;0;0;;
 Randsfjordmuseet AS;987107022;Aksjeselskap;kommunene;2025;0;0;8169227;0.0
-Region nordhordland helsehus IKS;915031579;Interkommunalt selskap;kommunene;2025;0;0;;
-Region nordhordland IKS;971361514;Interkommunalt selskap;kommunene;2025;0;0;;
+Region Nordhordland helsehus IKS;915031579;Interkommunalt selskap;kommunene;2025;0;0;;
+Region Nordhordland IKS;971361514;Interkommunalt selskap;kommunene;2025;0;0;;
 Reit AS;993474118;Aksjeselskap;kommunene;2025;0;0;12909802;0.0
 Reknes næringseiendom AS;930591114;Aksjeselskap;kommunene;2025;1;2104761;55294651;3.8
 Remidt IKS;975936333;Interkommunalt selskap;kommunene;2025;5;15465714;368294441;4.2
@@ -1132,22 +1175,22 @@ Remiks husholdning AS;994900579;Aksjeselskap;kommunene;2025;1;14671357;188316877
 Remiks miljøpark AS;894462132;Aksjeselskap;kommunene;2025;0;0;42432839;0.0
 Reno-vest IKS;971037202;Interkommunalt selskap;kommunene;2025;5;5719134;28549136;20.0
 Reno-vest produksjon AS;912209571;Aksjeselskap;kommunene;2025;5;38253479;99560361;38.4
-Renovasjon i grenland IKS;913482778;Interkommunalt selskap;kommunene;2025;16;49787927;;
+Renovasjon i Grenland IKS;913482778;Interkommunalt selskap;kommunene;2025;16;49787927;;
 Renovasjonen IKS;989111736;Interkommunalt selskap;kommunene;2025;3;24741402;90472501;27.3
-Renovasjonsselskapet for drammensregionen IKS;984459947;Interkommunalt selskap;kommunene;2025;25;92261732;238213358;38.7
-Renovasjonsselskapet for farsund og lyngdal AS;987517999;Aksjeselskap;kommunene;2025;0;0;57222362;0.0
+Renovasjonsselskapet for Drammensregionen IKS;984459947;Interkommunalt selskap;kommunene;2025;25;92261732;238213358;38.7
+Renovasjonsselskapet for Farsund og Lyngdal AS;987517999;Aksjeselskap;kommunene;2025;0;0;57222362;0.0
 Renovasjonsselskapet glør IKS;971041692;Interkommunalt selskap;kommunene;2025;10;1779394;102983260;1.7
 Renovest IKS;980018725;Interkommunalt selskap;kommunene;2025;2;4175039;55215571;7.6
 Retrans midt AS;920321941;Aksjeselskap;kommunene;2025;1;316222;74391657;0.4
 Retura iris AS;984019351;Aksjeselskap;kommunene;2025;0;0;66897589;0.0
 Retura nt AS;986850821;Aksjeselskap;kommunene;2025;0;0;85817583;0.0
-Retura søre sunnmøre AS;987578602;Aksjeselskap;kommunene;2025;0;0;24234118;0.0
+Retura Søre Sunnmøre AS;987578602;Aksjeselskap;kommunene;2025;0;0;24234118;0.0
 Retura trv AS;988517054;Aksjeselskap;kommunene;2025;0;0;211915693;0.0
 Returkraft AS;991590463;Aksjeselskap;kommunene;2025;19;37006599;233591188;15.8
 Rir næring AS;887670552;Aksjeselskap;kommunene;2025;0;0;32387886;0.0
 Rir transport AS;919546018;Aksjeselskap;kommunene;2025;0;0;13124115;0.0
 Risør kirkelige fellesråd;976992008;Kirkelig enhet;kommunene;2025;0;0;;
-Risør tvedestrand regionens avfallsselskap rta AS;877540332;Aksjeselskap;kommunene;2025;1;955025;45510971;2.1
+Risør Tvedestrand regionens avfallsselskap RTA AS;877540332;Aksjeselskap;kommunene;2025;1;955025;45510971;2.1
 Rogaland brann og redning IKS;886884702;Interkommunalt selskap;kommunene;2025;6;9063122;127796961;7.1
 Romerike avfallsforedling IKS;965075364;Interkommunalt selskap;kommunene;2025;51;163117650;299366492;54.5
 Romerike krisesenter IKS;997597575;Interkommunalt selskap;kommunene;2025;0;0;;
@@ -1156,6 +1199,7 @@ Romsdalshalvøya interkommunale renovasjonsselskap IKS;971042656;Interkommunalt 
 Ruter AS;991609407;Aksjeselskap;kommunene;2025;29;2445660483;13405152000;18.2
 Ryfylke friluftsråd kommunalt oppgavefelleskap;974247178;Annen juridisk person;kommunene;2025;0;0;;
 Ryfylke it-samarbeid kommunalt oppgavefellesskap;929371763;Annen juridisk person;kommunene;2025;2;23000000;;
+Ryfylke miljøverk IKS;975372189;Interkommunalt selskap;kommunene;2025;0;0;;
 Ryfylkemuseet STI;970916482;Stiftelse;kommunene;2025;0;0;8896586;0.0
 Rå biopark AS;929464842;Aksjeselskap;kommunene;2025;1;5000000;1698559;294.4
 Røyken eiendom AS;982201489;Aksjeselskap;kommunene;2025;0;0;15985202;0.0
@@ -1173,7 +1217,8 @@ Sirkulær bestiller AS;924332050;Aksjeselskap;kommunene;2025;0;0;588567;0.0
 Skien kirkelige fellesråd;976991273;Kirkelig enhet;kommunene;2025;0;0;;
 Skøyen sokn;945766530;Kirkelig enhet;kommunene;2025;0;0;;
 Sogn brann og redning IKS;996629880;Interkommunalt selskap;kommunene;2025;1;4500000;;
-Sogn og fjordane energi AS;984882092;Aksjeselskap;kommunene;2025;0;0;22055149;0.0
+Sogn og Fjordane energi AS;984882092;Aksjeselskap;kommunene;2025;0;0;22055149;0.0
+Sogn og Fjordane revisjon IKS;987803223;Interkommunalt selskap;kommunene;2025;0;0;;
 Sognekraft produksjon AS;916069634;Aksjeselskap;kommunene;2025;0;0;332424000;0.0
 Sola kirkelige fellesråd;976993691;Kirkelig enhet;kommunene;2025;1;477630;;
 Solør bioenergi tranby AS;916598017;Aksjeselskap;kommunene;2025;1;0;8641312;0.0
@@ -1186,13 +1231,13 @@ Sporveien vognmateriell AS;991005226;Aksjeselskap;kommunene;2025;0;0;618823000;0
 Stavanger kirkelige fellesråd;976993403;Kirkelig enhet;kommunene;2025;0;0;;
 Stavanger konserthus IKS;989887823;Interkommunalt selskap;kommunene;2025;5;14523018;90456083;16.1
 Stiftelsen buskerudmuseene;913084705;Stiftelse;kommunene;2025;0;0;38389345;0.0
-Stiftelsen bymuseet i bergen;988212024;Stiftelse;kommunene;2025;0;0;46669838;0.0
+Stiftelsen bymuseet i Bergen;988212024;Stiftelse;kommunene;2025;0;0;46669838;0.0
 Stiftelsen kunstsilo;976215834;Stiftelse;kommunene;2025;0;0;65540171;0.0
-Stiftelsen lillehammer museum;955378024;Stiftelse;kommunene;2025;0;0;55269976;0.0
+Stiftelsen Lillehammer museum;955378024;Stiftelse;kommunene;2025;0;0;55269976;0.0
 Stiftelsen museum vest;987669586;Stiftelse;kommunene;2025;0;0;38153378;0.0
-Stiftelsen trondheim pirbad;976741315;Stiftelse;kommunene;2025;0;0;38520145;0.0
-Stiftinga hardanger og voss museum;987927704;Stiftelse;kommunene;2025;1;21026267;34169131;61.5
-Stiftinga museumssenteret i hordaland;971349743;Stiftelse;kommunene;2025;0;0;17377568;0.0
+Stiftelsen Trondheim pirbad;976741315;Stiftelse;kommunene;2025;0;0;38520145;0.0
+Stiftinga Hardanger og Voss museum;987927704;Stiftelse;kommunene;2025;1;21026267;34169131;61.5
+Stiftinga museumssenteret i Hordaland;971349743;Stiftelse;kommunene;2025;0;0;17377568;0.0
 Stord vatn og avløp AS;934602900;Aksjeselskap;kommunene;2025;0;0;50863271;0.0
 Storfjorden kyrkjelege fellesråd;997535820;Kirkelig enhet;kommunene;2025;0;0;;
 Sunnfjord kyrkjelege fellesråd;921865686;Kirkelig enhet;kommunene;2025;1;2250000;;
@@ -1202,14 +1247,15 @@ Sunnhordland interkommunale miljøverk IKS;958284837;Interkommunalt selskap;komm
 Sunnhordland kraftlag AS;916435711;Aksjeselskap;kommunene;2025;0;0;531623000;0.0
 Sysikt kommunalt oppgavefellesskap;995501872;Annen juridisk person;kommunene;2025;1;15605749;;
 Søir husholdning AS;989018043;Aksjeselskap;kommunene;2025;2;2859110;63488114;4.5
-Søndre follo renseanlegg IKS;970964584;Interkommunalt selskap;kommunene;2025;6;6124350;;
-Søndre helgeland miljøverk;975824845;Interkommunalt selskap;kommunene;2025;7;43549196;111835000;38.9
+Sølvberget KF;982766184;Kommunalt foretak;kommunene;2025;0;0;;
+Søndre Follo renseanlegg IKS;970964584;Interkommunalt selskap;kommunene;2025;6;6124350;;
+Søndre Helgeland miljøverk;975824845;Interkommunalt selskap;kommunene;2025;7;43549196;111835000;38.9
 Sør-østerdal interkommunale renovasjonsselskap;977041341;Interkommunalt selskap;kommunene;2025;0;0;15273243;0.0
-Søre sunnmøre IKT kommunalt oppgåvefellesskap;919824573;Annen juridisk person;kommunene;2025;2;54245722;;
-Søre sunnmøre reinhaldsverk IKS;987570970;Interkommunalt selskap;kommunene;2025;0;0;42145993;0.0
+Søre Sunnmøre IKT kommunalt oppgåvefellesskap;919824573;Annen juridisk person;kommunene;2025;2;54245722;;
+Søre Sunnmøre reinhaldsverk IKS;987570970;Interkommunalt selskap;kommunene;2025;0;0;42145993;0.0
 Sørmarka flerbrukshall IKS;991422560;Interkommunalt selskap;kommunene;2025;1;258834;19682918;1.3
 Tafjord kraftvarme AS;977461804;Aksjeselskap;kommunene;2025;1;1998631;143337617;1.4
-Teater vestland AS;929181557;Aksjeselskap;kommunene;2025;1;489041;22548787;2.2
+Teater Vestland AS;929181557;Aksjeselskap;kommunene;2025;1;489041;22548787;2.2
 Tempevegen 25 AS;921956452;Aksjeselskap;kommunene;2025;0;0;5503689;0.0
 Tendranett AS;918999361;Aksjeselskap;kommunene;2025;1;2149814;86576960;2.5
 Tensio AS;922828172;Aksjeselskap;kommunene;2025;2;434322729;199886000;217.3
@@ -1233,27 +1279,29 @@ Validér AS;912061159;Aksjeselskap;kommunene;2025;1;7607306;12485036;60.9
 Vann vest AS;924367148;Aksjeselskap;kommunene;2025;2;1623973;7418917;21.9
 Vaterland bussterminal AS;943180555;Aksjeselskap;kommunene;2025;0;0;16040783;0.0
 Vennesla kirkelige fellesråd;976992814;Kirkelig enhet;kommunene;2025;0;0;;
-Vest-agder-museet IKS;989072048;Interkommunalt selskap;kommunene;2025;6;10278575;;
-Vest-finnmark avfallsselskap, oarje-finnmarkku rihpafitnodat vefas IKS;977079403;Interkommunalt selskap;kommunene;2025;4;8581163;58580184;14.6
-Vest-telemark interkommunalt politisk råd;975476588;Annen juridisk person;kommunene;2025;0;0;;
+Vest-Agder-museet IKS;989072048;Interkommunalt selskap;kommunene;2025;6;10278575;;
+Vest-Finnmark avfallsselskap, oarje-finnmarkku rihpafitnodat vefas IKS;977079403;Interkommunalt selskap;kommunene;2025;4;8581163;58580184;14.6
+Vest-Telemark interkommunalt politisk råd;975476588;Annen juridisk person;kommunene;2025;0;0;;
 Vestfold avfall og ressurs AS;979281536;Aksjeselskap;kommunene;2025;5;56697486;234896473;24.1
 Vestfold interkommunale brannvesen IKS;982847796;Interkommunalt selskap;kommunene;2025;0;0;;
 Vestfold krematorium IKS;988100226;Interkommunalt selskap;kommunene;2025;1;735662;;
 Vestfold vann IKS;962351409;Interkommunalt selskap;kommunene;2025;0;0;81677118;0.0
 Vestfoldmuseene IKS;993871184;Interkommunalt selskap;kommunene;2025;1;388775;;
+Vestviken interkommunale vei-, vann- og avløpsselskap IKS;913716922;Interkommunalt selskap;kommunene;2025;0;0;;
 Viermie AS;919884452;Aksjeselskap;kommunene;2025;0;0;42872756;0.0
 Vindafjord kyrkjelege fellesråd;976994132;Kirkelig enhet;kommunene;2025;0;0;;
-Volda og ørsta reinhaldsverk IKS;984068085;Interkommunalt selskap;kommunene;2025;3;7620569;34913732;21.8
+Volda og Ørsta reinhaldsverk IKS;984068085;Interkommunalt selskap;kommunene;2025;3;7620569;34913732;21.8
 Å energi AS;981952324;Aksjeselskap;kommunene;2025;0;0;504955303;0.0
+Ålesundregionen interkommunale miljøselskap IKS;994717286;Interkommunalt selskap;kommunene;2025;2;2919233;;
 Ålesundregionens havnevesen IKS;933239098;Interkommunalt selskap;kommunene;2025;1;6303901;;
 Øfas husholdning AS;888321942;Aksjeselskap;kommunene;2025;1;0;38673124;0.0
-Øst-finnmark avfallsselskap AS;921473346;Aksjeselskap;kommunene;2025;2;1520622;61539000;2.5
+Øst-Finnmark avfallsselskap AS;921473346;Aksjeselskap;kommunene;2025;2;1520622;61539000;2.5
 Østfold avfallssortering IKS;924961821;Interkommunalt selskap;kommunene;2025;0;0;3036360;0.0
 Østfoldmuseene STI;994963910;Stiftelse;kommunene;2025;1;2219178;37122800;6.0
-Øvre eiker kirkelige fellesråd;976990218;Kirkelig enhet;kommunene;2025;0;0;;
-Øvre romerike brann og redning IKS;987615516;Interkommunalt selskap;kommunene;2025;0;0;;
+Øvre Eiker kirkelige fellesråd;976990218;Kirkelig enhet;kommunene;2025;0;0;;
+Øvre Romerike brann og redning IKS;987615516;Interkommunalt selskap;kommunene;2025;0;0;;
 Øyvar AS;985345899;Aksjeselskap;kommunene;2025;8;27685039;205323187;13.5
-Aktieselskapet Vinmonopolet;817209882;Aksjeselskap;staten;2026;3;4580825;;
+Aktieselskapet Vinmonopolet;817209882;Aksjeselskap;staten;2026;4;7909592;;
 Andøya space AS;979122721;Aksjeselskap;staten;2026;3;14970825;;
 Andøya space defence AS;879122392;Aksjeselskap;staten;2026;0;0;;
 Andøya space education AS;982222559;Aksjeselskap;staten;2026;0;0;;
@@ -1303,17 +1351,17 @@ Rogaland teater AS;915443990;Aksjeselskap;staten;2026;2;9539726;;
 Simula research laboratory AS;984648855;Aksjeselskap;staten;2026;0;0;;
 SIVA - selskapet for industrivekst SF;966703032;Statsforetak;staten;2026;0;0;;
 Skagerak energi AS;980495302;Aksjeselskap;staten;2026;0;0;;
-Statnett SF;962986633;Statsforetak;staten;2026;18;194506380;;
+Statnett SF;962986633;Statsforetak;staten;2026;19;195753813;;
 Statskog SF;966056258;Statsforetak;staten;2026;1;117616;;
 Stavanger symfoniorkester stiftelse;874247502;Stiftelse;staten;2026;1;159138;;
 Stiftelsen musikkselskapet harmonien;976619005;Stiftelse;staten;2026;0;0;;
 Stiftelsen nasjonalmuseet for kunst;985686092;Stiftelse;staten;2026;6;19515491;;
-Stiftelsen oslo-filharmonien;976944143;Stiftelse;staten;2026;0;0;;
+Stiftelsen Oslo-filharmonien;976944143;Stiftelse;staten;2026;0;0;;
 Trondheim symfoniorkester & opera STI;971434023;Stiftelse;staten;2026;1;1219713;;
 Unifond AS;995200090;Aksjeselskap;staten;2026;0;0;;
 Universitetssenteret på svalbard AS;985204454;Aksjeselskap;staten;2026;0;0;;
-Veas AS;920171400;Aksjeselskap;staten;2026;0;0;;
-Veas selvkost AS;920171540;Aksjeselskap;staten;2026;13;24630851;;
+VEAS AS;920171400;Aksjeselskap;staten;2026;0;0;;
+VEAS selvkost AS;920171540;Aksjeselskap;staten;2026;13;24630851;;
 Vegamot AS;935162718;Aksjeselskap;staten;2026;0;0;;
 Vegfinans AS;983149499;Aksjeselskap;staten;2026;5;53894844;;
 Vy buss AS;976948394;Aksjeselskap;staten;2026;0;0;;
@@ -1321,6 +1369,7 @@ Vy tog AS;917374988;Aksjeselskap;staten;2026;2;166325;;
 Vygruppen AS;984661177;Aksjeselskap;staten;2026;28;295508845;;
 Abakus AS;983335543;Aksjeselskap;kommunene;2026;6;40098498;;
 Afiber AS;920050719;Aksjeselskap;kommunene;2026;0;0;;
+AFK eiendom FKF;996331202;Fylkeskommunalt foretak;kommunene;2026;0;0;;
 Agder kollektivtrafikk AS;991776524;Aksjeselskap;kommunene;2026;3;101507228;;
 Agder renovasjon IKS;997765494;Interkommunalt selskap;kommunene;2026;4;11601129;;
 Agenda aktiv AS;872414762;Aksjeselskap;kommunene;2026;0;0;;
@@ -1330,14 +1379,15 @@ Anno museum AS;994933272;Aksjeselskap;kommunene;2026;2;3605350;;
 Arktisk filharmoni AS;994387693;Aksjeselskap;kommunene;2026;1;976044;;
 Arva AS;979151950;Aksjeselskap;kommunene;2026;0;0;;
 Asker nett AS;917743193;Aksjeselskap;kommunene;2026;0;0;;
-Asker og bærum brann og redning IKS;980358380;Interkommunalt selskap;kommunene;2026;4;41530569;;
-Asker og bærum vannverk IKS;974636972;Interkommunalt selskap;kommunene;2026;0;0;;
+Asker og Bærum brann og redning IKS;980358380;Interkommunalt selskap;kommunene;2026;4;41530569;;
+Asker og Bærum vannverk IKS;974636972;Interkommunalt selskap;kommunene;2026;0;0;;
+Askerbadet KF;916284128;Kommunalt foretak;kommunene;2026;0;0;;
 Askvoll sokn;976996267;Kirkelig enhet;kommunene;2026;0;0;;
-Atb AS;994686011;Aksjeselskap;kommunene;2026;4;15225707;;
+AtB AS;994686011;Aksjeselskap;kommunene;2026;4;15225707;;
 Attvin AS;922025096;Aksjeselskap;kommunene;2026;16;35683342;;
 Attvin næring AS;923030891;Aksjeselskap;kommunene;2026;0;0;;
 Attvin produksjon AS;923030913;Aksjeselskap;kommunene;2026;4;1847626;;
-Aust-agder museum og arkiv IKS;986088695;Interkommunalt selskap;kommunene;2026;0;0;;
+Aust-Agder museum og arkiv IKS;986088695;Interkommunalt selskap;kommunene;2026;0;0;;
 Avfall sør AS;986296042;Aksjeselskap;kommunene;2026;0;0;;
 Avfall sør husholdning AS;995646137;Aksjeselskap;kommunene;2026;6;10486585;;
 Avfallsmegling nord AS;925117706;Aksjeselskap;kommunene;2026;1;1640328;;
@@ -1345,7 +1395,7 @@ Avfallsservice AS;964180644;Aksjeselskap;kommunene;2026;3;12226757;;
 Barents nett AS;971058854;Aksjeselskap;kommunene;2026;0;0;;
 Bergen havn AS;918404635;Aksjeselskap;kommunene;2026;1;16632444;;
 Bergen kirkelige fellesråd;976994434;Kirkelig enhet;kommunene;2026;0;0;;
-BIR AS;983495400;Aksjeselskap;kommunene;2026;42;168298426;;
+BIR AS;983495400;Aksjeselskap;kommunene;2026;43;169078713;;
 BIR infrastruktur AS;990766665;Aksjeselskap;kommunene;2026;1;997947;;
 BIR nyverdi AS;984504942;Aksjeselskap;kommunene;2026;2;4583162;;
 BIR ressurs AS;985825408;Aksjeselskap;kommunene;2026;1;665298;;
@@ -1354,12 +1404,14 @@ Bjørvika infrastruktur AS;985010110;Aksjeselskap;kommunene;2026;0;0;;
 Bkk AS;976944801;Aksjeselskap;kommunene;2026;0;0;;
 Bodø kirkelige fellesråd;976999800;Kirkelig enhet;kommunene;2026;1;432444;;
 Bodø spektrum AS;946028614;Aksjeselskap;kommunene;2026;1;665298;;
+Bodø2024 IKS;925047686;Interkommunalt selskap;kommunene;2026;1;3326489;;
 Bop5 AS;923617035;Aksjeselskap;kommunene;2026;1;39612329;;
 Borg havn IKS;970937099;Interkommunalt selskap;kommunene;2026;0;0;;
 Brakar AS;995082454;Aksjeselskap;kommunene;2026;1;14969199;;
 Brannvesenet sør IKS;969952890;Interkommunalt selskap;kommunene;2026;0;0;;
 Bredbåndsfylket AS;986358013;Aksjeselskap;kommunene;2026;0;0;;
-Bustadstiftinga ved sentral sjukehuset i sogn og fjordane;874979392;Stiftelse;kommunene;2026;0;0;;
+Brevik fergeselskap IKS;912617750;Interkommunalt selskap;kommunene;2026;0;0;;
+Bustadstiftinga ved sentral sjukehuset i Sogn og Fjordane;874979392;Stiftelse;kommunene;2026;0;0;;
 Bybanen AS;977511402;Aksjeselskap;kommunene;2026;9;52704919;;
 Bysykkelen AS;914000475;Aksjeselskap;kommunene;2026;1;1663244;;
 Bømlo kommunale eigedomsselskap AS;993002631;Aksjeselskap;kommunene;2026;0;0;;
@@ -1367,12 +1419,14 @@ Bømlo kyrkjelege fellesråd;976994647;Kirkelig enhet;kommunene;2026;0;0;;
 Bømlo vatn og avløpsselskap AS;985228825;Aksjeselskap;kommunene;2026;0;0;;
 Dalane energi AS;917368007;Aksjeselskap;kommunene;2026;0;0;;
 Dalane miljøverk AS;922169063;Aksjeselskap;kommunene;2026;1;2494867;;
+Dalane miljøverk IKS;979719345;Interkommunalt selskap;kommunene;2026;0;0;;
 Ddv IKS;930654914;Interkommunalt selskap;kommunene;2026;0;0;;
 Digitale gardermoen KO;915498582;Annen juridisk person;kommunene;2026;2;6381780;;
-Digitale innherred kommunale oppgavefellesskap;930457485;Annen juridisk person;kommunene;2026;0;0;;
-Divtasvuona ja hábmera tjoaggulvisráde/tysfjord og hamarøy menighetsråd;877000532;Kirkelig enhet;kommunene;2026;0;0;;
+Digitale Innherred kommunale oppgavefellesskap;930457485;Annen juridisk person;kommunene;2026;0;0;;
+Divtasvuona ja Hábmera tjoaggulvisráde/tysfjord og Hamarøy menighetsråd;877000532;Kirkelig enhet;kommunene;2026;0;0;;
 Drammen scener AS;894922672;Aksjeselskap;kommunene;2026;0;0;;
 Drammensregionens brannvesen IKS;984054408;Interkommunalt selskap;kommunene;2026;3;12396575;;
+Driftsassistansen i Hordaland - vann og avløp IKS;987701390;Interkommunalt selskap;kommunene;2026;0;0;;
 Ecopro AS;984853998;Aksjeselskap;kommunene;2026;5;13497934;;
 Eidos eiendomsutvikling AS;830078312;Aksjeselskap;kommunene;2026;0;0;;
 Eidsiva bioenergi AS;980258165;Aksjeselskap;kommunene;2026;1;4997260;;
@@ -1383,6 +1437,7 @@ Elvenett AS;979497482;Aksjeselskap;kommunene;2026;0;0;;
 Elvia AS;980489698;Aksjeselskap;kommunene;2026;1;4324435;;
 Endra AS;929347560;Aksjeselskap;kommunene;2026;0;0;;
 Enida AS;918312730;Aksjeselskap;kommunene;2026;1;833676;;
+Envina IKS;986790594;Interkommunalt selskap;kommunene;2026;0;0;;
 Eviny AS;880309102;Aksjeselskap;kommunene;2026;0;0;;
 Eviny termo AS;979427697;Aksjeselskap;kommunene;2026;1;39917864;;
 Fagne AS;915635857;Aksjeselskap;kommunene;2026;5;46909315;;
@@ -1400,7 +1455,7 @@ Forus energigjenvinning 2 AS;993465224;Aksjeselskap;kommunene;2026;0;0;;
 Fosen renovasjon IKS;978669360;Interkommunalt selskap;kommunene;2026;0;0;;
 Frid IKS;931388975;Interkommunalt selskap;kommunene;2026;0;0;;
 Fusa kraftlag sa;858837162;Samvirkeforetak;kommunene;2026;0;0;;
-Fylkeshuset sarpsborg AS;844311532;Aksjeselskap;kommunene;2026;0;0;;
+Fylkeshuset Sarpsborg AS;844311532;Aksjeselskap;kommunene;2026;0;0;;
 Føie AS;971589752;Aksjeselskap;kommunene;2026;3;112125707;;
 Gauldal brann og redning IKS;989516191;Interkommunalt selskap;kommunene;2026;0;0;;
 Givas IKS;989016245;Interkommunalt selskap;kommunene;2026;2;10644764;;
@@ -1412,7 +1467,7 @@ Grenland havn IKS;970940510;Interkommunalt selskap;kommunene;2026;1;712328767;;
 Greve biogass AS;912716635;Aksjeselskap;kommunene;2026;0;0;;
 Grimstad kirkelige fellesråd;976992059;Kirkelig enhet;kommunene;2026;1;461096;;
 Grønt hjerte AS;925535974;Aksjeselskap;kommunene;2026;1;24948665;;
-Hadeland og ringerike avfallsselskap AS;966494816;Aksjeselskap;kommunene;2026;8;41200053;;
+Hadeland og Ringerike avfallsselskap AS;966494816;Aksjeselskap;kommunene;2026;8;41200053;;
 Hafslund AS;920596509;Aksjeselskap;kommunene;2026;0;0;;
 Hafslund celsio AS;977296919;Aksjeselskap;kommunene;2026;8;295718625;;
 Halden arbeid og vekst AS;917715378;Aksjeselskap;kommunene;2026;0;0;;
@@ -1440,21 +1495,22 @@ Hovden prosjektutvikling AS;945765747;Aksjeselskap;kommunene;2026;0;0;;
 Hå kyrkjelege fellesråd;976993543;Kirkelig enhet;kommunene;2026;0;0;;
 Hålogaland ressursselskap IKS;959019126;Interkommunalt selskap;kommunene;2026;1;865479;;
 Hålogaland teater AS;920093914;Aksjeselskap;kommunene;2026;0;0;;
-Hægebostad og åseral renovasjonsselskap-hår IKS;979361475;Interkommunalt selskap;kommunene;2026;1;1470899;;
+Hægebostad og Åseral renovasjonsselskap-hår IKS;979361475;Interkommunalt selskap;kommunene;2026;1;1470899;;
 Ikomm AS;991335846;Aksjeselskap;kommunene;2026;1;580822;;
-IKT agder IKS;985359385;Interkommunalt selskap;kommunene;2026;1;114990;;
-IKT nordhordland kommunalt oppgåvefellesskap;923971890;Annen juridisk person;kommunene;2026;16;44551572;;
-IKT valdres IKS;995607409;Interkommunalt selskap;kommunene;2026;3;10514783;;
+IKT Agder IKS;985359385;Interkommunalt selskap;kommunene;2026;1;114990;;
+IKT Nordhordland kommunalt oppgåvefellesskap;923971890;Annen juridisk person;kommunene;2026;16;44551572;;
+IKT Valdres IKS;995607409;Interkommunalt selskap;kommunene;2026;3;10514783;;
 Indigo IKT IKS;930283487;Interkommunalt selskap;kommunene;2026;9;37013083;;
-Indre agder og telemark avfallsselskap IKS;977500303;Interkommunalt selskap;kommunene;2026;1;3550685;;
-Indre hordaland kraftnett AS;919415096;Aksjeselskap;kommunene;2026;1;2747712;;
-Indre østfold renovasjon IKS;974642239;Interkommunalt selskap;kommunene;2026;1;2120637;;
+Indre Agder og Telemark avfallsselskap IKS;977500303;Interkommunalt selskap;kommunene;2026;1;3550685;;
+Indre Hordaland kraftnett AS;919415096;Aksjeselskap;kommunene;2026;1;2747712;;
+Indre Hordaland miljøverk IKS;971155876;Interkommunalt selskap;kommunene;2026;0;0;;
+Indre Østfold renovasjon IKS;974642239;Interkommunalt selskap;kommunene;2026;1;2120637;;
 Innherred renovasjon IKS;971217391;Interkommunalt selskap;kommunene;2026;7;25035957;;
 Inspiria science center AS;893980482;Aksjeselskap;kommunene;2026;0;0;;
-Interkommunalt arkiv troms IKS;989532960;Interkommunalt selskap;kommunene;2026;1;3171131;;
-Interkommunalt arkiv trøndelag IKS;971375965;Interkommunalt selskap;kommunene;2026;0;0;;
-Interkommunalt politisk råd for nord-gudbrandsdal;976634845;Annen juridisk person;kommunene;2026;0;0;;
-Iris salten IKS;967518190;Interkommunalt selskap;kommunene;2026;2;1019357;;
+Interkommunalt arkiv Troms IKS;989532960;Interkommunalt selskap;kommunene;2026;1;3171131;;
+Interkommunalt arkiv Trøndelag IKS;971375965;Interkommunalt selskap;kommunene;2026;0;0;;
+Interkommunalt politisk råd for Nord-Gudbrandsdal;976634845;Annen juridisk person;kommunene;2026;0;0;;
+Iris Salten IKS;967518190;Interkommunalt selskap;kommunene;2026;2;1019357;;
 Iris service AS;984019327;Aksjeselskap;kommunene;2026;3;38015363;;
 Irmat AS;984364458;Aksjeselskap;kommunene;2026;4;21933921;;
 Irs miljø IKS;995055244;Interkommunalt selskap;kommunene;2026;1;2827515;;
@@ -1466,8 +1522,8 @@ Karmøy kirkelig fellesråd;876994062;Kirkelig enhet;kommunene;2026;0;0;;
 Kilden teater og konserthus IKS;986471839;Interkommunalt selskap;kommunene;2026;0;0;;
 Kinoalliansen AS;917630518;Aksjeselskap;kommunene;2026;0;0;;
 Kinonor AS;914726441;Aksjeselskap;kommunene;2026;0;0;;
-Kirkelig fellesråd i oslo;976987608;Kirkelig enhet;kommunene;2026;7;91202751;;
-Kirkelig fellesråd i trondheim;976998294;Kirkelig enhet;kommunene;2026;1;139726;;
+Kirkelig fellesråd i Oslo;976987608;Kirkelig enhet;kommunene;2026;7;91202751;;
+Kirkelig fellesråd i Trondheim;976998294;Kirkelig enhet;kommunene;2026;1;139726;;
 Klepp energi AS;826294442;Aksjeselskap;kommunene;2026;0;0;;
 Klubben i røverstaden AS;919058579;Aksjeselskap;kommunene;2026;0;0;;
 Kode kunstmuseer og komponisthjem STI;990269343;Stiftelse;kommunene;2026;2;6429574;;
@@ -1476,13 +1532,14 @@ Kraftia energi AS;980283976;Aksjeselskap;kommunene;2026;0;0;;
 Kristiansand havn IKS;926180711;Interkommunalt selskap;kommunene;2026;4;21147205;;
 Kristiansand kirkelig fellesråd;876992612;Kirkelig enhet;kommunene;2026;0;0;;
 Kristiansandsregionen brann og redning IKS;993470244;Interkommunalt selskap;kommunene;2026;1;476386;;
-Kristiansund og nordmøre havn IKS;986712720;Interkommunalt selskap;kommunene;2026;0;0;;
+Kristiansund og Nordmøre havn IKS;986712720;Interkommunalt selskap;kommunene;2026;0;0;;
 Krossobanen AS;958759819;Aksjeselskap;kommunene;2026;1;33287671;;
-Lillesand og birkenes interkommunale renovasjonsselskap libir IKS;870934432;Interkommunalt selskap;kommunene;2026;0;0;;
+Legevakta i Drammensregionen IKS;986390456;Interkommunalt selskap;kommunene;2026;0;0;;
+Lillesand og Birkenes interkommunale renovasjonsselskap LIBIR IKS;870934432;Interkommunalt selskap;kommunene;2026;0;0;;
 Lillestrøm kirkelige fellesråd;922052271;Kirkelig enhet;kommunene;2026;0;0;;
 Lillestrøm parkering AS;986304185;Aksjeselskap;kommunene;2026;0;0;;
 Linea AS;917424799;Aksjeselskap;kommunene;2026;1;49897;;
-Lister og dalane avfallsservice AS;922566771;Aksjeselskap;kommunene;2026;1;11642710;;
+Lister og Dalane avfallsservice AS;922566771;Aksjeselskap;kommunene;2026;1;11642710;;
 Lnett AS;980038408;Aksjeselskap;kommunene;2026;8;61518226;;
 Lofoten avfallsselskap IKS;971014407;Interkommunalt selskap;kommunene;2026;5;56409411;;
 Lofotkraft AS;886347782;Aksjeselskap;kommunene;2026;0;0;;
@@ -1496,53 +1553,55 @@ Maren AS;883369882;Aksjeselskap;kommunene;2026;0;0;;
 Maren kommuneservice AS;983564836;Aksjeselskap;kommunene;2026;0;0;;
 Marvika senter butikk 5 AS;995557010;Aksjeselskap;kommunene;2026;0;0;;
 Maskintråkk AS;981616634;Aksjeselskap;kommunene;2026;0;0;;
-Mia - museene i akershus STI;974235390;Stiftelse;kommunene;2026;0;0;;
-Midt-agder friluftsråd kommunalt oppgavefellesskap;975641716;Annen juridisk person;kommunene;2026;0;0;;
+MIA - museene i Akershus STI;974235390;Stiftelse;kommunene;2026;0;0;;
+Midt-Agder friluftsråd kommunalt oppgavefellesskap;975641716;Annen juridisk person;kommunene;2026;0;0;;
 Midtnett AS;917856222;Aksjeselskap;kommunene;2026;0;0;;
-Midtre namdal avfallsselskap IKS;957387969;Interkommunalt selskap;kommunene;2026;3;11644644;;
-Midtre romerike avløpsselskap IKS;911808005;Interkommunalt selskap;kommunene;2026;1;5524141;;
+Midtre Namdal avfallsselskap IKS;957387969;Interkommunalt selskap;kommunene;2026;4;11844233;;
+Midtre Romerike avløpsselskap IKS;911808005;Interkommunalt selskap;kommunene;2026;1;5524141;;
 Mitra AS;971178671;Aksjeselskap;kommunene;2026;0;0;;
 Mjøsanlegget AS;987916346;Aksjeselskap;kommunene;2026;2;2706023;;
 Mjøsmuseet AS;987828293;Aksjeselskap;kommunene;2026;0;0;;
 MOVAR IKS;959272204;Interkommunalt selskap;kommunene;2026;14;205922525;;
 Munkedamsveien 15 AS;936009107;Aksjeselskap;kommunene;2026;0;0;;
-Musea i sogn og fjordane STI;994179136;Stiftelse;kommunene;2026;0;0;;
+Musea i Sogn og Fjordane STI;994179136;Stiftelse;kommunene;2026;0;0;;
 Museene arven AS;956298660;Aksjeselskap;kommunene;2026;2;1531233;;
-Museene i sør-trøndelag AS;993595675;Aksjeselskap;kommunene;2026;0;0;;
+Museene i Sør-Trøndelag AS;993595675;Aksjeselskap;kommunene;2026;0;0;;
 Museet midt IKS;991500502;Interkommunalt selskap;kommunene;2026;0;0;;
-Museum stavanger AS;995642034;Aksjeselskap;kommunene;2026;0;0;;
+Museum Stavanger AS;995642034;Aksjeselskap;kommunene;2026;0;0;;
 Namdal rehabilitering IKS;986923845;Interkommunalt selskap;kommunene;2026;1;997947;;
 Narvik kirkelige fellesråd;976999851;Kirkelig enhet;kommunene;2026;0;0;;
 Nasjonalt kommunesamarbeid for 110-sentralene IKS;927056453;Interkommunalt selskap;kommunene;2026;6;122676574;;
-Nedre romerike brann- og redningsvesen IKS;976634438;Interkommunalt selskap;kommunene;2026;0;0;;
-Nedre romerike vann- og avløpsselskap IKS;892110972;Interkommunalt selskap;kommunene;2026;4;5653816;;
+Nedre Romerike brann- og redningsvesen IKS;976634438;Interkommunalt selskap;kommunene;2026;0;0;;
+Nedre Romerike vann- og avløpsselskap IKS;892110972;Interkommunalt selskap;kommunene;2026;4;5653816;;
+Nedre Romerike vannverk IKS;992110996;Interkommunalt selskap;kommunene;2026;0;0;;
 Ngir drift AS;932316943;Aksjeselskap;kommunene;2026;4;7759406;;
-Noranett andøy AS;921680554;Aksjeselskap;kommunene;2026;0;0;;
+Noranett Andøy AS;921680554;Aksjeselskap;kommunene;2026;0;0;;
 Noranett AS;985411131;Aksjeselskap;kommunene;2026;3;15271025;;
-Noranett hadsel AS;917983550;Aksjeselskap;kommunene;2026;0;0;;
+Noranett Hadsel AS;917983550;Aksjeselskap;kommunene;2026;0;0;;
 Norasondegruppen AS;914671965;Aksjeselskap;kommunene;2026;0;0;;
-Nord-gudbrandsdal renovasjonsselskap IKS;992549394;Interkommunalt selskap;kommunene;2026;4;13666772;;
-Nord-salten kraft AS;995114666;Aksjeselskap;kommunene;2026;0;0;;
+Nord-Gudbrandsdal renovasjonsselskap IKS;992549394;Interkommunalt selskap;kommunene;2026;4;13666772;;
+Nord-Salten kraft AS;995114666;Aksjeselskap;kommunene;2026;0;0;;
 Nordfjord havn IKS;884276012;Interkommunalt selskap;kommunene;2026;1;2121834;;
 Nordfjord miljøverk IKS;977549833;Interkommunalt selskap;kommunene;2026;1;19127310;;
-Nordhordland og gulen interkommunale renovasjonsselskap IKS;856167402;Interkommunalt selskap;kommunene;2026;1;304723;;
-Nordre follo renseanlegg IKS;971521570;Interkommunalt selskap;kommunene;2026;4;71319091;;
+Nordhordland og Gulen interkommunale renovasjonsselskap IKS;856167402;Interkommunalt selskap;kommunene;2026;1;304723;;
+Nordmøre interkommunale renovasjonsselskap;971143436;Interkommunalt selskap;kommunene;2026;0;0;;
+Nordre Follo renseanlegg IKS;971521570;Interkommunalt selskap;kommunene;2026;4;71319091;;
 Norefjell vann- og avløpsselskap AS;935803713;Aksjeselskap;kommunene;2026;0;0;;
 Novari IKS;998283914;Interkommunalt selskap;kommunene;2026;20;53819977;;
 Ofa IKS;931832336;Interkommunalt selskap;kommunene;2026;23;155955076;;
 Olavshallen AS;951615390;Aksjeselskap;kommunene;2026;0;0;;
-Opera østfold AS;923724826;Aksjeselskap;kommunene;2026;0;0;;
+Opera Østfold AS;923724826;Aksjeselskap;kommunene;2026;0;0;;
 Opplevelsessenteret østfoldbadet AS;979932790;Aksjeselskap;kommunene;2026;0;0;;
 Oslo konserthus AS;981175328;Aksjeselskap;kommunene;2026;0;0;;
 Oslo nye teater AS;915065805;Aksjeselskap;kommunene;2026;0;0;;
 Oslo produksjon & tjenester AS;961528135;Aksjeselskap;kommunene;2026;0;0;;
 Oslo&co AS;912588114;Aksjeselskap;kommunene;2026;1;1716788;;
 Personalpartner arbeid og inkludering AS;927359472;Aksjeselskap;kommunene;2026;0;0;;
-Plug ålesund AS;925788228;Aksjeselskap;kommunene;2026;0;0;;
+Plug Ålesund AS;925788228;Aksjeselskap;kommunene;2026;0;0;;
 Ramfoss kraftlag kommunalt oppgavefellesskap;971030690;Annen juridisk person;kommunene;2026;0;0;;
 Randsfjordmuseet AS;987107022;Aksjeselskap;kommunene;2026;0;0;;
-Region nordhordland helsehus IKS;915031579;Interkommunalt selskap;kommunene;2026;0;0;;
-Region nordhordland IKS;971361514;Interkommunalt selskap;kommunene;2026;0;0;;
+Region Nordhordland helsehus IKS;915031579;Interkommunalt selskap;kommunene;2026;0;0;;
+Region Nordhordland IKS;971361514;Interkommunalt selskap;kommunene;2026;0;0;;
 Reit AS;993474118;Aksjeselskap;kommunene;2026;0;0;;
 Reknes næringseiendom AS;930591114;Aksjeselskap;kommunene;2026;1;1401252;;
 Remidt IKS;975936333;Interkommunalt selskap;kommunene;2026;3;39972186;;
@@ -1550,22 +1609,22 @@ Remiks husholdning AS;994900579;Aksjeselskap;kommunene;2026;1;1688211;;
 Remiks miljøpark AS;894462132;Aksjeselskap;kommunene;2026;1;269431;;
 Reno-vest IKS;971037202;Interkommunalt selskap;kommunene;2026;2;2087803;;
 Reno-vest produksjon AS;912209571;Aksjeselskap;kommunene;2026;7;28204416;;
-Renovasjon i grenland IKS;913482778;Interkommunalt selskap;kommunene;2026;15;22402192;;
+Renovasjon i Grenland IKS;913482778;Interkommunalt selskap;kommunene;2026;15;22402192;;
 Renovasjonen IKS;989111736;Interkommunalt selskap;kommunene;2026;1;12020172;;
-Renovasjonsselskapet for drammensregionen IKS;984459947;Interkommunalt selskap;kommunene;2026;19;70946202;;
-Renovasjonsselskapet for farsund og lyngdal AS;987517999;Aksjeselskap;kommunene;2026;0;0;;
+Renovasjonsselskapet for Drammensregionen IKS;984459947;Interkommunalt selskap;kommunene;2026;19;70946202;;
+Renovasjonsselskapet for Farsund og Lyngdal AS;987517999;Aksjeselskap;kommunene;2026;0;0;;
 Renovasjonsselskapet glør IKS;971041692;Interkommunalt selskap;kommunene;2026;9;5051742;;
 Renovest IKS;980018725;Interkommunalt selskap;kommunene;2026;3;3756631;;
 Retrans midt AS;920321941;Aksjeselskap;kommunene;2026;1;76841889;;
 Retura iris AS;984019351;Aksjeselskap;kommunene;2026;0;0;;
 Retura nt AS;986850821;Aksjeselskap;kommunene;2026;0;0;;
-Retura søre sunnmøre AS;987578602;Aksjeselskap;kommunene;2026;0;0;;
+Retura Søre Sunnmøre AS;987578602;Aksjeselskap;kommunene;2026;0;0;;
 Retura trv AS;988517054;Aksjeselskap;kommunene;2026;0;0;;
 Returkraft AS;991590463;Aksjeselskap;kommunene;2026;17;34437321;;
 Rir næring AS;887670552;Aksjeselskap;kommunene;2026;0;0;;
 Rir transport AS;919546018;Aksjeselskap;kommunene;2026;1;2142466;;
 Risør kirkelige fellesråd;976992008;Kirkelig enhet;kommunene;2026;0;0;;
-Risør tvedestrand regionens avfallsselskap rta AS;877540332;Aksjeselskap;kommunene;2026;1;1758115;;
+Risør Tvedestrand regionens avfallsselskap RTA AS;877540332;Aksjeselskap;kommunene;2026;1;1758115;;
 Rogaland brann og redning IKS;886884702;Interkommunalt selskap;kommunene;2026;5;6491040;;
 Romerike avfallsforedling IKS;965075364;Interkommunalt selskap;kommunene;2026;48;164175707;;
 Romerike krisesenter IKS;997597575;Interkommunalt selskap;kommunene;2026;0;0;;
@@ -1574,6 +1633,7 @@ Romsdalshalvøya interkommunale renovasjonsselskap IKS;971042656;Interkommunalt 
 Ruter AS;991609407;Aksjeselskap;kommunene;2026;25;1867561701;;
 Ryfylke friluftsråd kommunalt oppgavefelleskap;974247178;Annen juridisk person;kommunene;2026;0;0;;
 Ryfylke it-samarbeid kommunalt oppgavefellesskap;929371763;Annen juridisk person;kommunene;2026;0;0;;
+Ryfylke miljøverk IKS;975372189;Interkommunalt selskap;kommunene;2026;0;0;;
 Ryfylkemuseet STI;970916482;Stiftelse;kommunene;2026;0;0;;
 Rå biopark AS;929464842;Aksjeselskap;kommunene;2026;1;1465753;;
 Røyken eiendom AS;982201489;Aksjeselskap;kommunene;2026;0;0;;
@@ -1591,7 +1651,8 @@ Sirkulær bestiller AS;924332050;Aksjeselskap;kommunene;2026;1;22824818;;
 Skien kirkelige fellesråd;976991273;Kirkelig enhet;kommunene;2026;0;0;;
 Skøyen sokn;945766530;Kirkelig enhet;kommunene;2026;0;0;;
 Sogn brann og redning IKS;996629880;Interkommunalt selskap;kommunene;2026;0;0;;
-Sogn og fjordane energi AS;984882092;Aksjeselskap;kommunene;2026;0;0;;
+Sogn og Fjordane energi AS;984882092;Aksjeselskap;kommunene;2026;0;0;;
+Sogn og Fjordane revisjon IKS;987803223;Interkommunalt selskap;kommunene;2026;0;0;;
 Sognekraft produksjon AS;916069634;Aksjeselskap;kommunene;2026;0;0;;
 Sola kirkelige fellesråd;976993691;Kirkelig enhet;kommunene;2026;0;0;;
 Solør bioenergi tranby AS;916598017;Aksjeselskap;kommunene;2026;1;0;;
@@ -1604,13 +1665,13 @@ Sporveien vognmateriell AS;991005226;Aksjeselskap;kommunene;2026;0;0;;
 Stavanger kirkelige fellesråd;976993403;Kirkelig enhet;kommunene;2026;0;0;;
 Stavanger konserthus IKS;989887823;Interkommunalt selskap;kommunene;2026;4;7983573;;
 Stiftelsen buskerudmuseene;913084705;Stiftelse;kommunene;2026;0;0;;
-Stiftelsen bymuseet i bergen;988212024;Stiftelse;kommunene;2026;0;0;;
+Stiftelsen bymuseet i Bergen;988212024;Stiftelse;kommunene;2026;0;0;;
 Stiftelsen kunstsilo;976215834;Stiftelse;kommunene;2026;0;0;;
-Stiftelsen lillehammer museum;955378024;Stiftelse;kommunene;2026;0;0;;
+Stiftelsen Lillehammer museum;955378024;Stiftelse;kommunene;2026;0;0;;
 Stiftelsen museum vest;987669586;Stiftelse;kommunene;2026;0;0;;
-Stiftelsen trondheim pirbad;976741315;Stiftelse;kommunene;2026;0;0;;
-Stiftinga hardanger og voss museum;987927704;Stiftelse;kommunene;2026;0;0;;
-Stiftinga museumssenteret i hordaland;971349743;Stiftelse;kommunene;2026;0;0;;
+Stiftelsen Trondheim pirbad;976741315;Stiftelse;kommunene;2026;0;0;;
+Stiftinga Hardanger og Voss museum;987927704;Stiftelse;kommunene;2026;0;0;;
+Stiftinga museumssenteret i Hordaland;971349743;Stiftelse;kommunene;2026;0;0;;
 Stord vatn og avløp AS;934602900;Aksjeselskap;kommunene;2026;3;30229979;;
 Storfjorden kyrkjelege fellesråd;997535820;Kirkelig enhet;kommunene;2026;0;0;;
 Sunnfjord kyrkjelege fellesråd;921865686;Kirkelig enhet;kommunene;2026;1;209589;;
@@ -1620,14 +1681,15 @@ Sunnhordland interkommunale miljøverk IKS;958284837;Interkommunalt selskap;komm
 Sunnhordland kraftlag AS;916435711;Aksjeselskap;kommunene;2026;0;0;;
 Sysikt kommunalt oppgavefellesskap;995501872;Annen juridisk person;kommunene;2026;0;0;;
 Søir husholdning AS;989018043;Aksjeselskap;kommunene;2026;1;1131006;;
-Søndre follo renseanlegg IKS;970964584;Interkommunalt selskap;kommunene;2026;4;4127329;;
-Søndre helgeland miljøverk;975824845;Interkommunalt selskap;kommunene;2026;9;54600101;;
+Sølvberget KF;982766184;Kommunalt foretak;kommunene;2026;0;0;;
+Søndre Follo renseanlegg IKS;970964584;Interkommunalt selskap;kommunene;2026;4;4127329;;
+Søndre Helgeland miljøverk;975824845;Interkommunalt selskap;kommunene;2026;9;54600101;;
 Sør-østerdal interkommunale renovasjonsselskap;977041341;Interkommunalt selskap;kommunene;2026;0;0;;
-Søre sunnmøre IKT kommunalt oppgåvefellesskap;919824573;Annen juridisk person;kommunene;2026;2;5027289;;
-Søre sunnmøre reinhaldsverk IKS;987570970;Interkommunalt selskap;kommunene;2026;0;0;;
+Søre Sunnmøre IKT kommunalt oppgåvefellesskap;919824573;Annen juridisk person;kommunene;2026;2;5027289;;
+Søre Sunnmøre reinhaldsverk IKS;987570970;Interkommunalt selskap;kommunene;2026;0;0;;
 Sørmarka flerbrukshall IKS;991422560;Interkommunalt selskap;kommunene;2026;0;0;;
 Tafjord kraftvarme AS;977461804;Aksjeselskap;kommunene;2026;1;1330595;;
-Teater vestland AS;929181557;Aksjeselskap;kommunene;2026;0;0;;
+Teater Vestland AS;929181557;Aksjeselskap;kommunene;2026;0;0;;
 Tempevegen 25 AS;921956452;Aksjeselskap;kommunene;2026;0;0;;
 Tendranett AS;918999361;Aksjeselskap;kommunene;2026;0;0;;
 Tensio AS;922828172;Aksjeselskap;kommunene;2026;0;0;;
@@ -1651,23 +1713,25 @@ Validér AS;912061159;Aksjeselskap;kommunene;2026;1;7545205;;
 Vann vest AS;924367148;Aksjeselskap;kommunene;2026;2;1008563;;
 Vaterland bussterminal AS;943180555;Aksjeselskap;kommunene;2026;0;0;;
 Vennesla kirkelige fellesråd;976992814;Kirkelig enhet;kommunene;2026;0;0;;
-Vest-agder-museet IKS;989072048;Interkommunalt selskap;kommunene;2026;6;6256532;;
-Vest-finnmark avfallsselskap, oarje-finnmarkku rihpafitnodat vefas IKS;977079403;Interkommunalt selskap;kommunene;2026;4;9260963;;
-Vest-telemark interkommunalt politisk råd;975476588;Annen juridisk person;kommunene;2026;1;1591376;;
+Vest-Agder-museet IKS;989072048;Interkommunalt selskap;kommunene;2026;6;6256532;;
+Vest-Finnmark avfallsselskap, oarje-finnmarkku rihpafitnodat vefas IKS;977079403;Interkommunalt selskap;kommunene;2026;4;9260963;;
+Vest-Telemark interkommunalt politisk råd;975476588;Annen juridisk person;kommunene;2026;1;1591376;;
 Vestfold avfall og ressurs AS;979281536;Aksjeselskap;kommunene;2026;5;37329662;;
 Vestfold interkommunale brannvesen IKS;982847796;Interkommunalt selskap;kommunene;2026;1;1852055;;
 Vestfold krematorium IKS;988100226;Interkommunalt selskap;kommunene;2026;0;0;;
 Vestfold vann IKS;962351409;Interkommunalt selskap;kommunene;2026;0;0;;
 Vestfoldmuseene IKS;993871184;Interkommunalt selskap;kommunene;2026;2;2006845;;
+Vestviken interkommunale vei-, vann- og avløpsselskap IKS;913716922;Interkommunalt selskap;kommunene;2026;0;0;;
 Viermie AS;919884452;Aksjeselskap;kommunene;2026;0;0;;
 Vindafjord kyrkjelege fellesråd;976994132;Kirkelig enhet;kommunene;2026;0;0;;
-Volda og ørsta reinhaldsverk IKS;984068085;Interkommunalt selskap;kommunene;2026;3;4421161;;
+Volda og Ørsta reinhaldsverk IKS;984068085;Interkommunalt selskap;kommunene;2026;3;4421161;;
 Å energi AS;981952324;Aksjeselskap;kommunene;2026;0;0;;
+Ålesundregionen interkommunale miljøselskap IKS;994717286;Interkommunalt selskap;kommunene;2026;0;0;;
 Ålesundregionens havnevesen IKS;933239098;Interkommunalt selskap;kommunene;2026;1;4989733;;
 Øfas husholdning AS;888321942;Aksjeselskap;kommunene;2026;1;0;;
-Øst-finnmark avfallsselskap AS;921473346;Aksjeselskap;kommunene;2026;0;0;;
+Øst-Finnmark avfallsselskap AS;921473346;Aksjeselskap;kommunene;2026;0;0;;
 Østfold avfallssortering IKS;924961821;Interkommunalt selskap;kommunene;2026;0;0;;
 Østfoldmuseene STI;994963910;Stiftelse;kommunene;2026;1;1664384;;
-Øvre eiker kirkelige fellesråd;976990218;Kirkelig enhet;kommunene;2026;0;0;;
-Øvre romerike brann og redning IKS;987615516;Interkommunalt selskap;kommunene;2026;0;0;;
+Øvre Eiker kirkelige fellesråd;976990218;Kirkelig enhet;kommunene;2026;0;0;;
+Øvre Romerike brann og redning IKS;987615516;Interkommunalt selskap;kommunene;2026;0;0;;
 Øyvar AS;985345899;Aksjeselskap;kommunene;2026;5;18018966;;

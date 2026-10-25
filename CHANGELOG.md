@@ -2,6 +2,16 @@
 
 ## Ikke utgitt
 
+- **Kjøpere uten orgnr:** noen kunngjøringer i Doffin, mest fra 2017–2022, har kjøpere uten orgnr. 1 192 slike
+  kjøpere kjennes nå igjen på navnet, eller navnet foran «v/» eller komma («Oslo kommune v/ Bymiljøetaten»), ut fra
+  navnene i tidligere kunngjøringer og registrene. Navn som har vært brukt av flere orgnr (som Sande kommune), er
+  ikke med. Det gir 98 nye kunngjøringer (blant annet Helse Sør-Øst, departementer og kommuner i Finnmark), og
+  kommuner og virksomheter som var medkjøpere i felles anskaffelser, får dem på sidene sine.
+- **Nedlagte IKS og kommunale foretak:** 16 nedlagte interkommunale selskaper og kommunale foretak (som ÅRIM, Viva
+  IKS og Nedre Romerike vannverk) er med blant de kommunale selskapene. De har mistet sektorkoden i
+  Enhetsregisteret og finnes ut fra organisasjonsformen. Til sammen 151 nye kontrakter (30 867 i alt).
+- **Stedsnavn i selskapsnavn:** navn som kommer med store bokstaver fra Enhetsregisteret, får stor forbokstav på
+  steder og regioner («Asker og Bærum vannverk IKS», «Nord-Gudbrandsdal renovasjonsselskap IKS»). 76 navn er rettet.
 - **Viken, Vestfold og Telemark og Troms og Finnmark:** fylkeskommunene som ble delt i 2024, er med for
   2020–2023 med KOSTRA-tallene og kontraktene sine (342 nye kontrakter, 30 716 i alt). Kunngjøringer fra
   fylkeskommunene før 2020 som ble en del av dem (som Akershus, Buskerud og Østfold), regnes nå til dem i stedet

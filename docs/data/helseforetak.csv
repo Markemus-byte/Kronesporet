@@ -11,7 +11,7 @@ Helse Nord IKT HF;918177833;Helse Nord RHF;2023;0;0;572210000;0.0
 Helse Nord RHF;883658752;Helse- og omsorgsdepartementet;2023;0;0;21187364000;0.0
 Helse Nord-Trøndelag HF;983974791;Helse Midt-Norge RHF;2023;0;0;1412328739;0.0
 Helse Stavanger HF;983974678;Helse Vest RHF;2023;2;4950624;3090657000;0.2
-Helse Sør-Øst RHF;991324968;Helse- og omsorgsdepartementet;2023;48;1904571298;98639343000;1.9
+Helse Sør-Øst RHF;991324968;Helse- og omsorgsdepartementet;2023;58;2081393414;98639343000;2.1
 Helse Vest RHF;983658725;Helse- og omsorgsdepartementet;2023;2;1067768652;34582837000;3.1
 Helsetjenestens driftsorganisasjon for nødnett HF;911912759;De fire regionale helseforetakene;2023;4;38840893;180510847;21.5
 Hemit HF;928033821;Helse Midt-Norge RHF;2023;0;0;1021697000;0.0
@@ -30,7 +30,7 @@ Sykehuset i Vestfold HF;983975259;Helse Sør-Øst RHF;2023;0;0;2676958000;0.0
 Sykehuset Innlandet HF;983971709;Helse Sør-Øst RHF;2023;3;2162723;3832826000;0.1
 Sykehuset Telemark HF;983975267;Helse Sør-Øst RHF;2023;0;0;1986238000;0.0
 Sykehuset Østfold HF;983971768;Helse Sør-Øst RHF;2023;0;0;3473918000;0.0
-Sykehusinnkjøp HF;916879067;De fire regionale helseforetakene;2023;771;8685547749;98245000;8840.7
+Sykehusinnkjøp HF;916879067;De fire regionale helseforetakene;2023;772;8685567009;98245000;8840.7
 Sykehuspartner HF;914637651;Helse Sør-Øst RHF;2023;0;0;3524911000;0.0
 Sørlandet sykehus HF;983975240;Helse Sør-Øst RHF;2023;0;0;3143274000;0.0
 Universitetssykehuset Nord-Norge HF;983974899;Helse Nord RHF;2023;0;0;3366433000;0.0
@@ -47,7 +47,7 @@ Helse Nord IKT HF;918177833;Helse Nord RHF;2024;0;0;654880000;0.0
 Helse Nord RHF;883658752;Helse- og omsorgsdepartementet;2024;0;0;23191864000;0.0
 Helse Nord-Trøndelag HF;983974791;Helse Midt-Norge RHF;2024;0;0;1632269000;0.0
 Helse Stavanger HF;983974678;Helse Vest RHF;2024;2;1387404;3370804000;0.0
-Helse Sør-Øst RHF;991324968;Helse- og omsorgsdepartementet;2024;52;1893092147;106733038000;1.8
+Helse Sør-Øst RHF;991324968;Helse- og omsorgsdepartementet;2024;56;1925800189;106733038000;1.8
 Helse Vest RHF;983658725;Helse- og omsorgsdepartementet;2024;3;1074437059;37552758000;2.9
 Helsetjenestens driftsorganisasjon for nødnett HF;911912759;De fire regionale helseforetakene;2024;8;134841114;182906874;73.7
 Hemit HF;928033821;Helse Midt-Norge RHF;2024;0;0;1045004000;0.0
@@ -83,7 +83,7 @@ Helse Nord IKT HF;918177833;Helse Nord RHF;2025;0;0;738878000;0.0
 Helse Nord RHF;883658752;Helse- og omsorgsdepartementet;2025;0;0;26120655000;0.0
 Helse Nord-Trøndelag HF;983974791;Helse Midt-Norge RHF;2025;0;0;1672281000;0.0
 Helse Stavanger HF;983974678;Helse Vest RHF;2025;0;0;3780394000;0.0
-Helse Sør-Øst RHF;991324968;Helse- og omsorgsdepartementet;2025;52;2096522439;122254249000;1.7
+Helse Sør-Øst RHF;991324968;Helse- og omsorgsdepartementet;2025;55;2103478813;122254249000;1.7
 Helse Vest RHF;983658725;Helse- og omsorgsdepartementet;2025;3;1082618652;42506118000;2.5
 Helsetjenestens driftsorganisasjon for nødnett HF;911912759;De fire regionale helseforetakene;2025;6;103667738;190287490;54.5
 Hemit HF;928033821;Helse Midt-Norge RHF;2025;0;0;1066519000;0.0
@@ -119,7 +119,7 @@ Helse Nord IKT HF;918177833;Helse Nord RHF;2026;0;0;;
 Helse Nord RHF;883658752;Helse- og omsorgsdepartementet;2026;0;0;;
 Helse Nord-Trøndelag HF;983974791;Helse Midt-Norge RHF;2026;0;0;;
 Helse Stavanger HF;983974678;Helse Vest RHF;2026;0;0;;
-Helse Sør-Øst RHF;991324968;Helse- og omsorgsdepartementet;2026;80;3261040862;;
+Helse Sør-Øst RHF;991324968;Helse- og omsorgsdepartementet;2026;83;3337145506;;
 Helse Vest RHF;983658725;Helse- og omsorgsdepartementet;2026;3;704371038;;
 Helsetjenestens driftsorganisasjon for nødnett HF;911912759;De fire regionale helseforetakene;2026;5;6553420;;
 Hemit HF;928033821;Helse Midt-Norge RHF;2026;0;0;;

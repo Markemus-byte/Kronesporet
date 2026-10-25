@@ -111,12 +111,64 @@ def find(conn: sqlite3.Connection, candidates: Iterable[str], session: requests.
         name = re.sub(r"\s+under (sletting|avvikling).*$", "", data.get("navn") or orgnr, flags=re.I)
         conn.execute("INSERT OR REPLACE INTO selskaper VALUES (?, ?, ?, ?)", (orgnr, _display(name), form, sector))
         found.append(orgnr)
+    fix_place_names(conn)
     conn.commit()
     return found
 
 
-_UPPER = {"AS", "ASA", "SF", "NRK", "STI", "KO", "IKT", "NBIM", "SIVA", "NOR", "NTNU", "LL", "IKS", "KF", "FKF",
-          "BIR", "IVAR", "ROAF", "MOVAR", "VEAS", "NDLA", "KS", "AtB"}
+# Regioner og distrikter som ikke er kommunenavn, men står i navnene på interkommunale selskaper
+REGIONS = {"follo", "romerike", "hordaland", "nordhordland", "sunnhordland", "fjordane", "sogn", "ryfylke", "dalane",
+           "nordmøre", "sunnmøre", "romsdal", "drammensregionen", "ålesundregionen", "vestviken", "hadeland", "valdres",
+           "gudbrandsdal", "midt-gudbrandsdal", "haugaland", "jæren", "lofoten", "vesterålen", "salten", "helgeland",
+           "innherred", "namdal", "fosen", "glåmdal", "hallingdal", "grenland", "setesdal", "hardanger", "eiker"}
+_NOT_PLACES = {"kommune", "fylkeskommune", "herad", "og", "i", "ja", "suohkan", "gielda", "komuuni", "tjïelte", "hole",
+               "nes", "lund", "sund", "vik", "bø", "os", "hå", "ål", "sola"}
+
+
+def _places(conn: sqlite3.Connection) -> set[str]:
+    out = set(REGIONS)
+    try:
+        for (name,) in conn.execute("SELECT name FROM kommuner"):
+            for w in re.split(r"[\s/]+", re.sub(r"\(.*?\)", "", name)):
+                if len(w) > 2 and w[:1].isupper():
+                    out.add(w.lower())
+    except sqlite3.OperationalError:
+        pass
+    return out - _NOT_PLACES
+
+
+def fix_place_names(conn: sqlite3.Connection) -> int:
+    """Stor forbokstav på steder i navn som kom med store bokstaver fra Enhetsregisteret:
+    'Asker og bærum vannverk IKS' -> 'Asker og Bærum vannverk IKS', 'nord-gudbrandsdal' -> 'Nord-Gudbrandsdal'.
+    Returnerer antall navn som ble rettet."""
+    places = _places(conn)
+    fixed = 0
+    for orgnr, name in conn.execute("SELECT orgnr, name FROM selskaper").fetchall():
+        words = re.split(r"(\s+|/)", name)
+        for i, w in enumerate(words):
+            if not w.strip() or w == "/":
+                continue
+            if w.upper() in _UPPER:
+                words[i] = _UPPER[w.upper()]
+                continue
+            parts = w.split("-")
+            if any(p.islower() and p in places for p in parts):  # «nord-gudbrandsdal», «sør-trøndelag»
+                words[i] = "-".join(p[:1].upper() + p[1:] if p in places or p in _DIRECTIONS else p for p in parts)
+        for i in range(len(words) - 2):  # «søre sunnmøre»
+            if words[i] in _DIRECTIONS and words[i + 2][:1].isupper() and words[i + 2].lower() in places:
+                words[i] = words[i][:1].upper() + words[i][1:]
+        new = "".join(words)
+        if new != name:
+            conn.execute("UPDATE selskaper SET name = ? WHERE orgnr = ?", (new, orgnr))
+            fixed += 1
+    return fixed
+
+
+_DIRECTIONS = {"nord", "sør", "øst", "vest", "midt", "indre", "ytre", "søre", "nordre", "søndre", "øvre", "nedre",
+               "midtre", "aust"}
+_UPPER = {w.upper(): w for w in (
+    "AS", "ASA", "SF", "NRK", "STI", "KO", "IKT", "NBIM", "SIVA", "NOR", "NTNU", "LL", "IKS", "KF", "FKF", "BIR", "IVAR",
+    "ROAF", "MOVAR", "VEAS", "NDLA", "KS", "AtB", "AFK", "RTA", "LIBIR", "HÅR", "MIA")}
 _NAMES = {  # egennavn der bare første ord har stor forbokstav ser feil ut
     "NORGES BANK": "Norges Bank", "NYE VEIER AS": "Nye Veier AS", "INNOVASJON NORGE": "Innovasjon Norge",
     "NORSK TIPPING AS": "Norsk Tipping AS", "NORSK HELSENETT SF": "Norsk Helsenett SF",
@@ -135,7 +187,7 @@ def _display(name: str) -> str:
     out = []
     for i, w in enumerate(words):
         if w in _UPPER:
-            out.append(w)
+            out.append(_UPPER[w])
         elif i == 0:
             out.append(w[:1] + w[1:].lower())
         else:
