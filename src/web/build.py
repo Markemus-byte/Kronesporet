@@ -290,10 +290,12 @@ def _front_hero(b: Breadth, ds: Dataset, root: str) -> str:
         (_group(b.units), "enheter og underenheter koblet via Enhetsregisteret"),
     ]
     if b.health and b.municipal:
-        figures.append((_group(b.health + b.companies + b.municipal),
+        figures.append((_group(b.health + b.companies + b.municipal + b.municipal_companies),
                         f'<a href="{root}helseforetak.html">helseforetak</a>, '
                         + (f'<a href="{root}selskaper.html">statlige selskaper</a>, ' if b.companies else "")
-                        + f'<a href="{root}kommuner.html">kommuner og fylkeskommuner</a> utenfor statsregnskapet'))
+                        + f'<a href="{root}kommuner.html">kommuner og fylkeskommuner</a>'
+                        + (f' og <a href="{root}kommunale-selskaper.html">kommunale selskaper</a>'
+                           if b.municipal_companies else "") + " utenfor statsregnskapet"))
     elif b.health:
         figures.append((_group(b.health), f'<a href="{root}helseforetak.html">helseforetak</a> med kontrakter og årsregnskap'))
     figs = "".join(f'<div class="figure"><div class="figure-value">{v}</div><div class="figure-label">{l}</div></div>'
@@ -304,7 +306,7 @@ def _front_hero(b: Breadth, ds: Dataset, root: str) -> str:
   <h1 id="tittel">Hvor går statens penger?</h1>
   <p class="lede">Kronesporet kobler hver kunngjorte kontrakt i Doffin med statsregnskapet og Enhetsregisteret,
   virksomhet for virksomhet og år for år. Da ser du hva staten kjøper, fra hvem, og hvor mye som aldri blir
-  kunngjort. Ingen av kildene viser dette alene.{" Helseforetakene" + (", de statlige selskapene" if b.companies else "") + " og alle kommuner og fylkeskommuner er også med." if b.health and b.municipal else ""}</p>
+  kunngjort. Ingen av kildene viser dette alene.{" Helseforetakene" + (", de statlige selskapene" if b.companies else "") + (", alle kommuner og fylkeskommuner og selskapene deres er også med." if b.municipal_companies else " og alle kommuner og fylkeskommuner er også med.") if b.health and b.municipal else ""}</p>
   <div class="figures">{figs}</div>
   <div class="hero-actions">
     <a class="button button-light" href="#virksomheter">Se virksomhetene {year_text(ds.year, short=True)}</a>
@@ -1028,36 +1030,53 @@ def health_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]], linke
 # --- statlige selskaper ------------------------------------------------------
 
 COMPANY_FORMS = {"AS": "Aksjeselskap", "ASA": "Allmennaksjeselskap", "SF": "Statsforetak", "SÆR": "Særlovsselskap",
-                 "STI": "Stiftelse", "ANNA": "Annen juridisk person", "KIRK": "Den norske kirke", "FLI": "Forening"}
+                 "STI": "Stiftelse", "ANNA": "Annen juridisk person", "KIRK": "Kirkelig enhet", "FLI": "Forening",
+                 "IKS": "Interkommunalt selskap", "KF": "Kommunalt foretak", "FKF": "Fylkeskommunalt foretak",
+                 "SA": "Samvirkeforetak"}
 
 
-def _company_caveat(root: str = "") -> str:
+def _company_caveat(root: str = "", level: str = "stat") -> str:
+    examples = (("statsregnskapet", "bygger flyplasser eller kjøper tog (Avinor, Norske tog)", "Norges Bank")
+                if level == "stat" else
+                ("KOSTRA", "bygger anlegg eller kjøper busser og trikker", "mange interkommunale selskaper"))
     return (
         '<aside class="caveat"><strong>Ikke samme mål som for virksomhetene.</strong> Selskapene står ikke i '
-        "statsregnskapet. Kronesporet bruker driftskostnadene utenom lønn fra årsregnskapet i Regnskapsregisteret, "
+        f"{examples[0]}. Kronesporet bruker driftskostnadene utenom lønn fra årsregnskapet i Regnskapsregisteret, "
         "som også tar med avskrivninger og andre kostnader enn kjøp. Investeringer er ikke med, så selskaper som "
-        "bygger flyplasser eller kjøper tog (Avinor, Norske tog), kan få en Doffin-andel over 100 %. Noen selskaper, som "
-        "Norges Bank, leverer ikke årsregnskap dit og har bare Doffin-tall. Selskapene flagges ikke. "
-        f'<a href="{root}om.html#selskaper">Mer om de statlige selskapene</a>.</aside>')
+        f"{examples[1]}, kan få en Doffin-andel over 100 %. Noen, som {examples[2]}, leverer ikke årsregnskap "
+        "dit og har bare Doffin-tall. Selskapene flagges ikke. "
+        f'<a href="{root}om.html#selskaper">Mer om selskapene</a>.</aside>')
 
 
-def company_index_page(datasets: list[Dataset], front: Dataset) -> str:
+COMPANY_PAGES = {"stat": ("selskaper.html", "Statlige selskaper", "Alle statlige selskaper"),
+                 "kommune": ("kommunale-selskaper.html", "Kommunale selskaper", "Alle kommunale selskaper")}
+
+
+def _companies_of(d: Dataset, level: str) -> list[Agency]:
+    return d.companies if level == "stat" else d.municipal_companies
+
+
+def company_index_page(datasets: list[Dataset], front: Dataset, level: str = "stat") -> str:
     year = front.year
+    path, title, _ = COMPANY_PAGES[level]
+    other_path, other_title, _ = COMPANY_PAGES["kommune" if level == "stat" else "stat"]
+    current = _companies_of(front, level)
     totals = []
     for d in sorted(datasets, key=lambda d: -d.year):
-        if not d.companies:
+        units = _companies_of(d, level)
+        if not units:
             continue
-        doffin = sum(a.contract_sum for a in d.companies)
-        costs = sum(a.spend_sum for a in d.companies)
-        with_costs = sum(a.contract_sum for a in d.companies if a.spend_sum)
-        n = sum(a.contract_count for a in d.companies)
+        doffin = sum(a.contract_sum for a in units)
+        costs = sum(a.spend_sum for a in units)
+        with_costs = sum(a.contract_sum for a in units if a.spend_sum)
+        n = sum(a.contract_count for a in units)
         totals.append(
             f'<tr{ROW_CURRENT if d is front else ""}><td>{year_text(d.year, short=True)}</td><td class="num">{_group(n)}</td>'
             f'<td class="num" title="{kr_full(doffin)}">{kr(doffin)}</td>'
             f'<td class="num" title="{kr_full(costs)}">{kr(costs) if costs else "–"}</td>'
             f'<td class="num">{pct(with_costs / costs) if costs else "–"}</td></tr>')
     rows = []
-    for a in sorted(front.companies, key=lambda a: (-a.contract_sum, a.name.lower())):
+    for a in sorted(current, key=lambda a: (-a.contract_sum, a.name.lower())):
         share = _health_share(a)
         form = COMPANY_FORMS.get(a.owner, a.owner)
         rows.append(
@@ -1068,18 +1087,25 @@ def company_index_page(datasets: list[Dataset], front: Dataset) -> str:
             f'<td class="num" data-sort="{_num(a.spend_sum)}" title="{kr_full(a.spend_sum)}">'
             f'{kr(a.spend_sum) if a.spend_sum else "–"}</td>'
             f'<td class="num" data-sort="{_num(share)}">{pct(share) if share is not None else "–"}</td></tr>')
-    n_contracts = len({c.id for d in datasets for a in d.companies for c in a.contracts})
+    n_contracts = len({c.id for d in datasets for a in _companies_of(d, level) for c in a.contracts})
     missing = [d.year for d in sorted(datasets, key=lambda d: d.year)
-               if d.companies and not any(a.spend_source for a in d.companies)]
+               if _companies_of(d, level) and not any(a.spend_source for a in _companies_of(d, level))]
+    lede = (f"""Statsforetak og statlig eide selskaper som Bane NOR, Avinor, Nye Veier og NRK kjøper for store
+  beløp, men står ikke i statsregnskapet. Kronesporet finner {len(current)} slike kjøpere i Doffin ut fra
+  hvilken sektor Enhetsregisteret plasserer dem i, og henter driftskostnadene fra årsregnskapene."""
+            if level == "stat" else
+            f"""Interkommunale selskaper og selskaper kommunene eier, som Ruter, BIR, IVAR og Kolumbus, kjøper
+  kollektivtransport, renovasjon, vann og avløp for kommunene. Kronesporet finner {len(current)} slike kjøpere i
+  Doffin ut fra hvilken sektor Enhetsregisteret plasserer dem i, og henter driftskostnadene fra årsregnskapene.
+  De regnes ikke til én kommune, fordi mange har flere eiere.""")
+    other = _companies_of(front, "kommune" if level == "stat" else "stat")
     body = f"""
 <section class="hero">
-  <h1>Statlige selskaper</h1>
-  <p class="lede">Statsforetak og statlig eide selskaper som Bane NOR, Avinor, Nye Veier og NRK kjøper for store
-  beløp, men står ikke i statsregnskapet. Kronesporet finner {len(front.companies)} slike kjøpere i Doffin ut fra
-  hvilken sektor Enhetsregisteret plasserer dem i, og henter driftskostnadene fra årsregnskapene.
-  {_group(n_contracts)} kontrakter løper i årene i oversikten.</p>
+  <h1>{title}</h1>
+  <p class="lede">{lede} {_group(n_contracts)} kontrakter løper i årene i oversikten.</p>
 </section>
-{_company_caveat()}
+{f'<p>Se også <a href="{other_path}">{other_title.lower()}</a> ({len(other)}).</p>' if other else ""}
+{_company_caveat(level=level)}
 <section>
   <h2>Utvikling, alle selskapene</h2>
   <div class="table-scroll"><table class="history"><thead><tr><th scope="col">År</th>
@@ -1096,7 +1122,7 @@ def company_index_page(datasets: list[Dataset], front: Dataset) -> str:
   <input id="filter" data-filter="companies" type="search" placeholder="Navn, orgnr eller type" autocomplete="off">
   <span class="muted small" data-count-for="companies" aria-live="polite"></span></div>
   <div class="table-scroll"><table class="sortable" id="companies">
-  <caption class="visually-hidden">Statlige selskaper i {year}: Doffin-kontrakter og driftskostnader</caption>
+  <caption class="visually-hidden">{title} i {year}: Doffin-kontrakter og driftskostnader</caption>
   <thead><tr><th scope="col" data-type="text"><button type="button">Selskap</button></th>
   <th scope="col" data-type="text"><button type="button">Type</button></th>
   <th scope="col" data-type="num"><button type="button">Kontrakter</button></th>
@@ -1106,8 +1132,8 @@ def company_index_page(datasets: list[Dataset], front: Dataset) -> str:
   <tbody>{"".join(rows)}</tbody></table></div>
 </section>
 """
-    return page("Statlige selskaper", body, active="selskaper", path="selskaper.html",
-                description=f"Doffin-kontraktene og driftskostnadene til {len(front.companies)} statlige selskaper.")
+    return page(title, body, active="selskaper", path=path,
+                description=f"Doffin-kontraktene og driftskostnadene til {len(current)} {title.lower()}.")
 
 
 def company_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]], linked: set[str] = frozenset()) -> str:
@@ -1133,11 +1159,11 @@ def company_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]], link
         for y, h in sorted(history, key=lambda t: -t[0]))
     suppliers_html, contracts_html, joint_html = _contract_parts(ds, a, linked)
     body = f"""
-<p class="crumbs"><a href="../selskaper.html">Alle statlige selskaper</a></p>
+<p class="crumbs"><a href="../{COMPANY_PAGES[a.owner_level or "stat"][0]}">{COMPANY_PAGES[a.owner_level or "stat"][2]}</a></p>
 <section class="hero"><h1>{escape(a.name)}</h1></section>
 <div class="two-col">
   <div><dl class="facts">{facts_html}</dl></div>
-  <div>{_company_caveat("../")}</div>
+  <div>{_company_caveat("../", a.owner_level or "stat")}</div>
 </div>
 <section><h2>Utvikling</h2><div class="table-scroll"><table class="history"><thead><tr><th scope="col">År</th>
 <th scope="col" data-type="num">Kontrakter</th><th scope="col" data-type="num">Doffin</th>
@@ -1253,6 +1279,9 @@ def municipal_index_page(datasets: list[Dataset], front: Dataset,
   rapporterer til SSB (KOSTRA). {_group(n_contracts)} kontrakter løper i årene i oversikten.</p>
 </section>
 {_municipal_caveat()}
+{f'<p>Interkommunale selskaper og selskaper kommunene eier, som Ruter og BIR, har en egen side: '
+ f'<a href="kommunale-selskaper.html">{len(front.municipal_companies)} kommunale selskaper</a>.</p>'
+ if front.municipal_companies else ""}
 <div class="stats">
   <div class="stat"><div class="stat-value">{pct(sum(a.contract_sum for a in front.municipal) / (sum(a.spend_sum for a in front.municipal) or 1))}</div>
   <div class="stat-label">av kjøpene i {year} finnes igjen i Doffin</div></div>
@@ -1396,7 +1425,8 @@ def _public() -> str:
 def _buyers_phrase(ds: Dataset) -> str:
     parts = ["statlige virksomheter"] + (["helseforetak"] if ds.health else []) + (
         ["statlige selskaper"] if ds.companies else []) + (
-        ["kommuner og fylkeskommuner"] if ds.municipal else [])
+        ["kommuner og fylkeskommuner"] if ds.municipal else []) + (
+        ["kommunale selskaper"] if ds.municipal_companies else [])
     return parts[0] if len(parts) == 1 else ", ".join(parts[:-1]) + " og " + parts[-1]
 
 
@@ -1405,7 +1435,7 @@ def supplier_index(datasets: list[Dataset], front: int) -> list[SupplierSummary]
     by_orgnr: dict[str, SupplierSummary] = {}
     names: dict[str, Counter[str]] = {}
     for ds in datasets:
-        for a in ds.agencies + ds.health + ds.companies + ds.municipal:
+        for a in ds.agencies + ds.health + ds.companies + ds.municipal_companies + ds.municipal:
             for c in a.contracts:
                 for w in c.suppliers:
                     if not w.orgnr:
@@ -1733,7 +1763,7 @@ hos foretakene.</p>"""
     if ds.companies:
         no_accounts = sum(1 for a in ds.companies if not a.spend_source)
         companies = f"""
-<h3 id="selskaper">De statlige selskapene</h3>
+<h3 id="selskaper">Selskapene</h3>
 <p>Statsforetak og statlig eide selskaper som Bane NOR, Avinor, Nye Veier og NRK kunngjør i Doffin, men står ikke
 i statsregnskapet. Kronesporet finner dem blant kjøperne i Doffin ut fra den institusjonelle sektoren i
 Enhetsregisteret, altså SSBs inndeling: statlig eide aksjeselskaper og statsforetak, Norges Bank, statlige
@@ -1747,6 +1777,14 @@ jernbane eller kjøper tog (Nye Veier, Avinor, Bane NOR, Norske tog) kan få en 
 store kostnader som ikke er kjøp, som premiene i Norsk Tipping. {no_accounts} av selskapene, blant dem Norges Bank,
 har ikke årsregnskap der for {ds.year} og har bare Doffin-tall. Andelen sier derfor mindre her enn for
 virksomhetene, og selskapene flagges ikke.</p>"""
+    if ds.municipal_companies:
+        companies += f"""
+<p>De {len(ds.municipal_companies)} <a href="kommunale-selskaper.html">kommunale selskapene</a> finnes på samme måte,
+ut fra sektorene for kommunale foretak, kommunalt eide aksjeselskaper og kommuneforvaltningen. Det er
+interkommunale selskaper (IKS), kommunale oppgavefellesskap og aksjeselskaper som Ruter, BIR og Kolumbus, som
+kjøper kollektivtransport, renovasjon og vann og avløp. De regnes ikke til én kommune, fordi mange har flere
+eiere. KOSTRA tar med kommunenes andel av IKS-ene, men ikke aksjeselskapene, så kontraktene deres er heller ikke
+med i dekningen for kommunene.</p>"""
     ledger = "Statsregnskapet" if _SITE["statsregnskap"] else "Årsrapportene"
     compare_rows = [
         ("Kunngjorte kontrakter med verdi og vinnere", "Ja", "Nei", "Nei"),
@@ -2055,11 +2093,12 @@ def health_rows(ds: Dataset) -> list[dict[str, object]]:
 
 
 def company_rows(ds: Dataset) -> list[dict[str, object]]:
-    return [{"selskap": a.name, "orgnr": a.orgnr, "type": COMPANY_FORMS.get(a.owner, a.owner), "år": a.year,
+    return [{"selskap": a.name, "orgnr": a.orgnr, "type": COMPANY_FORMS.get(a.owner, a.owner),
+             "eier": "staten" if a.owner_level == "stat" else "kommunene", "år": a.year,
              "antall_kontrakter": a.contract_count, "doffin_sum_kr": round(a.contract_sum),
              "driftskostnader_utenom_lonn_kr": round(a.spend_sum) if a.spend_source else "",
              "doffin_andel_prosent": round(_health_share(a) * 100, 1) if _health_share(a) is not None else ""}
-            for a in ds.companies]
+            for a in ds.companies + ds.municipal_companies]
 
 
 def municipal_rows(ds: Dataset) -> list[dict[str, object]]:
@@ -2077,7 +2116,7 @@ def municipal_rows(ds: Dataset) -> list[dict[str, object]]:
 
 def contract_rows(ds: Dataset) -> list[dict[str, object]]:
     rows = []
-    for a in ds.agencies + ds.health + ds.companies + ds.municipal:
+    for a in ds.agencies + ds.health + ds.companies + ds.municipal_companies + ds.municipal:
         for c in a.contracts:
             rows.append({
                 "regnskapsår": ds.year, "virksomhet": a.name, "virksomhet_orgnr": a.orgnr,
@@ -2127,7 +2166,7 @@ def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "",
     _SITE["statsregnskap"] = "1" if any(a.spend_source for d in datasets for a in d.agencies) else ""
     _SITE["units"] = "1" if breadth and breadth.units else ""
     _SITE["health"] = "1" if any(d.health for d in datasets) else ""
-    _SITE["companies"] = "1" if any(d.companies for d in datasets) else ""
+    _SITE["companies"] = "1" if any(d.companies or d.municipal_companies for d in datasets) else ""
     _SITE["municipal"] = "1" if any(d.municipal for d in datasets) else ""
     _SITE["years"] = str(years[0]) if len(years) == 1 else f"{years[0]}/{years[-1]}"
 
@@ -2189,11 +2228,15 @@ def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "",
         (out / "selskap").mkdir()
         (out / "selskaper.html").write_text(company_index_page(datasets, latest), encoding="utf-8")
         pages += 1
+        if any(d.municipal_companies for d in datasets):
+            (out / "kommunale-selskaper.html").write_text(company_index_page(datasets, latest, "kommune"),
+                                                          encoding="utf-8")
+            pages += 1
         c_history: dict[str, list[tuple[int, Agency]]] = {}
         for ds in datasets:
-            for a in ds.companies:
+            for a in ds.companies + ds.municipal_companies:
                 c_history.setdefault(a.slug, []).append((ds.year, a))
-        for a in latest.companies:
+        for a in latest.companies + latest.municipal_companies:
             (out / a.path).write_text(company_page(latest, a, c_history[a.slug], linked), encoding="utf-8")
             pages += 1
 
