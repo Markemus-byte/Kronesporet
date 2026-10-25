@@ -2,6 +2,13 @@
 
 ## Ikke utgitt
 
+- **Tidligere kommuner og fylkeskommuner:** kunngjøringer fra kommuner og fylkeskommuner som er slått sammen
+  (som Skedsmo, nå Lillestrøm, og Hordaland, nå Vestland), og fra nedlagte kommunale foretak og etater (som
+  Omsorgsbygg Oslo KF og Renovasjonsetaten i Oslo), regnes nå til kommunen de ble en del av. 90 slike enheter er
+  koblet ut fra navnet i Enhetsregisteret og SSBs kommuneendringer (KLASS 131 og 104), og 1 423 nye kontrakter er
+  hentet (25 658 i alt, 6 549 leverandører). Dekningen for kommunene øker mest i de første årene (2020: 9,2 % til
+  12,8 %; 2025: 18,3 % til 18,6 %). Viken, Vestfold og Telemark og Troms og Finnmark ble delt i 2024 og er ikke
+  med. Ny valgfri `--recheck-buyers` i `update_site_data.py` slår opp igjen kjøpere som er sjekket før.
 - **KOSTRA 2020–2023:** kommunene har nå kjøpstall for seks år (2020–2025) i stedet for to. Kommuner som fikk nytt
   nummer i 2024 (som Halden, 3001 til 3101), kobles til de gamle numrene med SSBs klassifikasjon (KLASS 131). 355
   kommuner og 7 fylkeskommuner har tall for 2020–2023; Ålesund og Haram (delt i 2024) og de sju nye

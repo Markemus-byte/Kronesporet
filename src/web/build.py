@@ -1564,8 +1564,13 @@ kommunenummer da fylkene ble delt i 2024, og de gamle numrene kobles til dagens 
 Ålesund og Haram ble delt i 2024 og har bare tall fra da. Det samme gjelder de sju fylkeskommunene som ble
 opprettet i 2024, fordi forgjengerne (Viken, Vestfold og Telemark, Troms og Finnmark) ikke finnes lenger.</p>
 <p>Kontraktene kobles på kjøperen i Doffin. Etater, bydeler og kommunale foretak som kunngjør med eget
-organisasjonsnummer, slås opp i Enhetsregisteret og regnes til kommunen de hører til. Interkommunale selskaper og
-innkjøpssamarbeid har flere eiere og regnes ikke til én kommune.</p>
+organisasjonsnummer, slås opp i Enhetsregisteret og regnes til kommunen de hører til. Kunngjøringer fra kommuner og
+fylkeskommuner som er slått sammen med andre (som Skedsmo, nå Lillestrøm, og Hordaland, nå Vestland), og fra
+kommunale foretak og etater som er lagt ned (som Omsorgsbygg Oslo KF), regnes til kommunen de ble en del av. Det
+går på navnet og SSBs oversikt over kommuneendringer, fordi Enhetsregisteret fjerner koblingen når en enhet slettes.
+Viken, Vestfold og Telemark og Troms og Finnmark ble delt i 2024 og kan ikke regnes til én fylkeskommune, så
+kontraktene deres er ikke med. Interkommunale selskaper og innkjøpssamarbeid har flere eiere og regnes ikke til
+én kommune.</p>
 <p>Dekningen sammenlignes med kommuner av lignende størrelse: kommunene deles i tre like store grupper etter kjøp,
 og fylkeskommunene er én gruppe. En kommune merkes når dekningen avviker tydelig fra gruppen (robust z-verdi over
 2 på logaritmen til dekningen), og som uvanlig når avviket går samme vei to år på rad. Kommuner uten kontrakter i

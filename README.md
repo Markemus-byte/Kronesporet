@@ -105,8 +105,10 @@ kjøpene fra KOSTRA (SSB-tabell 13551, 13552, 13547 og 13548, konserntall: kjøp
 som erstatter egen produksjon og investeringer) fra 2020, og orgnr fra Enhetsregisteret. For årene før 2024
 hentes de gamle kommunenumrene fra SSBs klassifikasjon (KLASS 131); Ålesund og Haram (delt i 2024) og de
 sju nye fylkeskommunene har tall fra 2024. Kjøpere i Doffin som ikke er kjent, slås opp oppover i Enhetsregisteret
-(`brreg.resolve_upward`), og etater, bydeler og kommunale foretak føres på kommunen. Orgnr som er slått opp
-uten treff, huskes i tabellen `orgnr_checked`. Nettsiden viser dem på `kommuner.html` og
+(`brreg.resolve_upward`), og etater, bydeler og kommunale foretak føres på kommunen. Tidligere kommuner og
+fylkeskommuner og nedlagte kommunale foretak føres på kommunen de ble en del av (`kostra.successors`, ut fra
+navnet og kommuneendringene i KLASS). Orgnr som er slått opp uten treff, huskes i tabellen `orgnr_checked`;
+`--recheck-buyers` slår dem opp på nytt etter nye regler. Nettsiden viser dem på `kommuner.html` og
 `docs/kommune/<orgnr>.html`, med dekningen sammenlignet med kommuner av lignende størrelse.
 
 Med leverandører i databasen får nettsiden også en leverandøroversikt (`leverandorer.html`) og én

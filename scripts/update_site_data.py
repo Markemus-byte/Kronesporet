@@ -72,7 +72,9 @@ CHECKED_SCHEMA = "CREATE TABLE IF NOT EXISTS orgnr_checked (orgnr TEXT PRIMARY K
 
 def resolve_municipal(conn: sqlite3.Connection, orgnrs: set[str]) -> int:
     """Slå opp ukjente kjøpere i Enhetsregisteret og før dem som ligger under en kommune eller et fylke,
-    på kommunen (orgnr_parent). Kjøpere som er slått opp, huskes i orgnr_checked. Returnerer antall nye."""
+    på kommunen (orgnr_parent). Tidligere kommuner og fylkeskommuner og kommunale foretak med kommunen i
+    navnet føres på kommunen de ble en del av (kostra.successors). Kjøpere som er slått opp, huskes i
+    orgnr_checked. Returnerer antall nye."""
     roots = kostra.orgnrs(conn)
     conn.execute(CHECKED_SCHEMA)
     checked = {r[0] for r in conn.execute("SELECT orgnr FROM orgnr_checked")}
@@ -80,6 +82,7 @@ def resolve_municipal(conn: sqlite3.Connection, orgnrs: set[str]) -> int:
     if not roots or not todo:
         return 0
     found = resolve_upward(todo, roots)
+    found |= kostra.successors(conn, todo - set(found))
     conn.executemany("INSERT OR IGNORE INTO orgnr_parent VALUES (?, ?, ?, ?)",
                      [(child, root, name, kind) for child, (root, name, kind) in found.items()])
     conn.executemany("INSERT OR IGNORE INTO orgnr_checked VALUES (?)", [(o,) for o in todo - set(found)])
@@ -229,6 +232,9 @@ def main() -> int:
     ap.add_argument("--max-new", type=int, help="Hent høyst så mange nye kunngjøringer (prøvekjøring)")
     ap.add_argument("--cache-dir", type=Path, default=ROOT / "data" / "doffin_cache")
     ap.add_argument("--dry-run", action="store_true", help="Regn ut alt, men ikke skriv site-data/")
+    ap.add_argument("--recheck-buyers", action="store_true",
+                    help="Slå opp igjen kjøperne i orgnr_checked (etter nye regler for hvem som hører til kommunene); "
+                         "bruk sammen med --years for alle årene")
     a = ap.parse_args()
     a.cache_dir.mkdir(parents=True, exist_ok=True)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -264,6 +270,9 @@ def main() -> int:
         except Exception as e:  # SSB nede: behold tallene fra forrige kjøring
             log.warning("Kunne ikke hente KOSTRA fra SSB: %s", e)
             report.append(f"KOSTRA: kunne ikke hentes ({e}), tallene fra forrige kjøring er beholdt.")
+        if a.recheck_buyers:
+            conn.execute(CHECKED_SCHEMA)
+            conn.execute("DELETE FROM orgnr_checked")
         n_new = fetch_new_contracts(conn, years, DoffinClient(cache_dir=a.cache_dir), a.max_new)
         report.append(f"Doffin: {n_new} nye kontrakter ({', '.join(map(str, years))}).")
 
