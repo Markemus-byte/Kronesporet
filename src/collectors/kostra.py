@@ -20,6 +20,10 @@ En kommune som ble delt (Ålesund og Haram i 2024), har ikke tall for årene fø
 samme gjelder fylkeskommunene som ble opprettet i 2024 (Østfold, Akershus, Buskerud, Vestfold,
 Telemark, Troms og Finnmark): forgjengerne Viken, Vestfold og Telemark og Troms og Finnmark er
 ikke med.
+
+Kjøpere i Doffin som er tidligere kommuner og fylkeskommuner (Skedsmo, Hordaland) eller nedlagte kommunale
+foretak og etater (Omsorgsbygg Oslo KF), føres på kommunen de ble en del av (`successors`), ut fra navnet i
+Enhetsregisteret og kommuneendringene i KLASS (131 for kommuner, 104 for fylker).
 """
 from __future__ import annotations
 
@@ -27,6 +31,7 @@ import logging
 import re
 import sqlite3
 import time
+from datetime import date
 from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
@@ -235,3 +240,135 @@ def orgnrs(conn: sqlite3.Connection) -> set[str]:
         return {r[0] for r in conn.execute("SELECT orgnr FROM kommuner")}
     except sqlite3.OperationalError:
         return set()
+
+
+# --- tidligere kommuner, fylkeskommuner og kommunale foretak ---------------------------------
+
+KLASS = "https://data.ssb.no/api/klass/v1/classifications/{}/{}"
+KLASS_IDS = {"kommune": "131", "fylke": "104"}
+HISTORY_FROM = 2017  # Doffin-kontraktene starter i 2017
+_DELETED = re.compile(r"\s+under sletting.*$", re.I)
+_OWNER = re.compile(r"^(.+?)\s+(fylkeskommune|kommune|herad)\b", re.I)
+PREDECESSOR_FORMS = {"KOMM": "kommune", "FYLK": "fylke"}
+PART_FORMS = {"ORGL": None, "OPMV": None, "KF": "kommune", "FKF": "fylke"}  # navnet sier hvem de hører til
+
+
+def _keys(name: str) -> set[str]:
+    """Navnenøklene til et kommunenavn i KLASS, også de samiske: 'Troms - Romsa' -> {'troms', 'romsa'}."""
+    name = re.sub(r"\(.*?\)", "", name.lower())
+    return {_name_key(p) for p in re.split(r"\s+-\s+", name) if p.strip()}
+
+
+def _history(session: requests.Session, kind: str) -> tuple[dict[str, set[str]], list[tuple[str, str, str]],
+                                                            dict[str, set[str]]]:
+    """Kommune- eller fylkesinndelingen fra HISTORY_FROM: (navnenøkkel -> koder, endringer (dato, gammel, ny)
+    sortert på dato, kode -> navnenøkler)."""
+    cid = KLASS_IDS[kind]
+    by_key: dict[str, set[str]] = {}
+    keys_of: dict[str, set[str]] = {}
+    for year in range(HISTORY_FROM, date.today().year + 1):
+        resp = session.get(KLASS.format(cid, "codesAt"), params={"date": f"{year}-01-02"},
+                           headers={"Accept": "application/json"}, timeout=60)
+        resp.raise_for_status()
+        for c in resp.json().get("codes", []):
+            for key in _keys(c["name"]):
+                by_key.setdefault(key, set()).add(c["code"])
+                keys_of.setdefault(c["code"], set()).add(key)
+    resp = session.get(KLASS.format(cid, "changes"), params={"from": f"{HISTORY_FROM}-01-02", "to": date.today().isoformat()},
+                       headers={"Accept": "application/json"}, timeout=60)
+    resp.raise_for_status()
+    changes = sorted((c["changeOccurred"], c["oldCode"], c["newCode"]) for c in resp.json().get("codeChanges", []))
+    return by_key, changes, keys_of
+
+
+def _forward(code: str, key: str, changes: list[tuple[str, str, str]], keys_of: dict[str, set[str]],
+             current: set[str]) -> set[str]:
+    """Dagens koder en eldre kode ble til. Ved en deling velges delen med samme navn (Buskerud ut av Viken);
+    uten den er det ikke én etterfølger. Beholder kommunen koden (en grensejustering), er den samme kommune."""
+    out: set[str] = set()
+    todo = [(code, "")]
+    while todo:
+        c, since = todo.pop()
+        later = [w for w, old, new in changes if old == c and w > since]
+        if not later:
+            if c in current:
+                out.add(c)
+            continue
+        when = min(later)
+        targets = {new for w, old, new in changes if old == c and w == when}
+        if c in targets:
+            todo.append((c, when))
+            continue
+        if len(targets) > 1:
+            same = {t for t in targets if key in keys_of.get(t, set())}
+            if len(same) != 1:
+                continue
+            targets = same
+        todo += [(t, when) for t in targets]
+    return out
+
+
+def successors(conn: sqlite3.Connection, orgnrs: Iterable[str], session: requests.Session | None = None
+               ) -> dict[str, tuple[str, str, str]]:
+    """orgnr -> (kommunen eller fylkeskommunen i dag, navn, kind) for kjøpere i Doffin som er en tidligere
+    kommune eller fylkeskommune (Skedsmo -> Lillestrøm, Hordaland -> Vestland), eller et kommunalt foretak
+    eller en etat med kommunen i navnet (Omsorgsbygg Oslo KF, Oslo kommune Renovasjonsetaten).
+
+    Enhetsregisteret fjerner koblingen til kommunen når en enhet slettes, så det går på navnet. Navn som
+    finnes i flere kommuner (Sande, Herøy), og fylkeskommuner som ble delt uten en del med samme navn
+    (Viken, Vestfold og Telemark), kobles ikke.
+    """
+    import requests
+
+    session = session or requests.Session()
+    units = conn.execute("SELECT orgnr, name, kind, region FROM kommuner").fetchall()
+    if not units:
+        return {}
+    current_names: dict[tuple[str, str], set[str]] = {}
+    by_code: dict[tuple[str, str], str] = {}
+    for orgnr, name, kind, region in units:
+        current_names.setdefault((kind, _name_key(name)), set()).add(orgnr)
+        by_code[(kind, region if kind == "kommune" else region[:2])] = orgnr
+    history = {kind: _history(session, kind) for kind in KLASS_IDS}
+    current = {kind: {code for k, code in by_code if k == kind} for kind in KLASS_IDS}
+
+    def resolve(kind: str, key: str) -> str | None:
+        # Historikken først: «Sande kommune» kan være Sande i Vestfold (nå Holmestrand) eller i Møre og Romsdal.
+        by_key, changes, keys_of = history[kind]
+        found = {by_code[(kind, c)] for code in by_key.get(key, set())
+                 for c in _forward(code, key, changes, keys_of, current[kind])}
+        found = found or current_names.get((kind, key), set())
+        return next(iter(found)) if len(found) == 1 else None
+
+    def by_word(kind: str, name: str) -> str | None:
+        text = name.lower()
+        keys = {k for (kd, k) in current_names if kd == kind} | set(history[kind][0])
+        hits = {k for k in keys if len(k) > 2 and re.search(rf"(?<![\wæøå]){re.escape(k)}(?![\wæøå])", text)}
+        found = {r for r in (resolve(kind, k) for k in hits) if r}
+        return next(iter(found)) if len(found) == 1 else None
+
+    out: dict[str, tuple[str, str, str]] = {}
+    for orgnr in sorted(set(orgnrs)):
+        try:
+            resp = session.get(f"{BRREG_API}/{orgnr}", timeout=30)
+        except requests.RequestException as e:
+            log.warning("Enhetsregisteret svarte ikke for %s: %s", orgnr, e)
+            continue
+        time.sleep(PAUSE_S / 10)
+        if resp.status_code != 200:
+            continue
+        data = resp.json()
+        form = (data.get("organisasjonsform") or {}).get("kode")
+        name = _DELETED.sub("", data.get("navn") or "")
+        root = None
+        if form in PREDECESSOR_FORMS:
+            root = resolve(PREDECESSOR_FORMS[form], _name_key(re.sub(r"\s+herad$", "", name, flags=re.I)))
+        elif form in PART_FORMS:
+            m = _OWNER.match(name)
+            if m:
+                root = resolve("fylke" if m.group(2).lower() == "fylkeskommune" else "kommune", _name_key(m.group(1)))
+            elif PART_FORMS[form]:
+                root = by_word(PART_FORMS[form], name)
+        if root and root != orgnr:
+            out[orgnr] = (root, data.get("navn") or "", "forgjenger" if form in PREDECESSOR_FORMS else "enhet")
+    return out

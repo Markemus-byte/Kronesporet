@@ -20,14 +20,17 @@ ROOT = Path(__file__).resolve().parents[1]
 # (tabell, WHERE-filter). Filteret begrenser til virksomhetene som er med på nettsiden.
 # Kontraktene hentes via doffin_contract_years når den finnes, fordi kjøperen der er
 # regnskapsvirksomheten også når en underenhet (orgnr_parent) står som kjøper i Doffin.
-# Helseforetakene (foretak) og kommunene (kommuner) er med når tabellene finnes; {buyers} byttes ut i export().
+# Helseforetakene (foretak), de statlige selskapene (selskaper) og kommunene (kommuner) er med når tabellene
+# finnes; {buyers} byttes ut i export().
 BUYERS = ("SELECT orgnr FROM contract_spend_comparison UNION "
           "SELECT orgnr FROM statsregnskap WHERE orgnr IS NOT NULL")
-EXTRA_BUYERS = {"foretak": " UNION SELECT orgnr FROM foretak", "kommuner": " UNION SELECT orgnr FROM kommuner"}
+EXTRA_BUYERS = {"foretak": " UNION SELECT orgnr FROM foretak", "selskaper": " UNION SELECT orgnr FROM selskaper",
+                "kommuner": " UNION SELECT orgnr FROM kommuner"}
 TABLES: list[tuple[str, str]] = [
     ("contract_spend_comparison", ""),
     ("foretak", ""),
-    ("foretak_regnskap", ""),
+    ("foretak_regnskap", ""),  # årsregnskapene til helseforetakene og de statlige selskapene
+    ("selskaper", ""),
     ("kommuner", ""),
     ("kommune_regnskap", ""),
     ("orgnr_checked", ""),  # kjøpere i Doffin som er slått opp uten treff, så de ikke slås opp hver måned

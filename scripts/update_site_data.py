@@ -11,6 +11,8 @@ Tar utgangspunkt i dataene som allerede ligger i repoet og legger til det som er
      foretak og årsregnskapene fra Regnskapsregisteret (src/collectors/foretak.py).
   4. Kommunene og fylkeskommunene: kjøp fra KOSTRA (SSB) og kjøperne i Doffin som hører til dem
      (etater, bydeler og kommunale foretak, slått opp oppover i Enhetsregisteret, src/collectors/kostra.py).
+     Statlige selskaper blant kjøperne (statsforetak, statlig eide aksjeselskaper, Norges Bank) legges i
+     `selskaper` ut fra sektoren i Enhetsregisteret, med underenheter og årsregnskap (src/collectors/selskaper.py).
   5. Kjente feil i Doffin rettes etter site-data/rettinger.csv (f.eks. feil orgnr på kjøperen).
   6. Årsfordeling, avvik og Doffin-dekning regnes ut på nytt, og tallene eksporteres.
 
@@ -46,7 +48,7 @@ from src.collectors.doffin import (  # noqa: E402
     DoffinClient, DoffinError, buyer_list, init_db, iter_search_hits, month_ranges, normalize,
     save_buyers, save_contracts, save_winners, winners,
 )
-from src.collectors import foretak, kostra  # noqa: E402
+from src.collectors import foretak, kostra, selskaper  # noqa: E402
 from src.collectors.brreg import load_subunits, main_units, resolve_upward  # noqa: E402
 from src.collectors.statsregnskap import load_raadata_xlsx, raadata_orgnrs  # noqa: E402
 from src.web.data import source_month  # noqa: E402
@@ -62,17 +64,39 @@ def agencies(conn: sqlite3.Connection) -> set[str]:
 
 
 def buyers(conn: sqlite3.Connection) -> set[str]:
-    """Orgnr som kan stå som kjøper i Doffin: virksomhetene, helseforetakene, kommunene og underenhetene deres."""
-    return (agencies(conn) | foretak.orgnrs(conn) | kostra.orgnrs(conn)
+    """Orgnr som kan stå som kjøper i Doffin: virksomhetene, helseforetakene, de statlige selskapene,
+    kommunene og underenhetene deres."""
+    return (agencies(conn) | foretak.orgnrs(conn) | selskaper.orgnrs(conn) | kostra.orgnrs(conn)
             | {r[0] for r in conn.execute("SELECT child FROM orgnr_parent")})
 
 
 CHECKED_SCHEMA = "CREATE TABLE IF NOT EXISTS orgnr_checked (orgnr TEXT PRIMARY KEY)  -- kjøpere slått opp uten treff"
 
 
+def resolve_companies(conn: sqlite3.Connection, orgnrs: set[str]) -> int:
+    """Legg statlige selskaper blant de ukjente kjøperne i `selskaper`, med underenhetene. Returnerer antall nye."""
+    conn.execute(CHECKED_SCHEMA)
+    checked = {r[0] for r in conn.execute("SELECT orgnr FROM orgnr_checked")}
+    new = selskaper.find(conn, {o for o in orgnrs if o} - buyers(conn) - checked)
+    if new:
+        load_subunits(conn, new, replace=False)
+    return len(new)
+
+
+def load_companies(conn: sqlite3.Connection) -> list[str]:
+    """Årsregnskapene til de statlige selskapene fra Regnskapsregisteret."""
+    orgs = sorted(selskaper.orgnrs(conn))
+    if not orgs:
+        return []
+    n = foretak.fetch_accounts(conn, orgs)
+    return [f"Statlige selskaper: {len(orgs)} selskaper, {n} årsregnskap fra Regnskapsregisteret."]
+
+
 def resolve_municipal(conn: sqlite3.Connection, orgnrs: set[str]) -> int:
     """Slå opp ukjente kjøpere i Enhetsregisteret og før dem som ligger under en kommune eller et fylke,
-    på kommunen (orgnr_parent). Kjøpere som er slått opp, huskes i orgnr_checked. Returnerer antall nye."""
+    på kommunen (orgnr_parent). Tidligere kommuner og fylkeskommuner og kommunale foretak med kommunen i
+    navnet føres på kommunen de ble en del av (kostra.successors). Kjøpere som er slått opp, huskes i
+    orgnr_checked. Returnerer antall nye."""
     roots = kostra.orgnrs(conn)
     conn.execute(CHECKED_SCHEMA)
     checked = {r[0] for r in conn.execute("SELECT orgnr FROM orgnr_checked")}
@@ -80,6 +104,7 @@ def resolve_municipal(conn: sqlite3.Connection, orgnrs: set[str]) -> int:
     if not roots or not todo:
         return 0
     found = resolve_upward(todo, roots)
+    found |= kostra.successors(conn, todo - set(found))
     conn.executemany("INSERT OR IGNORE INTO orgnr_parent VALUES (?, ?, ?, ?)",
                      [(child, root, name, kind) for child, (root, name, kind) in found.items()])
     conn.executemany("INSERT OR IGNORE INTO orgnr_checked VALUES (?)", [(o,) for o in todo - set(found)])
@@ -129,7 +154,11 @@ def fetch_new_contracts(conn: sqlite3.Connection, years: list[int], client: Doff
         for start, end in month_ranges(year, to_month):
             hits += iter_search_hits(client, start, end)
         log.info("Doffin %s: %d tildelinger så langt", year, len(hits))
-    n_units = resolve_municipal(conn, {o for hit in hits for o, _ in buyer_list(hit)})
+    found = {o for hit in hits for o, _ in buyer_list(hit)}
+    n_companies = resolve_companies(conn, found)
+    if n_companies:
+        log.info("%d nye statlige selskaper blant kjøperne", n_companies)
+    n_units = resolve_municipal(conn, found)
     if n_units:
         log.info("%d nye kjøpere under kommuner og fylker", n_units)
     wanted = buyers(conn)
@@ -229,6 +258,9 @@ def main() -> int:
     ap.add_argument("--max-new", type=int, help="Hent høyst så mange nye kunngjøringer (prøvekjøring)")
     ap.add_argument("--cache-dir", type=Path, default=ROOT / "data" / "doffin_cache")
     ap.add_argument("--dry-run", action="store_true", help="Regn ut alt, men ikke skriv site-data/")
+    ap.add_argument("--recheck-buyers", action="store_true",
+                    help="Slå opp igjen kjøperne i orgnr_checked (etter nye regler for hvem som hører til kommunene); "
+                         "bruk sammen med --years for alle årene")
     a = ap.parse_args()
     a.cache_dir.mkdir(parents=True, exist_ok=True)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -264,8 +296,12 @@ def main() -> int:
         except Exception as e:  # SSB nede: behold tallene fra forrige kjøring
             log.warning("Kunne ikke hente KOSTRA fra SSB: %s", e)
             report.append(f"KOSTRA: kunne ikke hentes ({e}), tallene fra forrige kjøring er beholdt.")
+        if a.recheck_buyers:
+            conn.execute(CHECKED_SCHEMA)
+            conn.execute("DELETE FROM orgnr_checked")
         n_new = fetch_new_contracts(conn, years, DoffinClient(cache_dir=a.cache_dir), a.max_new)
         report.append(f"Doffin: {n_new} nye kontrakter ({', '.join(map(str, years))}).")
+        report += load_companies(conn)
 
         n_fixed = apply_corrections(conn)
         if n_fixed:
