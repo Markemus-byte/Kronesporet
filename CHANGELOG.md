@@ -2,6 +2,12 @@
 
 ## Ikke utgitt
 
+- **Kommunale og interkommunale selskaper:** 352 selskaper som kommunene eier, alene eller sammen (som Ruter,
+  Kolumbus, BIR, ROAF, IVAR og Sirkula), er med. De finnes blant kjøperne i Doffin ut fra sektorene for kommunale
+  foretak, kommunalt eide aksjeselskaper og kommuneforvaltningen i Enhetsregisteret, på samme måte som de statlige
+  selskapene, og 2 286 nye kontrakter for 2017–2026 er hentet (30 374 i alt). Ny side `kommunale-selskaper.html`,
+  linket fra `selskaper.html`, `kommuner.html` og forsiden. De regnes ikke til én kommune, fordi mange har flere
+  eiere. `selskaper.csv` har en ny kolonne for eier (staten eller kommunene).
 - **Statlige selskaper:** 65 statsforetak, statlig eide selskaper og andre statlige enheter utenfor
   statsregnskapet (som Bane NOR, Avinor, Nye Veier, NRK, Norsk Helsenett, Vinmonopolet og Norges Bank) er med.
   De finnes blant kjøperne i Doffin ut fra institusjonell sektor i Enhetsregisteret (`src/collectors/selskaper.py`),

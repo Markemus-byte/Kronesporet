@@ -11,8 +11,9 @@ Tar utgangspunkt i dataene som allerede ligger i repoet og legger til det som er
      foretak og årsregnskapene fra Regnskapsregisteret (src/collectors/foretak.py).
   4. Kommunene og fylkeskommunene: kjøp fra KOSTRA (SSB) og kjøperne i Doffin som hører til dem
      (etater, bydeler og kommunale foretak, slått opp oppover i Enhetsregisteret, src/collectors/kostra.py).
-     Statlige selskaper blant kjøperne (statsforetak, statlig eide aksjeselskaper, Norges Bank) legges i
-     `selskaper` ut fra sektoren i Enhetsregisteret, med underenheter og årsregnskap (src/collectors/selskaper.py).
+     Statlige og kommunale selskaper blant kjøperne (statsforetak, statlig eide aksjeselskaper, Norges Bank,
+     IKS og kommunalt eide aksjeselskaper) legges i `selskaper` ut fra sektoren i Enhetsregisteret, med
+     underenheter og årsregnskap (src/collectors/selskaper.py).
   5. Kjente feil i Doffin rettes etter site-data/rettinger.csv (f.eks. feil orgnr på kjøperen).
   6. Årsfordeling, avvik og Doffin-dekning regnes ut på nytt, og tallene eksporteres.
 
@@ -73,43 +74,44 @@ def buyers(conn: sqlite3.Connection) -> set[str]:
 CHECKED_SCHEMA = "CREATE TABLE IF NOT EXISTS orgnr_checked (orgnr TEXT PRIMARY KEY)  -- kjøpere slått opp uten treff"
 
 
-def resolve_companies(conn: sqlite3.Connection, orgnrs: set[str]) -> int:
-    """Legg statlige selskaper blant de ukjente kjøperne i `selskaper`, med underenhetene. Returnerer antall nye."""
-    conn.execute(CHECKED_SCHEMA)
-    checked = {r[0] for r in conn.execute("SELECT orgnr FROM orgnr_checked")}
-    new = selskaper.find(conn, {o for o in orgnrs if o} - buyers(conn) - checked)
-    if new:
-        load_subunits(conn, new, replace=False)
-    return len(new)
-
-
 def load_companies(conn: sqlite3.Connection) -> list[str]:
-    """Årsregnskapene til de statlige selskapene fra Regnskapsregisteret."""
+    """Årsregnskapene til de statlige og kommunale selskapene fra Regnskapsregisteret."""
     orgs = sorted(selskaper.orgnrs(conn))
     if not orgs:
         return []
     n = foretak.fetch_accounts(conn, orgs)
-    return [f"Statlige selskaper: {len(orgs)} selskaper, {n} årsregnskap fra Regnskapsregisteret."]
+    n_state = len(selskaper.orgnrs(conn, state=True))
+    return [f"Selskaper: {n_state} statlige og {len(orgs) - n_state} kommunale, "
+            f"{n} årsregnskap fra Regnskapsregisteret."]
 
 
-def resolve_municipal(conn: sqlite3.Connection, orgnrs: set[str]) -> int:
-    """Slå opp ukjente kjøpere i Enhetsregisteret og før dem som ligger under en kommune eller et fylke,
-    på kommunen (orgnr_parent). Tidligere kommuner og fylkeskommuner og kommunale foretak med kommunen i
-    navnet føres på kommunen de ble en del av (kostra.successors). Kjøpere som er slått opp, huskes i
-    orgnr_checked. Returnerer antall nye."""
+def resolve_buyers(conn: sqlite3.Connection, orgnrs: set[str]) -> tuple[int, int]:
+    """Slå opp ukjente kjøpere i Enhetsregisteret.
+
+    Kjøpere under en kommune eller et fylke føres på kommunen (orgnr_parent). Tidligere kommuner og
+    fylkeskommuner og kommunale foretak med kommunen i navnet føres på kommunen de ble en del av
+    (kostra.successors). Resten som er statlige eller kommunale selskaper etter sektoren i Enhetsregisteret,
+    legges i `selskaper` med underenhetene. Kjøpere som er slått opp uten treff, huskes i orgnr_checked.
+    Returnerer (nye enheter under kommuner, nye selskaper)."""
     roots = kostra.orgnrs(conn)
     conn.execute(CHECKED_SCHEMA)
     checked = {r[0] for r in conn.execute("SELECT orgnr FROM orgnr_checked")}
     todo = {o for o in orgnrs if o} - buyers(conn) - checked
-    if not roots or not todo:
-        return 0
-    found = resolve_upward(todo, roots)
-    found |= kostra.successors(conn, todo - set(found))
+    if not todo:
+        return 0, 0
+    found = resolve_upward(todo, roots) if roots else {}
+    if roots:
+        found |= kostra.successors(conn, todo - set(found))
     conn.executemany("INSERT OR IGNORE INTO orgnr_parent VALUES (?, ?, ?, ?)",
                      [(child, root, name, kind) for child, (root, name, kind) in found.items()])
-    conn.executemany("INSERT OR IGNORE INTO orgnr_checked VALUES (?)", [(o,) for o in todo - set(found)])
+    failed: set[str] = set()  # prøves igjen neste gang
+    companies = selskaper.find(conn, todo - set(found), failed=failed)
+    if companies:
+        load_subunits(conn, companies, replace=False)
+    conn.executemany("INSERT OR IGNORE INTO orgnr_checked VALUES (?)",
+                     [(o,) for o in todo - set(found) - set(companies) - failed])
     conn.commit()
-    return len(found)
+    return len(found), len(companies)
 
 
 def load_health(conn: sqlite3.Connection, path: Path = HEALTH) -> list[str]:
@@ -155,12 +157,9 @@ def fetch_new_contracts(conn: sqlite3.Connection, years: list[int], client: Doff
             hits += iter_search_hits(client, start, end)
         log.info("Doffin %s: %d tildelinger så langt", year, len(hits))
     found = {o for hit in hits for o, _ in buyer_list(hit)}
-    n_companies = resolve_companies(conn, found)
-    if n_companies:
-        log.info("%d nye statlige selskaper blant kjøperne", n_companies)
-    n_units = resolve_municipal(conn, found)
-    if n_units:
-        log.info("%d nye kjøpere under kommuner og fylker", n_units)
+    n_units, n_companies = resolve_buyers(conn, found)
+    if n_units or n_companies:
+        log.info("%d nye kjøpere under kommuner og fylker, %d nye selskaper", n_units, n_companies)
     wanted = buyers(conn)
     new: dict[str, dict] = {}
     for hit in hits:
