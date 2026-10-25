@@ -90,6 +90,7 @@ class Agency:
     section: str = "virksomhet"        # mappen siden ligger i: 'virksomhet' | 'helseforetak' | 'selskap' | 'kommune'
     owner: str = ""                    # eieren for helseforetakene; 'kommune' | 'fylke' for kommunene
     owner_level: str = ""              # 'stat' | 'kommune' for selskapene
+    until_year: int | None = None      # siste år for en fylkeskommune som ble delt (Viken: 2023)
 
     @property
     def slug(self) -> str:
@@ -544,15 +545,17 @@ def _municipal(conn: sqlite3.Connection, year: int, annualized: bool, has_parent
     spend: dict[str, dict[str, float]] = {}
     for orgnr, art, amount in conn.execute("SELECT orgnr, art, amount FROM kommune_regnskap WHERE year = ?", (year,)):
         spend.setdefault(orgnr, {})[art] = amount or 0.0
+    until = "until_year" if "until_year" in {r[1] for r in conn.execute("PRAGMA table_info(kommuner)")} else "NULL"
     out = []
-    for orgnr, name, kind in conn.execute("SELECT orgnr, name, kind FROM kommuner").fetchall():
+    for orgnr, name, kind, last in conn.execute(
+            f"SELECT orgnr, name, kind, {until} FROM kommuner WHERE {until} IS NULL OR {until} >= ?", (year,)).fetchall():
         contracts = _contracts(conn, orgnr, year, annualized)
         parts = spend.get(orgnr, {})
         a = Agency(orgnr=orgnr, name=display_name(name), year=year,
                    contract_sum=sum(c.year_value or 0.0 for c in contracts), contract_count=len(contracts),
                    spend_sum=sum(parts.values()), deviation=0.0, flagged=False, match_method=None,
                    spend_parts=parts, spend_source=MUNICIPAL_SOURCE if parts else None, contracts=contracts,
-                   coverage=scores.get((orgnr, year)), section="kommune", owner=kind)
+                   coverage=scores.get((orgnr, year)), section="kommune", owner=kind, until_year=last)
         awarded = conn.execute(
             f"SELECT COUNT(*), COALESCE(SUM(value), 0) FROM doffin_contracts WHERE {_units(has_parents)} AND year = ?",
             (orgnr, orgnr, year)).fetchone()
