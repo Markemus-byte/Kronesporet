@@ -2,6 +2,9 @@
 
 ## Ikke utgitt
 
+- **E-post:** `varsler.html` har knappen «Meld interesse på e-post» til varsler@kronesporet.no (#37). Bunnteksten
+  viser post@kronesporet.no. `vilkar.html` har personvern@kronesporet.no for personvern og ønsker om å skjule
+  enkeltpersonforetak, post@ for feil i tallene og presse@kronesporet.no for presse.
 - **Kjøpere uten orgnr:** noen kunngjøringer i Doffin, mest fra 2017–2022, har kjøpere uten orgnr. 1 192 slike
   kjøpere kjennes nå igjen på navnet, eller navnet foran «v/» eller komma («Oslo kommune v/ Bymiljøetaten»), ut fra
   navnene i tidligere kunngjøringer og registrene. Navn som har vært brukt av flere orgnr (som Sande kommune), er

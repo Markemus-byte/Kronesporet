@@ -42,7 +42,10 @@ _SITE: dict[str, str] = {"base_url": "", "data_date": "", "years": "", "statsreg
                          "health": "", "companies": "", "municipal": ""}
 COPYRIGHT = "© 2026 Markemus-byte / Kronesporet. Alle rettigheter forbeholdt."
 REPO_URL = "https://github.com/Markemus-byte/Kronesporet"
-CONTACT_EMAIL = ""  # e-postadresse for personvernhenvendelser; tom = henvendelser via GitHub
+CONTACT_EMAIL = "post@kronesporet.no"  # kontakt i bunnteksten; tom = henvendelser via GitHub
+PRIVACY_EMAIL = "personvern@kronesporet.no"  # personvernhenvendelser (vilkar.html)
+ALERTS_EMAIL = "varsler@kronesporet.no"  # interessepåmelding for varsler (varsler.html)
+PRESS_EMAIL = "presse@kronesporet.no"
 
 PERIOD_SOURCES = {
     "datoer": "start- og sluttdato i kunngjøringen",
@@ -195,7 +198,8 @@ def page(title: str, body: str, root: str = "", active: str = "", description: s
     <a href="https://data.norge.no/nlod/no/2.0">Norsk lisens for offentlige data (NLOD 2.0)</a>.
     Kronesporet er ikke tilknyttet DFØ, Digdir eller Brønnøysundregistrene.</p>
     <p>{data_date}<a href="{root}om.html">Om dataene og metoden</a> ·
-    <a href="{root}vilkar.html">Vilkår og personvern</a>.</p>
+    <a href="{root}vilkar.html">Vilkår og personvern</a>{
+    f' · Kontakt: <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>' if CONTACT_EMAIL else ""}.</p>
     <p>{COPYRIGHT}</p>
   </div>
 </footer>
@@ -1918,8 +1922,8 @@ EXPIRING_SHOWN = 20
 
 def alerts_page(ref_date: str, expiring: list[Expiring]) -> str:
     """Planlagte varsler (første betalte tilbud), avtaler som løper ut, og interessepåmelding."""
-    if CONTACT_EMAIL:
-        mail = (f"mailto:{CONTACT_EMAIL}?subject=" + quote("Interesse for varsler fra Kronesporet")
+    if ALERTS_EMAIL:
+        mail = (f"mailto:{ALERTS_EMAIL}?subject=" + quote("Interesse for varsler fra Kronesporet")
                 + "&body=" + quote("Virksomhet:\nHva vil dere følge (kjøpere, leverandører eller kategorier):\n"))
         signup = (f'<p><a class="button" href="{escape(mail)}">Meld interesse på e-post</a></p>'
                   '<p class="muted small">Det er gratis og forplikter ikke. Vi bruker adressen bare til å si fra når '
@@ -1981,13 +1985,13 @@ konkurranse.</li>
 def terms_page() -> str:
     """Vilkår for bruk, forbehold, retting og personvern."""
     issue = f"{REPO_URL}/issues/new"
-    contact = (f'Send en e-post til <a href="mailto:{escape(CONTACT_EMAIL)}">{escape(CONTACT_EMAIL)}</a>.'
-               if CONTACT_EMAIL else
+    contact = (f'Send en e-post til <a href="mailto:{escape(PRIVACY_EMAIL)}">{escape(PRIVACY_EMAIL)}</a>.'
+               if PRIVACY_EMAIL else
                f'Opprett en <a href="{issue}">sak på GitHub</a> og be om kontakt. Ikke skriv personopplysninger i '
                "saken, for den er offentlig.")
     signup = ("<li><strong>Påmelding til varsler.</strong> Melder du interesse for varsler på e-post, bruker vi "
               "adressen bare til å si fra når varslene er klare. Vi deler den ikke og sletter den når du ber om det.</li>"
-              if CONTACT_EMAIL else "")
+              if ALERTS_EMAIL else "")
     body = f"""<section class="hero">
   <h1>Vilkår og personvern</h1>
   <p class="lede">Kronesporet er gratis å bruke. Tallene kommer fra åpne offentlige kilder og er satt sammen av
@@ -1997,7 +2001,10 @@ def terms_page() -> str:
 <div class="prose">
 <h2 id="hvem">Hvem står bak</h2>
 <p>Kronesporet drives av Markemus-byte og er ikke tilknyttet DFØ, Digdir eller Brønnøysundregistrene.
-Kildekoden og endringsloggen ligger på <a href="{REPO_URL}">GitHub</a>.</p>
+Kildekoden og endringsloggen ligger på <a href="{REPO_URL}">GitHub</a>.{
+f' Kontakt oss på <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>' if CONTACT_EMAIL else ""}{
+f', og presse kan skrive til <a href="mailto:{PRESS_EMAIL}">{PRESS_EMAIL}</a>.' if CONTACT_EMAIL and PRESS_EMAIL else
+"." if CONTACT_EMAIL else ""}</p>
 
 <h2 id="bruk">Bruk av tallene</h2>
 <p>Dataene fra kildene er lisensiert under <a href="https://data.norge.no/nlod/no/2.0">Norsk lisens for offentlige
@@ -2013,7 +2020,7 @@ av tallene. Sjekk mot kilden før du bruker et tall; hver kontrakt lenker til ku
 
 <h2 id="retting">Feil i tallene</h2>
 <p>Mener du at tallene for en virksomhet eller leverandør er feil, kan du <a href="{issue}">melde det på
-GitHub</a>. Skriv hvilken side det gjelder og hva som er feil. Rettelser står i
+GitHub</a>{f' eller sende en e-post til <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>' if CONTACT_EMAIL else ""}. Skriv hvilken side det gjelder og hva som er feil. Rettelser står i
 <a href="{REPO_URL}/blob/main/CHANGELOG.md">endringsloggen</a>.</p>
 
 <h2 id="personvern">Personvern</h2>
