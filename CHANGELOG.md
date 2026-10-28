@@ -2,6 +2,11 @@
 
 ## Ikke utgitt
 
+- **Betaling for varsler (#39), forberedt:** `plan/betaling-stripe.md` vurderer Stripe på den statiske siden
+  (Payment Link, kundeportal og webhook til Workeren fra #38), og `plan/sjekkliste-lansering.md` er sjekklisten for
+  selskapsform, mva, vilkår og juridisk gjennomgang. Vilkårene for abonnementet og personvern for abonnenter ligger
+  i `src/web/build.py` og vises på `vilkar.html` først når `SELLER` og `PAID_ALERTS_PRICE` er fylt inn. Nettsiden
+  er uendret til da.
 - **E-post:** `varsler.html` har knappen «Meld interesse på e-post» til varsler@kronesporet.no (#37). Bunnteksten
   viser post@kronesporet.no. `vilkar.html` har personvern@kronesporet.no for personvern og ønsker om å skjule
   enkeltpersonforetak, post@ for feil i tallene og presse@kronesporet.no for presse.

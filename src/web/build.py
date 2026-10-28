@@ -46,6 +46,10 @@ CONTACT_EMAIL = "post@kronesporet.no"  # kontakt i bunnteksten; tom = henvendels
 PRIVACY_EMAIL = "personvern@kronesporet.no"  # personvernhenvendelser (vilkar.html)
 ALERTS_EMAIL = "varsler@kronesporet.no"  # interessepåmelding for varsler (varsler.html)
 PRESS_EMAIL = "presse@kronesporet.no"
+# Betalte varsler (#39). Vilkårene for abonnementet vises på vilkar.html først når selger og pris er fylt inn.
+SELLER = ""  # ENK-ets navn, orgnr og forretningsadresse, f.eks. "Kronesporet Ola Nordmann, org.nr. 123 456 789, Gate 1, 0150 Oslo"
+PAID_ALERTS_PRICE = ""  # f.eks. "490 kr i måneden eks. mva"
+STRIPE_PORTAL_URL = ""  # Stripes kundeportal, der abonnenter sier opp og bytter kort
 
 PERIOD_SOURCES = {
     "datoer": "start- og sluttdato i kunngjøringen",
@@ -1982,6 +1986,73 @@ konkurranse.</li>
                 description="Planlagte e-postvarsler om nye tildelinger og avtaler som løper ut hos statlige kjøpere.")
 
 
+def paid_terms_section() -> str:
+    """Vilkår for abonnementet på varsler (#39). Tom til SELLER og PAID_ALERTS_PRICE er satt."""
+    if not (SELLER and PAID_ALERTS_PRICE):
+        return ""
+    contact = CONTACT_EMAIL or ALERTS_EMAIL
+    mail = f'<a href="mailto:{escape(contact)}">{escape(contact)}</a>'
+    portal = (f'i <a href="{escape(STRIPE_PORTAL_URL)}">kundeportalen</a>' if STRIPE_PORTAL_URL else
+              f"ved å sende en e-post til {mail}")
+    return f"""
+<h2 id="abonnement">Vilkår for abonnement på varsler</h2>
+<p>Disse vilkårene gjelder i tillegg til resten av siden når du kjøper abonnement på varsler fra Kronesporet.
+Selger er {escape(SELLER)}.</p>
+<h3 id="abonnement-innhold">Hva abonnementet gir</h3>
+<p>Abonnementet gir e-postvarsler om nye tildelinger og avtaler som kan løpe ut hos kjøperne, leverandørene eller
+kategoriene du velger, og uttrekk av kontraktene som CSV. Innholdet er beskrevet på <a href="varsler.html">varslingssiden</a>.
+Abonnementet gjelder for én bruker. Nettsiden og tallene på den er fortsatt gratis for alle.</p>
+<h3 id="abonnement-kunde">Hvem kan kjøpe</h3>
+<p>Abonnementet selges bare til næringsdrivende, og kjøpet gjøres på vegne av en virksomhet med organisasjonsnummer.
+Reglene for forbrukerkjøp, digitale ytelser og angrerett gjelder derfor ikke. Redaksjoner, forskere og offentlige virksomheter kan få
+varslene gratis. Send en e-post til {mail} og fortell hvem du er.</p>
+<h3 id="abonnement-pris">Pris og betaling</h3>
+<p>Prisen er {escape(PAID_ALERTS_PRICE)}. Når Kronesporet er registrert i Merverdiavgiftsregisteret, kommer
+merverdiavgift i tillegg. Abonnementet betales forskuddsvis for én måned om gangen med kort via Stripe, og fornyes
+automatisk til du sier det opp. Kronesporet ser ikke kortnummeret ditt. Hvis en betaling ikke går gjennom, prøver
+Stripe på nytt i noen dager før abonnementet stopper.</p>
+<h3 id="abonnement-oppsigelse">Oppsigelse</h3>
+<p>Du kan si opp når som helst {portal}. Oppsigelsen gjelder fra slutten av perioden du har betalt for, og du får
+varslene til da. Betalte perioder refunderes ikke. Kronesporet kan si opp abonnementet med 30 dagers varsel, og
+refunderer da den delen av perioden som ikke er brukt.</p>
+<h3 id="abonnement-endringer">Endringer i pris og vilkår</h3>
+<p>Endringer i prisen eller i disse vilkårene varsles på e-post minst 30 dager før de gjelder. Vil du ikke fortsette
+på de nye vilkårene, kan du si opp før de trer i kraft.</p>
+<h3 id="abonnement-bruk">Bruk av varslene</h3>
+<p>Du kan bruke varslene og uttrekkene i din egen virksomhet. Du kan ikke dele abonnementet med andre eller selge
+varslene videre som en egen tjeneste. Dataene fra kildene er fortsatt lisensiert under NLOD 2.0 og kan hentes fritt
+fra Doffin, DFØ og Brønnøysundregistrene; abonnementet gjelder Kronesporets tjeneste, ikke kildedataene.</p>
+<h3 id="abonnement-ansvar">Ansvar</h3>
+<p>Varslene bygger på kunngjøringene i Doffin og gjelder bare det som er kunngjort der. Løpetid og verdi er ofte
+anslag, og en avtale kan ha opsjoner som gjør at den løper lenger. Det står i varselet når løpetiden er anslått.
+Kronesporet garanterer ikke at varslene er fullstendige eller kommer til en bestemt tid, for eksempel hvis kildene er
+nede. Kronesporet er ikke ansvarlig for indirekte tap, som tapt omsetning eller en konkurranse du ikke fikk med deg.
+Samlet ansvar er begrenset til det du har betalt for abonnementet de siste 12 månedene.</p>
+<h3 id="abonnement-overdragelse">Overdragelse</h3>
+<p>Kronesporet kan overdra abonnementsavtalen til et selskap som eies av innehaveren av Kronesporet, for eksempel hvis
+virksomheten blir et aksjeselskap. Du får beskjed på e-post minst 30 dager før, og kan si opp hvis du ikke vil
+fortsette.</p>
+<h3 id="abonnement-tvister">Tvister</h3>
+<p>Avtalen følger norsk rett. Vi prøver å løse uenighet i minnelighet; ellers avgjøres tvister ved selgers
+verneting.</p>
+
+"""
+
+
+def paid_privacy_item() -> str:
+    """Personvern for abonnenter. Tom til abonnementet er i salg."""
+    if not (SELLER and PAID_ALERTS_PRICE):
+        return ""
+    return ("<li><strong>Abonnenter på varsler.</strong> Vi lagrer e-post, navn og organisasjonsnummer på virksomheten, "
+            "hva du følger, hvilke varsler som er sendt, og om abonnementet er betalt. Grunnlaget er avtalen med deg "
+            "(artikkel 6 nr. 1 bokstav b) og bokføringsplikten (bokstav c). Betalingen behandles av Stripe, som også er "
+            "selvstendig behandlingsansvarlig for å forhindre svindel. Abonnementet og følge-listene lagres hos "
+            "Cloudflare, og varslene sendes via en e-posttjeneste som behandler adressen din på våre vegne. Noen av "
+            "disse lagrer data i USA, med EUs standardkontrakter eller EU–US Data Privacy Framework som grunnlag. Vi "
+            "sletter opplysningene om deg når abonnementet er avsluttet, bortsett fra kvitteringer og annet "
+            "regnskapsmateriale, som bokføringsloven krever at vi tar vare på i fem år.</li>\n")
+
+
 def terms_page() -> str:
     """Vilkår for bruk, forbehold, retting og personvern."""
     issue = f"{REPO_URL}/issues/new"
@@ -2002,6 +2073,7 @@ def terms_page() -> str:
 <h2 id="hvem">Hvem står bak</h2>
 <p>Kronesporet drives av Markemus-byte og er ikke tilknyttet DFØ, Digdir eller Brønnøysundregistrene.
 Kildekoden og endringsloggen ligger på <a href="{REPO_URL}">GitHub</a>.{
+f" Selger av abonnementet på varsler er {escape(SELLER)}." if SELLER else ""}{
 f' Kontakt oss på <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>' if CONTACT_EMAIL else ""}{
 f', og presse kan skrive til <a href="mailto:{PRESS_EMAIL}">{PRESS_EMAIL}</a>.' if CONTACT_EMAIL and PRESS_EMAIL else
 "." if CONTACT_EMAIL else ""}</p>
@@ -2023,7 +2095,7 @@ av tallene. Sjekk mot kilden før du bruker et tall; hver kontrakt lenker til ku
 GitHub</a>{f' eller sende en e-post til <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>' if CONTACT_EMAIL else ""}. Skriv hvilken side det gjelder og hva som er feil. Rettelser står i
 <a href="{REPO_URL}/blob/main/CHANGELOG.md">endringsloggen</a>.</p>
 
-<h2 id="personvern">Personvern</h2>
+{paid_terms_section()}<h2 id="personvern">Personvern</h2>
 <ul>
 <li><strong>Besøk på nettsiden.</strong> Siden har ingen innlogging, ingen informasjonskapsler og ingen analyse-
 eller sporingsverktøy, og den henter ikke noe fra andre nettsteder. Siden ligger på GitHub Pages, og GitHub
@@ -2037,7 +2109,7 @@ kontrakter.</li>
 <li><strong>Du kan be om å bli skjult.</strong> Har du et enkeltpersonforetak og vil ikke vises med navn, viser
 vi foretaket som «Enkeltpersonforetak (skjult)» uten organisasjonsnummer, og leverandørsiden fjernes. Kontraktene
 står fortsatt i Doffin. {contact}</li>
-{signup}<li><strong>Klage.</strong> Du kan klage til <a href="https://www.datatilsynet.no">Datatilsynet</a>.</li>
+{signup}{paid_privacy_item()}<li><strong>Klage.</strong> Du kan klage til <a href="https://www.datatilsynet.no">Datatilsynet</a>.</li>
 </ul>
 </div>
 """

@@ -138,6 +138,7 @@ src/web/          nettsiden: data.py leser SQLite, build.py lager HTML, assets/ 
 scripts/          run_phase1.py, fetch_winners.py, build_site.py, export_site_data.py, check_site.py
 site-data/        tallene nettsiden bygges fra (SQL-tekst)
 docs/             ferdig bygget nettside (publiseres som den er)
+plan/             vurderinger og sjekklister, blant annet betaling for varsler (#39)
 ```
 
 ## Metode
