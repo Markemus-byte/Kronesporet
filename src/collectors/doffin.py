@@ -72,6 +72,8 @@ class DoffinContract:
     end_date: str | None = None
     duration_months: float | None = None
     duration_source: str | None = None   # "varighet" | "datoer" | "tekst" | None
+    # CPV-koder fra detaljvisningen, mellomromsdelt. "" = sjekket uten koder, None = ikke hentet.
+    cpv: str | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -403,6 +405,16 @@ def contract_period(notice: dict[str, Any]) -> ContractPeriod:
     return period
 
 
+def cpv_codes(detail: dict[str, Any] | None) -> str | None:
+    """CPV-kodene i en detaljvisning (hovedkode og tilleggskoder, også per delkontrakt) som
+    mellomromsdelt tekst, f.eks. '72000000 48000000'. Søketreffene har ikke CPV."""
+    if detail is None:
+        return None
+    codes = detail.get("allCpvCodes") or detail.get("directCpvCodes") or []
+    clean = (re.sub(r"\D", "", str(c))[:8] for c in codes)
+    return " ".join(dict.fromkeys(c for c in clean if len(c) == 8))
+
+
 def _clean_orgnr(raw: Any) -> str | None:
     digits = re.sub(r"\D", "", str(raw or ""))
     return digits if len(digits) == 9 else None
@@ -457,6 +469,7 @@ def normalize(hit: dict[str, Any], detail: dict[str, Any] | None = None) -> Doff
         end_date=period.end_date if period else None,
         duration_months=period.duration_months if period else None,
         duration_source=period.duration_source if period else None,
+        cpv=cpv_codes(detail),
     )
 
 
@@ -589,7 +602,8 @@ CREATE TABLE IF NOT EXISTS doffin_contracts (
     start_date       TEXT,
     end_date         TEXT,
     duration_months  REAL,
-    duration_source  TEXT
+    duration_source  TEXT,
+    cpv              TEXT      -- CPV-koder, mellomromsdelt ('' = ingen i kunngjøringen)
 );
 CREATE INDEX IF NOT EXISTS idx_doffin_buyer_year ON doffin_contracts (buyer_orgnr, year);
 
@@ -616,7 +630,7 @@ CREATE INDEX IF NOT EXISTS idx_doffin_buyers_orgnr ON doffin_buyers (orgnr);
 # Kolonner lagt til etter fase 1; eldre databaser får dem med ALTER TABLE.
 _ADDED_COLUMNS = {
     "is_framework": "INTEGER", "start_date": "TEXT", "end_date": "TEXT",
-    "duration_months": "REAL", "duration_source": "TEXT",
+    "duration_months": "REAL", "duration_source": "TEXT", "cpv": "TEXT",
 }
 
 
