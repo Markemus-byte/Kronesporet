@@ -47,7 +47,7 @@ PRIVACY_EMAIL = "personvern@kronesporet.no"  # personvernhenvendelser (vilkar.ht
 ALERTS_EMAIL = "varsler@kronesporet.no"  # interessepåmelding for varsler (varsler.html)
 PRESS_EMAIL = "presse@kronesporet.no"
 # Betalte varsler (#39). Vilkårene for abonnementet vises på vilkar.html først når selger og pris er fylt inn.
-SELLER = ""  # firmanavn, orgnr og forretningsadresse, f.eks. "Kronesporet Ola Nordmann ENK, org.nr. 123 456 789, Gate 1, 0150 Oslo"
+SELLER = ""  # ENK-ets navn, orgnr og forretningsadresse, f.eks. "Kronesporet Ola Nordmann, org.nr. 123 456 789, Gate 1, 0150 Oslo"
 PAID_ALERTS_PRICE = ""  # f.eks. "490 kr i måneden eks. mva"
 STRIPE_PORTAL_URL = ""  # Stripes kundeportal, der abonnenter sier opp og bytter kort
 
@@ -2028,6 +2028,10 @@ anslag, og en avtale kan ha opsjoner som gjør at den løper lenger. Det står i
 Kronesporet garanterer ikke at varslene er fullstendige eller kommer til en bestemt tid, for eksempel hvis kildene er
 nede. Kronesporet er ikke ansvarlig for indirekte tap, som tapt omsetning eller en konkurranse du ikke fikk med deg.
 Samlet ansvar er begrenset til det du har betalt for abonnementet de siste 12 månedene.</p>
+<h3 id="abonnement-overdragelse">Overdragelse</h3>
+<p>Kronesporet kan overdra abonnementsavtalen til et selskap som eies av innehaveren av Kronesporet, for eksempel hvis
+virksomheten blir et aksjeselskap. Du får beskjed på e-post minst 30 dager før, og kan si opp hvis du ikke vil
+fortsette.</p>
 <h3 id="abonnement-tvister">Tvister</h3>
 <p>Avtalen følger norsk rett. Vi prøver å løse uenighet i minnelighet; ellers avgjøres tvister ved selgers
 verneting.</p>
