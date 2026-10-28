@@ -33,9 +33,9 @@ lenken får kundens token med seg. Prøveperiode og rabattkoder kan også slås 
 
 Worker-koden ligger i `worker/` og skrives i #38, også webhook-ruten, så filen har én eier.
 
-1. Kunden fyller ut skjemaet på `varsler.html`. Workeren lagrer raden med status `venter` og sender en
+1. Kunden fyller ut skjemaet på `varsler.html`. Workeren lagrer raden med status `ny` og sender en
    bekreftelse på e-post.
-2. Bekreft-lenken setter status `bekreftet` og sender kunden videre til Payment Link med
+2. Bekreft-lenken setter tidsstempelet `bekreftet` og sender kunden videre til Payment Link med
    `?prefilled_email=<e-post>&client_reference_id=<token>`. Stripe godtar bare bokstaver, tall, `-` og `_` i
    `client_reference_id`, så den er raden sitt token, ikke e-posten.
 3. Stripe sender hendelser til `POST /stripe/webhook`. Workeren verifiserer signaturen i `Stripe-Signature` med
@@ -49,11 +49,13 @@ Worker-koden ligger i `worker/` og skrives i #38, også webhook-ruten, så filen
 | `customer.subscription.deleted` | `canceled` |
 
 D1-tabellen `abonnenter` har `email` som nøkkel, og ellers blant annet `stripe_customer_id`, `status`
-(`venter`, `bekreftet`, `active`, `past_due`, `canceled`, `gratis`), `plan` (`standard`, eventuelt `aar` for
+som bare er betalingsstatus (`ny`, `active`, `past_due`, `canceled`, `gratis`), tidsstemplene `bekreftet` og
+`avmeldt`, `plan` (`standard`, eventuelt `aar` for
 årspris), `gratis_grunn` (redaksjon, forskning, offentlig), `token` og `oppdatert`. Følge-listene ligger i
 `utvalg`.
 
-Varselmotoren sender bare til `status IN ('active', 'gratis')`. Webhooken må svare 200 raskt og tåle samme hendelse
+Varselmotoren sender bare når `bekreftet` er satt, `avmeldt` er tom og `status` er `active` eller `gratis`.
+Avmelding stopper e-postene uten å røre Stripe; avmeldingssiden lenker til kundeportalen for å si opp betalingen. Webhooken må svare 200 raskt og tåle samme hendelse
 to ganger, for Stripe prøver på nytt i opptil tre dager hvis svaret uteblir.
 
 E-postadresser og følge-lister ligger bare i D1 og Stripe. Repoet er offentlig, så ingen abonnentdata skal dit.
