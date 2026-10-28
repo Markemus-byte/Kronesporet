@@ -11,7 +11,8 @@
   Workeren er satt opp (`ALERTS_API` i `src/web/build.py`); oppsettet står i `worker/README.md`.
 - **CPV-koder:** `doffin_contracts` har en ny kolonne `cpv` med CPV-kodene fra kunngjøringen. Nye kontrakter får
   dem med en gang, og den månedlige oppdateringen fyller inn opptil 2 000 eldre kontrakter per kjøring
-  (`--cpv-backfill`).
+  (`--cpv-backfill`). 20 502 av 30 867 kontrakter har kodene nå: alle fra 2022 og senere, og 4 384 av 14 743 fra
+  2017–2021. Resten kommer med de neste oppdateringene.
 - **E-post:** `varsler.html` har knappen «Meld interesse på e-post» til varsler@kronesporet.no (#37). Bunnteksten
   viser post@kronesporet.no. `vilkar.html` har personvern@kronesporet.no for personvern og ønsker om å skjule
   enkeltpersonforetak, post@ for feil i tallene og presse@kronesporet.no for presse.
