@@ -35,29 +35,26 @@ Alt under gjøres én gang. Tallene i parentes er omtrentlig tid.
 3. Legg til avsenderen `varsler@kronesporet.no` under *Senders*.
 4. Lag en API-nøkkel under *SMTP & API → API Keys*. Ta vare på den til steg 2 og 3.
 
-**2. Cloudflare Worker og database (15 min)**
+**2. Cloudflare-konto og API-token (10 min)**
 1. Lag en gratis konto på [dash.cloudflare.com](https://dash.cloudflare.com). Domenet trenger ikke flyttes dit.
-2. På en maskin med Node.js, i mappen `worker/` i repoet:
-   ```
-   npx wrangler login
-   npx wrangler d1 create kronesporet-varsler
-   ```
-   Kopier `database_id` fra svaret inn i `wrangler.toml` (eller lim den inn i tråden, så gjør jeg det).
-3. ```
-   npx wrangler d1 execute kronesporet-varsler --remote --file=schema.sql
-   npx wrangler secret put BREVO_API_KEY        # nøkkelen fra Brevo
-   npx wrangler secret put API_TOKEN            # finn på en lang tilfeldig streng, f.eks. fra en passordgenerator
-   npx wrangler deploy
-   ```
-   `deploy` skriver ut adressen, f.eks. `https://kronesporet-varsler.<konto>.workers.dev`.
-4. Lim adressen inn i tråden. Da legger jeg den inn som `ALERTS_API` i `src/web/build.py`, og skjemaet og
-   «Få varsel»-lenkene kommer på nettsiden.
+2. Gå til *Workers & Pages* og velg et workers.dev-underdomene når du blir spurt (f.eks. `kronesporet`).
+3. Kopier *Account ID* fra høyre kolonne på oversikten (eller fra *Workers & Pages*).
+4. Gå til *My Profile → API Tokens → Create Token*, velg malen *Edit Cloudflare Workers*, legg til tillatelsen
+   *Account → D1 → Edit*, og lag tokenet. Det vises bare én gang.
 
-**3. GitHub (5 min)**, under *Settings → Secrets and variables → Actions* i repoet:
-- *Variables*: `VARSLER_API` = Worker-adressen fra steg 2.
-- *Secrets*: `VARSLER_API_TOKEN` = samme streng som `API_TOKEN`, og `BREVO_API_KEY` = nøkkelen fra Brevo.
+**3. GitHub (5 min)**, under [*Settings → Secrets and variables → Actions*](https://github.com/Markemus-byte/Kronesporet/settings/secrets/actions)
+→ *New repository secret*:
+- `CLOUDFLARE_API_TOKEN` = tokenet fra steg 2
+- `CLOUDFLARE_ACCOUNT_ID` = Account ID fra steg 2
+- `BREVO_API_KEY` = nøkkelen fra Brevo
+- `VARSLER_API_TOKEN` = en lang tilfeldig streng du finner på (f.eks. fra en passordgenerator). Den brukes bare
+  mellom GitHub og Worker-en, og du trenger aldri å skrive den inn andre steder.
 
-Da sender arbeidsflyten *Varsler* e-post hver morgen til dem som har noe nytt. Før dette er gjort, gjør den ingenting.
+Kjør så arbeidsflyten [*Worker*](https://github.com/Markemus-byte/Kronesporet/actions/workflows/worker.yml)
+(*Run workflow*). Den lager databasen, legger inn tabellene, publiserer Worker-en og legger inn hemmelighetene.
+Adressen til Worker-en står i oppsummeringen av kjøringen. Når den legges inn som `ALERTS_API` i
+`src/web/build.py`, kommer skjemaet og «Få varsel»-lenkene på nettsiden, og arbeidsflyten *Varsler* begynner å
+sende. Før det gjør den ingenting.
 
 **4. Stripe (fra betalingsoppsettet i #39)**
 1. Lag en Payment Link for abonnementet. Sett `STRIPE_PAYMENT_LINK` i `wrangler.toml` til lenken, og
@@ -65,12 +62,15 @@ Da sender arbeidsflyten *Varsler* e-post hver morgen til dem som har noe nytt. F
 2. Under *Developers → Webhooks*: legg til `https://<worker-adressen>/stripe/webhook` med hendelsene
    `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`,
    `customer.subscription.deleted` og `invoice.payment_failed`.
-3. `npx wrangler secret put STRIPE_WEBHOOK_SECRET` med signeringsnøkkelen (`whsec_...`), og `npx wrangler deploy`.
+3. Legg signeringsnøkkelen (`whsec_...`) inn som GitHub-secret `STRIPE_WEBHOOK_SECRET` og kjør *Worker* på nytt.
 
 Uten Stripe virker alt unntatt betalingen: bekreftede abonnenter får beskjed om at betalingen åpner snart, og
 gratisabonnenter kan settes opp for hånd.
 
 ## Drift
+
+Kommandoene under kjøres i D1-konsollen i Cloudflare (*Storage & Databases → D1 → kronesporet-varsler → Console*)
+uten `npx wrangler ...`-delen, eller med wrangler på en maskin med Node.js.
 
 Gratis tilgang for redaksjoner, forskere og offentlige virksomheter (etter at de har meldt seg på og bekreftet):
 ```

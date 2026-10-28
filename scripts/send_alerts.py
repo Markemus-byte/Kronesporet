@@ -7,12 +7,12 @@ noe nytt får ingen e-post, så jobben kan kjøres hver dag og på nytt: nye abo
 dagen etter at de har bekreftet, og de andre får varsel når den månedlige oppdateringen har lagt inn nye data.
 
 Miljøvariabler:
-  VARSLER_API         adressen til Workeren, f.eks. https://kronesporet-varsler.<konto>.workers.dev
+  VARSLER_API         adressen til Workeren (standard: ALERTS_API i src/web/build.py)
   VARSLER_API_TOKEN   samme verdi som API_TOKEN i Workeren
   BREVO_API_KEY eller SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_PASSWORD   utsending (src/alerts/mail.py)
   STRIPE_PORTAL_URL   valgfri lenke til Stripe-kundeportalen i bunnen av e-posten
 
-Uten VARSLER_API (og uten --abonnenter) avslutter skriptet uten å gjøre noe, så arbeidsflyten
+Uten Worker-adresse (og uten --abonnenter) avslutter skriptet uten å gjøre noe, så arbeidsflyten
 virker før Workeren er satt opp.
 
 Eksempel (fra repo-roten):
@@ -34,6 +34,7 @@ sys.path.insert(0, str(ROOT))
 from scripts.build_site import sql_to_db  # noqa: E402
 from src.alerts.engine import build_alert, children, load_contracts, load_subscribers, ref_date  # noqa: E402
 from src.alerts.mail import PreviewSender, build_message, sender_from_env  # noqa: E402
+from src.web.build import ALERTS_API  # noqa: E402
 
 log = logging.getLogger("varsler")
 
@@ -58,9 +59,9 @@ def main() -> int:
     a = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
-    api, token = os.environ.get("VARSLER_API", ""), os.environ.get("VARSLER_API_TOKEN", "")
+    api, token = os.environ.get("VARSLER_API") or ALERTS_API, os.environ.get("VARSLER_API_TOKEN", "")
     if not a.abonnenter and not api:
-        print("- Varsler: VARSLER_API er ikke satt, ingen varsler sendt.")
+        print("- Varsler: Workeren er ikke satt opp (ALERTS_API), ingen varsler sendt.")
         return 0
     source = a.abonnenter or f"{api.rstrip('/')}/api/abonnenter"
     subs = [s for s in load_subscribers(source, token) if s.receives]

@@ -1,7 +1,7 @@
 # E-postvarsler om nye tildelinger og avtaler som løper ut (scripts/send_alerts.py, worker/).
 # - Hver dag og rett etter den månedlige oppdateringen: henter abonnentene fra Workeren og sender varsel til dem
-#   som har noe nytt. Nye abonnenter får velkomstvarselet dagen etter at de har bekreftet. Uten VARSLER_API
-#   gjør jobben ingenting.
+#   som har noe nytt. Nye abonnenter får velkomstvarselet dagen etter at de har bekreftet. Før Workeren er
+#   satt opp (ALERTS_API i src/web/build.py) gjør jobben ingenting.
 # - Pull requests som endrer varslene: tester for motoren og Workeren, og eksempelvarsler fra
 #   worker/eksempel-abonnenter.json som kan lastes ned fra kjøringen (ingenting sendes).
 name: Varsler
