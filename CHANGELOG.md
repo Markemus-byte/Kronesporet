@@ -2,6 +2,17 @@
 
 ## Ikke utgitt
 
+- **Varsler (v1.1, #38):** e-postvarsler om nye tildelinger og avtaler som løper ut om 3, 6 eller 12 måneder, for
+  utvalgte kjøpere (med underenheter), leverandører, CPV-kategorier og søkeord, med CSV-uttrekk av alle treffene
+  og historikk fra 2017. Sluttdatoen er merket som anslag når Doffin bare oppgir varighet. Varselmotoren er i
+  `src/alerts/` og `scripts/send_alerts.py`, og arbeidsflyten `Varsler` sender hver morgen til dem som har noe
+  nytt. Påmelding, dobbel opt-in, avmelding, sletting og betalingsstatus fra Stripe ligger i en Cloudflare Worker
+  med D1-database (`worker/`). Ingen e-postadresser ligger i repoet. Skjemaet kommer på `varsler.html` når
+  Workeren er satt opp (`ALERTS_API` i `src/web/build.py`); oppsettet står i `worker/README.md`.
+- **CPV-koder:** `doffin_contracts` har en ny kolonne `cpv` med CPV-kodene fra kunngjøringen. Nye kontrakter får
+  dem med en gang, og den månedlige oppdateringen fyller inn opptil 2 000 eldre kontrakter per kjøring
+  (`--cpv-backfill`). 20 502 av 30 867 kontrakter har kodene nå: alle fra 2022 og senere, og 4 384 av 14 743 fra
+  2017–2021. Resten kommer med de neste oppdateringene.
 - **E-post:** `varsler.html` har knappen «Meld interesse på e-post» til varsler@kronesporet.no (#37). Bunnteksten
   viser post@kronesporet.no. `vilkar.html` har personvern@kronesporet.no for personvern og ønsker om å skjule
   enkeltpersonforetak, post@ for feil i tallene og presse@kronesporet.no for presse.

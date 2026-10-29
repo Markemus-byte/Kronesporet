@@ -1,0 +1,20 @@
+# Cloudflare Worker for varslene (påmelding, avmelding, Stripe-webhook og abonnentlisten for utsendingen).
+# Oppsett: se worker/README.md.
+name = "kronesporet-varsler"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+
+[vars]
+SITE_URL = "https://kronesporet.no"
+AVSENDER = "varsler@kronesporet.no"
+# Stripe Payment Link for abonnementet (fra betalingsoppsettet i #39). Tom = bekreftede abonnenter venter på betaling.
+STRIPE_PAYMENT_LINK = ""
+# Stripe-kundeportalen, lenket fra avmeldingssiden.
+STRIPE_PORTAL_URL = ""
+
+[[d1_databases]]
+binding = "DB"
+database_name = "kronesporet-varsler"
+database_id = "FYLL-INN-FRA-wrangler-d1-create"
+
+# Hemmeligheter (ikke her): npx wrangler secret put API_TOKEN | BREVO_API_KEY | STRIPE_WEBHOOK_SECRET

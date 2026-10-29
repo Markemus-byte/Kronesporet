@@ -1,0 +1,86 @@
+# Setter opp og oppdaterer Cloudflare Worker-en for varslene (worker/), så ingenting må installeres lokalt.
+# - Lager D1-databasen kronesporet-varsler første gang og legger inn tabellene (schema.sql tåler å kjøres på nytt).
+# - Publiserer Worker-en og legger inn hemmelighetene fra GitHub: VARSLER_API_TOKEN (som API_TOKEN), BREVO_API_KEY
+#   og STRIPE_WEBHOOK_SECRET (når de finnes). Adressen til Worker-en står i oppsummeringen av kjøringen.
+# Kjører ved endringer i worker/ på main og manuelt fra Actions-fanen. Uten CLOUDFLARE_API_TOKEN gjør den ingenting.
+name: Worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "worker/**"
+      - ".github/workflows/worker.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: worker
+  cancel-in-progress: false
+
+env:
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+  WRANGLER: npx --yes wrangler@4
+
+jobs:
+  publiser:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: worker
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Sjekk oppsettet
+        id: sjekk
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "CLOUDFLARE_API_TOKEN eller CLOUDFLARE_ACCOUNT_ID mangler; se worker/README.md" | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "klar=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "klar=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.sjekk.outputs.klar == 'true'
+        with:
+          node-version: "22"
+
+      - name: Database
+        if: steps.sjekk.outputs.klar == 'true'
+        run: |
+          find_id() { $WRANGLER d1 list --json | jq -r '.[] | select(.name == "kronesporet-varsler") | .uuid'; }
+          id=$(find_id)
+          if [ -z "$id" ]; then
+            $WRANGLER d1 create kronesporet-varsler
+            id=$(find_id)
+          fi
+          test -n "$id"
+          sed -i "s/^database_id = .*/database_id = \"$id\"/" wrangler.toml
+          $WRANGLER d1 execute kronesporet-varsler --remote --file=schema.sql
+
+      - name: Publiser
+        if: steps.sjekk.outputs.klar == 'true'
+        run: |
+          $WRANGLER deploy | tee deploy.log
+          url=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' deploy.log | head -1)
+          echo "Worker-adresse: ${url:-ikke funnet i loggen}" | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Hemmeligheter
+        if: steps.sjekk.outputs.klar == 'true'
+        env:
+          API_TOKEN: ${{ secrets.VARSLER_API_TOKEN }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+        run: |
+          for name in API_TOKEN BREVO_API_KEY STRIPE_WEBHOOK_SECRET; do
+            if [ -n "${!name}" ]; then
+              printf '%s' "${!name}" | $WRANGLER secret put "$name"
+              echo "$name lagt inn" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "$name mangler i GitHub og er ikke lagt inn" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
