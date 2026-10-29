@@ -14,14 +14,17 @@ punktene mot [Altinn: Starte og drive bedrift](https://info.altinn.no/starte-og-
 | Regnskap | Næringsoppgave med skattemeldingen | Årsregnskap til Regnskapsregisteret, aksjonærregisteroppgave |
 | Adresse på nettsiden | Ofte hjemmeadressen din | Selskapets adresse |
 
-**Valgt (28.10.2026):** Morten selger varslene gjennom enkeltpersonforetaket han alt har, og vurderer AS når
+**Valgt (28.10.2026):** Morten selger varslene gjennom enkeltpersonforetaket han alt har, Brafaring Thevik
+(org.nr. 938 405 565, Multeveien 1, 1712 Grålum, registrert 14.09.2026, ikke mva-registrert), og vurderer AS når
 inntektene er der (rundt 30 000 kr).
 
-- [ ] Sjekk at næringskoden og formålet til ENK-et dekker salg av informasjonstjenester, og endre det i
+- [x] Aktiviteten i Enhetsregisteret («utvikling og utgivelse av egne programvarer/apper ... samt salg») dekker en
+  abonnementstjeneste på nett. Næringskoden er 62.100 Dataprogrammeringstjenester. Vil du være presis, kan du legge
+  til 63.990 Andre informasjonstjenester som næringskode 2 i
   [Samordnet registermelding](https://info.altinn.no/skjemaoversikt/bronnoysundregistrene/samordnet-registermelding---enhetsregisteret-og-foretaksregisteret/)
   hvis ikke (gratis)
 - [ ] Bruk en egen bankkonto for ENK-et til utbetalingene fra Stripe, så salget er lett å skille ut
-- [ ] Gi meg navnet på ENK-et, orgnr og forretningsadressen, så kommer de inn i vilkårene og bunnteksten (`SELLER` i
+- [x] Gi meg navnet på ENK-et, orgnr og forretningsadressen, så kommer de inn i vilkårene og bunnteksten (`SELLER` i
   `src/web/build.py`). Ehandelsloven krever en geografisk adresse; for et ENK er det som regel adressen i
   Enhetsregisteret
 
@@ -47,7 +50,8 @@ Kronesporet og ikke navnet ditt.
 
 - Du **må** registrere deg i Merverdiavgiftsregisteret når salget passerer **50 000 kr i løpet av 12 måneder**.
   Før det tar du ikke mva.
-- Grensen gjelder hele ENK-et. Har det annet mva-pliktig salg, teller det med. Er ENK-et alt mva-registrert, skal
+- Grensen gjelder hele ENK-et. Har det annet mva-pliktig salg, teller det med. Brafaring Thevik driver også med
+  musikk og konsulentarbeid, og det salget teller med i de samme 50 000 kr. Er ENK-et alt mva-registrert, skal
   det legges mva på varslene fra første krone.
 - 30 000 kr har ingenting med mva å gjøre; det er minste aksjekapital for et AS.
 - Etter registreringen legger du på 25 % mva. Prisene til bedrifter vises eks. mva, så prisen på nettsiden kan

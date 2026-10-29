@@ -47,7 +47,8 @@ PRIVACY_EMAIL = "personvern@kronesporet.no"  # personvernhenvendelser (vilkar.ht
 ALERTS_EMAIL = "varsler@kronesporet.no"  # interessepåmelding for varsler (varsler.html)
 PRESS_EMAIL = "presse@kronesporet.no"
 # Betalte varsler (#39). Vilkårene for abonnementet vises på vilkar.html først når selger og pris er fylt inn.
-SELLER = ""  # ENK-ets navn, orgnr og forretningsadresse, f.eks. "Kronesporet Ola Nordmann, org.nr. 123 456 789, Gate 1, 0150 Oslo"
+# Selger: ENK-et til innehaveren (Enhetsregisteret, ikke mva-registrert per 29.10.2026).
+SELLER = "Brafaring Thevik (enkeltpersonforetak), org.nr. 938 405 565, Multeveien 1, 1712 Grålum"
 PAID_ALERTS_PRICE = ""  # f.eks. "490 kr i måneden eks. mva"
 STRIPE_PORTAL_URL = ""  # Stripes kundeportal, der abonnenter sier opp og bytter kort
 
@@ -2073,7 +2074,7 @@ def terms_page() -> str:
 <h2 id="hvem">Hvem står bak</h2>
 <p>Kronesporet drives av Markemus-byte og er ikke tilknyttet DFØ, Digdir eller Brønnøysundregistrene.
 Kildekoden og endringsloggen ligger på <a href="{REPO_URL}">GitHub</a>.{
-f" Selger av abonnementet på varsler er {escape(SELLER)}." if SELLER else ""}{
+f" Selger av abonnementet på varsler er {escape(SELLER)}." if SELLER and PAID_ALERTS_PRICE else ""}{
 f' Kontakt oss på <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>' if CONTACT_EMAIL else ""}{
 f', og presse kan skrive til <a href="mailto:{PRESS_EMAIL}">{PRESS_EMAIL}</a>.' if CONTACT_EMAIL and PRESS_EMAIL else
 "." if CONTACT_EMAIL else ""}</p>
