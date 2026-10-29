@@ -75,8 +75,8 @@ Etter mva-registrering kommer 25 % mva på toppen, og gebyret regnes av beløpet
 
 ## Pris
 
-#39 foreslår 300–800 kr i måneden per bruker, og prisen skal testes. Forslag: start med **490 kr i måneden
-eks. mva**, og et årsabonnement til 4 900 kr (to måneder gratis). Det er lett å senke prisen for de neste
+#39 foreslår 300–800 kr i måneden per bruker, og prisen skal testes. Valgt 29.10.2026: **490 kr i måneden
+eks. mva**. Et årsabonnement til 4 900 kr (to måneder gratis) kan legges til senere. Det er lett å senke prisen for de neste
 kundene, men vanskelig å heve den for dem som alt betaler. Stripe lar eksisterende kunder beholde gammel pris
 når en ny pris legges til.
 
@@ -94,7 +94,8 @@ når en ny pris legges til.
 6. Test hele flyten i testmodus med kort 4242 4242 4242 4242 før lenken legges på nettsiden.
 
 Lenken til kundeportalen og selgeropplysningene legges som konstanter øverst i `src/web/build.py`
-(`STRIPE_PORTAL_URL`, `SELLER`, `PAID_ALERTS_PRICE`), slik e-postene er. Payment Link brukes bare av Workeren.
+(`STRIPE_PORTAL_URL`, `SELLER`, `PAID_ALERTS_PRICE`), slik e-postene er. Selger og pris er fylt inn; vilkårene
+vises når `STRIPE_PORTAL_URL` også er satt. Payment Link brukes bare av Workeren.
 
 ## Senere
 

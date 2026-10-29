@@ -46,11 +46,17 @@ CONTACT_EMAIL = "post@kronesporet.no"  # kontakt i bunnteksten; tom = henvendels
 PRIVACY_EMAIL = "personvern@kronesporet.no"  # personvernhenvendelser (vilkar.html)
 ALERTS_EMAIL = "varsler@kronesporet.no"  # interessepåmelding for varsler (varsler.html)
 PRESS_EMAIL = "presse@kronesporet.no"
-# Betalte varsler (#39). Vilkårene for abonnementet vises på vilkar.html først når selger og pris er fylt inn.
+# Betalte varsler (#39). Vilkårene for abonnementet vises på vilkar.html først når selger, pris og kundeportal er
+# fylt inn, altså når betalingen i Stripe er klar.
 # Selger: ENK-et til innehaveren (Enhetsregisteret, ikke mva-registrert per 29.10.2026).
 SELLER = "Brafaring Thevik (enkeltpersonforetak), org.nr. 938 405 565, Multeveien 1, 1712 Grålum"
-PAID_ALERTS_PRICE = ""  # f.eks. "490 kr i måneden eks. mva"
+PAID_ALERTS_PRICE = "490 kr i måneden eks. mva"  # valgt 29.10.2026
 STRIPE_PORTAL_URL = ""  # Stripes kundeportal, der abonnenter sier opp og bytter kort
+
+
+def paid_alerts_live() -> bool:
+    """Om abonnementet er i salg: selger, pris og kundeportal er satt."""
+    return bool(SELLER and PAID_ALERTS_PRICE and STRIPE_PORTAL_URL)
 
 PERIOD_SOURCES = {
     "datoer": "start- og sluttdato i kunngjøringen",
@@ -1988,13 +1994,12 @@ konkurranse.</li>
 
 
 def paid_terms_section() -> str:
-    """Vilkår for abonnementet på varsler (#39). Tom til SELLER og PAID_ALERTS_PRICE er satt."""
-    if not (SELLER and PAID_ALERTS_PRICE):
+    """Vilkår for abonnementet på varsler (#39). Tom til abonnementet er i salg."""
+    if not paid_alerts_live():
         return ""
     contact = CONTACT_EMAIL or ALERTS_EMAIL
     mail = f'<a href="mailto:{escape(contact)}">{escape(contact)}</a>'
-    portal = (f'i <a href="{escape(STRIPE_PORTAL_URL)}">kundeportalen</a>' if STRIPE_PORTAL_URL else
-              f"ved å sende en e-post til {mail}")
+    portal = f'i <a href="{escape(STRIPE_PORTAL_URL)}">kundeportalen</a>'
     return f"""
 <h2 id="abonnement">Vilkår for abonnement på varsler</h2>
 <p>Disse vilkårene gjelder i tillegg til resten av siden når du kjøper abonnement på varsler fra Kronesporet.
@@ -2042,7 +2047,7 @@ verneting.</p>
 
 def paid_privacy_item() -> str:
     """Personvern for abonnenter. Tom til abonnementet er i salg."""
-    if not (SELLER and PAID_ALERTS_PRICE):
+    if not paid_alerts_live():
         return ""
     return ("<li><strong>Abonnenter på varsler.</strong> Vi lagrer e-post, navn og organisasjonsnummer på virksomheten, "
             "hva du følger, hvilke varsler som er sendt, og om abonnementet er betalt. Grunnlaget er avtalen med deg "
@@ -2074,7 +2079,7 @@ def terms_page() -> str:
 <h2 id="hvem">Hvem står bak</h2>
 <p>Kronesporet drives av Markemus-byte og er ikke tilknyttet DFØ, Digdir eller Brønnøysundregistrene.
 Kildekoden og endringsloggen ligger på <a href="{REPO_URL}">GitHub</a>.{
-f" Selger av abonnementet på varsler er {escape(SELLER)}." if SELLER and PAID_ALERTS_PRICE else ""}{
+f" Selger av abonnementet på varsler er {escape(SELLER)}." if paid_alerts_live() else ""}{
 f' Kontakt oss på <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>' if CONTACT_EMAIL else ""}{
 f', og presse kan skrive til <a href="mailto:{PRESS_EMAIL}">{PRESS_EMAIL}</a>.' if CONTACT_EMAIL and PRESS_EMAIL else
 "." if CONTACT_EMAIL else ""}</p>

@@ -77,7 +77,7 @@ selger er fylt inn, så nettsiden er uendret til da. Hovedpunktene:
   regnskapsdata lagres i 5 år etter bokføringsloven
 
 - [ ] Les utkastet og si fra om noe skal endres
-- [ ] Bestem prisen (forslag 490 kr i måneden eks. mva, 4 900 kr for et år)
+- [x] Bestem prisen: 490 kr i måneden eks. mva (valgt 29.10.2026). Årspris (forslag 4 900 kr) kan legges til senere
 
 ## 4. Juridisk gjennomgang
 
@@ -98,5 +98,6 @@ Be en advokat med e-handel og personvern om en fastpris-gjennomgang av:
 1. ENK-et klart: næringskode, bankkonto og selgeropplysninger (punkt 1)
 2. Stripe-konto i testmodus og pris (betaling-stripe.md)
 3. Advokat ser på vilkårene mens varslene fra #38 testes
-4. Fyll inn `SELLER`, `PAID_ALERTS_PRICE` og lenkene i `src/web/build.py`, slå på Stripe live, og lanser
+4. Slå på Stripe live og fyll inn `STRIPE_PORTAL_URL` i `src/web/build.py` (selger og pris står der alt). Da
+   vises vilkårene, og varslene kan selges
 5. Mva-registrering når salget nærmer seg 50 000 kr
