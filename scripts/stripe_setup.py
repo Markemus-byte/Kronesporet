@@ -198,11 +198,32 @@ def ensure_webhook(stripe: Stripe, url: str, secret_file: str | None) -> dict:
     return hook
 
 
+def show_status(stripe: Stripe) -> None:
+    """Abonnementene på prisen, uten e-post eller navn (loggene er offentlige)."""
+    subs = stripe.list_all("/subscriptions", {"status": "all", "price": None})
+    ours = [s for s in subs if any(i["price"].get("lookup_key") == PRICE_LOOKUP_KEY or _tagged(i["price"])
+                                   for i in s["items"]["data"])]
+    print(f"Abonnementer på Kronesporet varsler: {len(ours)}")
+    for sub in ours:
+        amount = sum(i["price"]["unit_amount"] * i.get("quantity", 1) for i in sub["items"]["data"]) / 100
+        print(f"  {sub['id']}: {sub['status']}, {amount:.0f} kr, startet {_date(sub['created'])}"
+              + (", sagt opp fra periodens slutt" if sub.get("cancel_at_period_end") else ""))
+    paid = stripe.call("GET", "/checkout/sessions", {"limit": 20, "status": "complete"})["data"]
+    ref = sum(1 for c in paid if c.get("client_reference_id"))
+    print(f"Fullførte betalinger (siste 20): {len(paid)}, {ref} med kobling til påmeldingen (client_reference_id)")
+
+
+def _date(ts: int) -> str:
+    import datetime
+    return datetime.datetime.fromtimestamp(ts, datetime.timezone.utc).strftime("%d.%m.%Y %H:%M UTC")
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--live", action="store_true", help="tillat live-nøkkel (ekte betalinger)")
     ap.add_argument("--webhook-url", help="Workerens adresse til /stripe/webhook")
     ap.add_argument("--webhook-secret-file", help="fil som får signeringshemmeligheten (whsec_...)")
+    ap.add_argument("--status", action="store_true", help="bare vis abonnementene, endre ingenting")
     args = ap.parse_args(argv)
 
     key = os.environ.get("STRIPE_SECRET_KEY", "").strip()
