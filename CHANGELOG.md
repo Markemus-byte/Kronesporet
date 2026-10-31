@@ -13,6 +13,13 @@
   dem med en gang, og den månedlige oppdateringen fyller inn opptil 2 000 eldre kontrakter per kjøring
   (`--cpv-backfill`). 20 502 av 30 867 kontrakter har kodene nå: alle fra 2022 og senere, og 4 384 av 14 743 fra
   2017–2021. Resten kommer med de neste oppdateringene.
+- **Betaling for varsler (#39), forberedt:** `plan/betaling-stripe.md` vurderer Stripe på den statiske siden
+  (Payment Link, kundeportal og webhook til Workeren fra #38), og `plan/sjekkliste-lansering.md` er sjekklisten for
+  selskapsform, mva, vilkår og juridisk gjennomgang. Vilkårene for abonnementet og personvern for abonnenter ligger
+  i `src/web/build.py` og vises på `vilkar.html` først når kundeportalen i Stripe (`STRIPE_PORTAL_URL`) er satt.
+  Selger er Brafaring Thevik (ENK), og prisen er 490 kr i måneden eks. mva. Arbeidsflyten «Stripe-oppsett»
+  (`scripts/stripe_setup.py`) lager produktet, prisen, betalingslenken og kundeportalen i Stripe via API-et.
+  Nettsiden er uendret til da.
 - **E-post:** `varsler.html` har knappen «Meld interesse på e-post» til varsler@kronesporet.no (#37). Bunnteksten
   viser post@kronesporet.no. `vilkar.html` har personvern@kronesporet.no for personvern og ønsker om å skjule
   enkeltpersonforetak, post@ for feil i tallene og presse@kronesporet.no for presse.
