@@ -224,7 +224,6 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--webhook-url", help="Workerens adresse til /stripe/webhook")
     ap.add_argument("--webhook-secret-file", help="fil som får signeringshemmeligheten (whsec_...)")
     ap.add_argument("--status", action="store_true", help="bare vis abonnementene, endre ingenting")
-    ap.add_argument("--status", action="store_true", help="bare vis abonnementene, endre ingenting")
     args = ap.parse_args(argv)
 
     key = os.environ.get("STRIPE_SECRET_KEY", "").strip()
