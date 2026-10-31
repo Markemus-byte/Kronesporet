@@ -2008,6 +2008,8 @@ def alerts_page(ref_date: str, expiring: list[Expiring]) -> str:
   <p class="lede">{"Kronesporet sender" if ALERTS_API else "Kronesporet planlegger"} e-postvarsler for leverandører og
   rådgivere som følger statens innkjøp. Nettsiden og tallene her forblir gratis. Varslene sparer deg for å lete selv.</p>
 </section>
+<p class="signup-status prose" id="takk" role="status" hidden>Takk for betalingen! Abonnementet er i gang, og det første
+varselet kommer i løpet av et døgn. Kvitteringen kommer på e-post fra Stripe.</p>
 <div class="prose">
 <h2>Dette får du</h2>
 <ul>

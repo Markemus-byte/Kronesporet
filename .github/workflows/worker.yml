@@ -2,6 +2,9 @@
 # - Lager D1-databasen kronesporet-varsler første gang og legger inn tabellene (schema.sql tåler å kjøres på nytt).
 # - Publiserer Worker-en og legger inn hemmelighetene fra GitHub: VARSLER_API_TOKEN (som API_TOKEN), BREVO_API_KEY
 #   og STRIPE_WEBHOOK_SECRET (når de finnes). Adressen til Worker-en står i oppsummeringen av kjøringen.
+# - Manuelt med «Stripe-webhook» huket av: lager webhook-endepunktet i Stripe (scripts/stripe_setup.py, nøkkel fra
+#   STRIPE_SANDBOX_KEY) og legger signeringshemmeligheten rett inn i Worker-en, uten at den vises noe sted.
+#   Endepunktet lages på nytt hver gang, så kjør det bare når webhooken mangler eller adressen er endret.
 # Kjører ved endringer i worker/ på main og manuelt fra Actions-fanen. Uten CLOUDFLARE_API_TOKEN gjør den ingenting.
 name: Worker
 
@@ -12,6 +15,11 @@ on:
       - "worker/**"
       - ".github/workflows/worker.yml"
   workflow_dispatch:
+    inputs:
+      stripe_webhook:
+        description: "Lag Stripe-webhooken og legg hemmeligheten inn i Worker-en"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -63,11 +71,13 @@ jobs:
           $WRANGLER d1 execute kronesporet-varsler --remote --file=schema.sql
 
       - name: Publiser
+        id: publiser
         if: steps.sjekk.outputs.klar == 'true'
         run: |
           $WRANGLER deploy | tee deploy.log
           url=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' deploy.log | head -1)
           echo "Worker-adresse: ${url:-ikke funnet i loggen}" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
 
       - name: Hemmeligheter
         if: steps.sjekk.outputs.klar == 'true'
@@ -81,6 +91,26 @@ jobs:
               printf '%s' "${!name}" | $WRANGLER secret put "$name"
               echo "$name lagt inn" >> "$GITHUB_STEP_SUMMARY"
             else
-              echo "$name mangler i GitHub og er ikke lagt inn" >> "$GITHUB_STEP_SUMMARY"
+              echo "$name er ikke i GitHub; Worker-en beholder det den har" >> "$GITHUB_STEP_SUMMARY"
             fi
           done
+
+      - uses: actions/setup-python@v6
+        if: steps.sjekk.outputs.klar == 'true' && inputs.stripe_webhook
+        with:
+          python-version: "3.12"
+
+      - name: Stripe-webhook
+        if: steps.sjekk.outputs.klar == 'true' && inputs.stripe_webhook
+        env:
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SANDBOX_KEY }}
+          WORKER_URL: ${{ steps.publiser.outputs.url }}
+        run: |
+          test -n "$STRIPE_SECRET_KEY" || { echo "STRIPE_SANDBOX_KEY mangler i GitHub" | tee -a "$GITHUB_STEP_SUMMARY"; exit 1; }
+          test -n "$WORKER_URL" || { echo "Fant ikke Worker-adressen" | tee -a "$GITHUB_STEP_SUMMARY"; exit 1; }
+          pip install -r ../requirements.txt
+          secret="$RUNNER_TEMP/whsec"
+          python ../scripts/stripe_setup.py --webhook-url "$WORKER_URL/stripe/webhook" --webhook-secret-file "$secret"
+          $WRANGLER secret put STRIPE_WEBHOOK_SECRET < "$secret"
+          rm -f "$secret"
+          echo "Stripe-webhook: $WORKER_URL/stripe/webhook, hemmeligheten er lagt inn i Worker-en" >> "$GITHUB_STEP_SUMMARY"
