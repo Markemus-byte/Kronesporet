@@ -197,3 +197,17 @@ a:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visibl
 .button-quiet { background: var(--surface); color: var(--accent); border: 1px solid var(--line); font: inherit; font-weight: 600; cursor: pointer; }
 .button-quiet:hover { border-color: var(--accent); }
 [hidden] { display: none !important; }
+
+/* Påmelding til varsler (varsler.html) */
+.signup { max-width: 36rem; }
+.signup label { display: block; font-weight: 600; margin: 14px 0 4px; }
+.signup label .muted { font-weight: 400; }
+.signup input:not([type="checkbox"]), .signup textarea { width: 100%; box-sizing: border-box; padding: 8px 10px; font: inherit; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--text); }
+.signup fieldset { border: 0; padding: 0; margin: 14px 0 0; }
+.signup legend { font-weight: 600; padding: 0; }
+.signup label.check { display: inline-flex; gap: 6px; align-items: center; font-weight: 400; margin: 6px 16px 0 0; }
+.signup button { border: 0; cursor: pointer; font: inherit; font-weight: 600; }
+.signup .hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+.signup-status { padding: 10px 12px; border-radius: 8px; background: var(--surface); border-left: 4px solid var(--accent); }
+textarea:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.follow { margin-top: .6rem; }

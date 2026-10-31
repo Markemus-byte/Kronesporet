@@ -160,4 +160,28 @@
   document.querySelectorAll("select[data-flag-filter]").forEach(function (el) {
     el.addEventListener("change", function () { applyFilters(el.getAttribute("data-flag-filter")); });
   });
+
+  // Påmeldingen til varsler (varsler.html): fyll inn ?kjoper=, ?leverandor= osv. og vis ?status= fra Workeren.
+  var signup = document.getElementById("varsel-skjema");
+  if (signup) {
+    var params = new URLSearchParams(window.location.search);
+    ["kjoper", "leverandor", "cpv", "sokeord"].forEach(function (k) {
+      if (params.get(k) && signup.elements[k]) signup.elements[k].value = params.get(k);
+    });
+    var messages = {
+      "sjekk-epost": "Takk! Sjekk e-posten din og trykk på lenken for å bekrefte påmeldingen.",
+      "vent": "Vi har nettopp sendt deg en e-post. Vent noen minutter før du prøver igjen.",
+      "ugyldig-epost": "E-postadressen ser ikke riktig ut.",
+      "mangler-utvalg": "Velg minst én kjøper, leverandør, kategori eller ett søkeord.",
+      "bekreftet": "Påmeldingen er bekreftet. Det første varselet kommer i løpet av et døgn.",
+      "bekreftet-betaling": "E-posten er bekreftet. Vi gir beskjed når betalingen er åpen og varslene starter.",
+      "feil": "Lenken virket ikke. Meld deg på igjen."
+    };
+    var box = signup.querySelector(".signup-status");
+    var status = params.get("status");
+    if (box && messages[status]) {
+      box.textContent = messages[status];
+      box.hidden = false;
+    }
+  }
 })();

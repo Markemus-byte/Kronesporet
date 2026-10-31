@@ -61,7 +61,7 @@ jobs:
 
       - name: Oppdater site-data/
         if: github.event_name != 'pull_request'
-        run: python scripts/update_site_data.py
+        run: python scripts/update_site_data.py --cpv-backfill 2000
 
       - name: Bygg nettsiden
         if: github.event_name != 'pull_request'

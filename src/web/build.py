@@ -46,6 +46,9 @@ CONTACT_EMAIL = "post@kronesporet.no"  # kontakt i bunnteksten; tom = henvendels
 PRIVACY_EMAIL = "personvern@kronesporet.no"  # personvernhenvendelser (vilkar.html)
 ALERTS_EMAIL = "varsler@kronesporet.no"  # interessepåmelding for varsler (varsler.html)
 PRESS_EMAIL = "presse@kronesporet.no"
+# Workeren for varsler (worker/, f.eks. https://kronesporet-varsler.<konto>.workers.dev). Tom = varsler.html har
+# interessepåmelding på e-post, og sidene har ingen «Få varsel»-lenker.
+ALERTS_API = ""
 # Betalte varsler (#39). Vilkårene for abonnementet vises på vilkar.html først når selger, pris og kundeportal er
 # fylt inn, altså når betalingen i Stripe er klar.
 # Selger: ENK-et til innehaveren (Enhetsregisteret, ikke mva-registrert per 29.10.2026).
@@ -806,6 +809,14 @@ def _contract_parts(ds: Dataset, a: Agency, linked: set[str]) -> tuple[str, str,
     return suppliers_html, contracts_html, joint_html
 
 
+def _follow(kind: str, orgnr: str, name: str) -> str:
+    """Lenke til varselpåmeldingen med kjøperen eller leverandøren fylt inn, når varslene er satt opp."""
+    if not ALERTS_API or not orgnr:
+        return ""
+    return (f'<p class="follow"><a href="../varsler.html?{kind}={quote(orgnr)}#meld-interesse">Få varsel om nye avtaler '
+            f'{"hos" if kind == "kjoper" else "med"} {escape(name)}</a></p>')
+
+
 def agency_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]] | None = None,
                 linked: set[str] = frozenset()) -> str:
     facts = [
@@ -882,7 +893,7 @@ def agency_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]] | None
 <p class="crumbs"><a href="../index.html">Alle virksomheter</a></p>
 <section class="hero">
   <h1>{escape(a.name)}</h1>
-  <div class="badges">{_flag_badges(a)}</div>
+  <div class="badges">{_flag_badges(a)}</div>{_follow("kjoper", a.orgnr, a.name)}
 </section>
 <div class="two-col">
   <div><dl class="facts">{facts_html}</dl>{parts_html}</div>
@@ -1025,7 +1036,7 @@ def health_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]], linke
     suppliers_html, contracts_html, joint_html = _contract_parts(ds, a, linked)
     body = f"""
 <p class="crumbs"><a href="../helseforetak.html">Alle helseforetak</a></p>
-<section class="hero"><h1>{escape(a.name)}</h1></section>
+<section class="hero"><h1>{escape(a.name)}</h1>{_follow("kjoper", a.orgnr, a.name)}</section>
 <div class="two-col">
   <div><dl class="facts">{facts_html}</dl></div>
   <div>{f'<ul class="notes"><li>{escape(note)}</li></ul>' if note else ""}{_health_caveat("../")}</div>
@@ -1175,7 +1186,7 @@ def company_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]], link
     suppliers_html, contracts_html, joint_html = _contract_parts(ds, a, linked)
     body = f"""
 <p class="crumbs"><a href="../{COMPANY_PAGES[a.owner_level or "stat"][0]}">{COMPANY_PAGES[a.owner_level or "stat"][2]}</a></p>
-<section class="hero"><h1>{escape(a.name)}</h1></section>
+<section class="hero"><h1>{escape(a.name)}</h1>{_follow("kjoper", a.orgnr, a.name)}</section>
 <div class="two-col">
   <div><dl class="facts">{facts_html}</dl></div>
   <div>{_company_caveat("../", a.owner_level or "stat")}</div>
@@ -1421,7 +1432,7 @@ def municipal_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]], li
     suppliers_html, contracts_html, joint_html = _contract_parts(ds, a, linked)
     body = f"""
 <p class="crumbs"><a href="../kommuner.html">Alle kommuner og fylker</a></p>
-<section class="hero"><h1>{escape(a.name)}</h1><div class="badges">{_coverage_badge(a)}</div></section>
+<section class="hero"><h1>{escape(a.name)}</h1><div class="badges">{_coverage_badge(a)}</div>{_follow("kjoper", a.orgnr, a.name)}</section>
 <div class="two-col">
   <div><dl class="facts">{facts_html}</dl></div>
   <div>{notes_html}{_municipal_caveat("../")}</div>
@@ -1617,7 +1628,7 @@ def supplier_page(datasets: list[Dataset], s: SupplierSummary, front: Dataset) -
     facts_html = "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in facts)
     body = f"""
 <p class="crumbs"><a href="../leverandorer.html">Alle leverandører</a></p>
-<section class="hero"><h1>{escape(s.name)}</h1></section>
+<section class="hero"><h1>{escape(s.name)}</h1>{_follow("leverandor", s.orgnr, s.name)}</section>
 <div class="two-col">
   <dl class="facts">{facts_html}</dl>
   <div class="table-scroll"><table class="history"><thead><tr><th scope="col">År</th>
@@ -1931,17 +1942,52 @@ underlagt NLOD 2.0; oppgi kildene ved gjenbruk.</p>
 EXPIRING_SHOWN = 20
 
 
+def _signup_form() -> str:
+    """Påmeldingsskjemaet. Sendes som vanlig skjema til Workeren (worker/src/index.js), som sender en e-post for å
+    bekrefte og så videre til betaling. app.js fyller inn ?kjoper= og ?leverandor= og viser ?status= etterpå."""
+    horizons = "".join(f'<label class="check"><input type="checkbox" name="horisont" value="{h}" checked> {h} måneder'
+                       "</label>" for h in (3, 6, 12))
+    return f"""<h2 id="meld-interesse">Meld deg på</h2>
+<form class="signup" id="varsel-skjema" method="post" action="{escape(ALERTS_API.rstrip("/"))}/pamelding">
+  <p class="signup-status" role="status" hidden></p>
+  <label for="v-epost">E-post</label>
+  <input id="v-epost" name="epost" type="email" autocomplete="email" required>
+  <label for="v-kjoper">Kjøpere <span class="muted">(organisasjonsnummer, ett per linje)</span></label>
+  <textarea id="v-kjoper" name="kjoper" rows="2" placeholder="915429785"></textarea>
+  <label for="v-leverandor">Leverandører <span class="muted">(organisasjonsnummer eller navn)</span></label>
+  <textarea id="v-leverandor" name="leverandor" rows="2"></textarea>
+  <label for="v-cpv">Kategorier <span class="muted">(CPV-kode eller begynnelsen av den, f.eks. 72 for IT-tjenester
+  eller 45 for bygg og anlegg)</span></label>
+  <input id="v-cpv" name="cpv" inputmode="numeric">
+  <label for="v-sokeord">Søkeord i tittelen <span class="muted">(skill med komma)</span></label>
+  <input id="v-sokeord" name="sokeord">
+  <fieldset><legend>Varsle om avtaler som løper ut innen</legend>{horizons}</fieldset>
+  <label class="check"><input type="checkbox" name="csv" value="1" checked> Legg ved alle treffene med historikk fra
+  2017 som CSV</label>
+  <div class="hp" aria-hidden="true"><label>Nettside <input name="nettside" tabindex="-1" autocomplete="off"></label></div>
+  <p><button class="button" type="submit">Meld meg på</button></p>
+  <p class="muted small">Velger du både kjøpere eller leverandører og kategorier eller søkeord, får du avtalene som
+  treffer begge. Kjøpere tar med underenhetene sine. Du får en e-post for å bekrefte adressen, og hver e-post har en
+  lenke for å avslutte. Se <a href="vilkar.html#personvern">personvern</a>.</p>
+</form>"""
+
+
 def alerts_page(ref_date: str, expiring: list[Expiring]) -> str:
-    """Planlagte varsler (første betalte tilbud), avtaler som løper ut, og interessepåmelding."""
-    if ALERTS_EMAIL:
+    """Varsler (første betalte tilbud): påmeldingsskjemaet når Workeren er satt opp (ALERTS_API), ellers
+    interessepåmelding på e-post, og avtalene som løper ut."""
+    if ALERTS_API:
+        signup = _signup_form()
+    elif ALERTS_EMAIL:
         mail = (f"mailto:{ALERTS_EMAIL}?subject=" + quote("Interesse for varsler fra Kronesporet")
                 + "&body=" + quote("Virksomhet:\nHva vil dere følge (kjøpere, leverandører eller kategorier):\n"))
-        signup = (f'<p><a class="button" href="{escape(mail)}">Meld interesse på e-post</a></p>'
+        signup = ('<h2 id="meld-interesse">Meld interesse</h2>\n<p>Påmeldingen åpner snart. Fortell oss hvem du vil '
+                  'følge, så sier vi fra når den er klar.</p>\n'
+                  f'<p><a class="button" href="{escape(mail)}">Meld interesse på e-post</a></p>'
                   '<p class="muted small">Det er gratis og forplikter ikke. Vi bruker adressen bare til å si fra når '
                   'varslene er klare, og sletter den hvis du ber om det. Se <a href="vilkar.html#personvern">'
                   "personvern</a>.</p>")
     else:
-        signup = '<p class="muted">Påmeldingen åpner snart.</p>'
+        signup = '<h2 id="meld-interesse">Meld interesse</h2>\n<p class="muted">Påmeldingen åpner snart.</p>'
     ref = f"{ref_date[8:10]}.{ref_date[5:7]}.{ref_date[:4]}" if ref_date else ""
     rows = "".join(
         f'<tr><td>{_contract_link(e)}' + ('<span class="tag">rammeavtale</span>' if e.is_framework else "")
@@ -1968,10 +2014,10 @@ def alerts_page(ref_date: str, expiring: list[Expiring]) -> str:
   <tbody>{rows}</tbody></table></div>
 </section>""" if expiring else ""
     body = f"""<section class="hero">
-  <p class="eyebrow eyebrow-dark">Planlagt</p>
+  <p class="eyebrow eyebrow-dark">{"Nytt" if ALERTS_API else "Planlagt"}</p>
   <h1>Varsler om statens avtaler</h1>
-  <p class="lede">Kronesporet planlegger e-postvarsler for leverandører og rådgivere som følger statens innkjøp.
-  Nettsiden og tallene her forblir gratis. Varslene sparer deg for å lete selv.</p>
+  <p class="lede">{"Kronesporet sender" if ALERTS_API else "Kronesporet planlegger"} e-postvarsler for leverandører og
+  rådgivere som følger statens innkjøp. Nettsiden og tallene her forblir gratis. Varslene sparer deg for å lete selv.</p>
 </section>
 <div class="prose">
 <h2>Dette får du</h2>
@@ -1983,8 +2029,6 @@ konkurranse.</li>
 <li><strong>Fullt uttrekk</strong> av kontraktene med leverandører og historikk fra 2017 som CSV.</li>
 </ul>
 <p>Redaksjoner, forskere og offentlige virksomheter får varslene gratis.</p>
-<h2 id="meld-interesse">Meld interesse</h2>
-<p>Vi bygger varslene når nok har meldt interesse. Fortell oss hvem du vil følge.</p>
 {signup}
 </div>
 {table}

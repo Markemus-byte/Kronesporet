@@ -1,0 +1,14 @@
+[
+  {"email": "kjoper@example.no", "token": "eksempel1", "status": "active", "plan": "standard",
+   "horisonter": "3,6,12", "csv": 1, "sist_sendt": null,
+   "utvalg": [{"type": "kjoper", "verdi": "915429785"}]},
+  {"email": "it@example.no", "token": "eksempel2", "status": "gratis", "plan": "standard",
+   "horisonter": "6", "csv": 0, "sist_sendt": "2026-09-01",
+   "utvalg": [{"type": "cpv", "verdi": "72000000"}, {"type": "sokeord", "verdi": "skytjenester"}]},
+  {"email": "leverandor@example.no", "token": "eksempel3", "status": "active", "plan": "standard",
+   "horisonter": "3,12", "csv": 1, "sist_sendt": "2026-09-01",
+   "utvalg": [{"type": "leverandor", "verdi": "Atea"}, {"type": "kjoper", "verdi": "971032081"}]},
+  {"email": "venter@example.no", "token": "eksempel4", "status": "venter", "plan": "standard",
+   "horisonter": "3,6,12", "csv": 1, "sist_sendt": null,
+   "utvalg": [{"type": "cpv", "verdi": "45"}]}
+]

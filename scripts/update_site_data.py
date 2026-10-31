@@ -47,7 +47,7 @@ from src.analysis.annualize import annualize_contracts  # noqa: E402
 from src.analysis.coverage import flag_coverage_outliers  # noqa: E402
 from src.analysis.join_and_flag import THRESHOLD, flag_deviations  # noqa: E402
 from src.collectors.doffin import (  # noqa: E402
-    DoffinClient, DoffinError, buyer_list, init_db, iter_search_hits, month_ranges, normalize,
+    DoffinClient, DoffinError, buyer_list, cpv_codes, init_db, iter_search_hits, month_ranges, normalize,
     save_buyers, save_contracts, save_winners, winners,
 )
 from src.collectors import foretak, kostra, selskaper  # noqa: E402
@@ -237,6 +237,26 @@ def fetch_new_contracts(conn: sqlite3.Connection, years: list[int], client: Doff
     return saved
 
 
+def fill_cpv(conn: sqlite3.Connection, client: DoffinClient, limit: int) -> int:
+    """Fyll inn CPV-koder (brukes av varslene) for kontrakter lagret før koden fantes, nyeste først.
+    Detaljvisningen tas fra hurtigbufferen når den finnes. Returnerer antall kontrakter fylt inn."""
+    ids = [r[0] for r in conn.execute(
+        "SELECT id FROM doffin_contracts WHERE cpv IS NULL ORDER BY publication_date DESC, id DESC LIMIT ?", (limit,))]
+    n = 0
+    for i, notice_id in enumerate(ids, 1):
+        try:
+            detail = client.notice(notice_id)
+        except DoffinError as e:
+            log.warning("CPV: hopper over %s: %s", notice_id, e)
+            continue
+        n += conn.execute("UPDATE doffin_contracts SET cpv = ? WHERE id = ?", (cpv_codes(detail), notice_id)).rowcount
+        if i % 200 == 0:
+            conn.commit()
+            log.info("CPV: %d/%d", i, len(ids))
+    conn.commit()
+    return n
+
+
 def apply_corrections(conn: sqlite3.Connection, path: Path = CORRECTIONS) -> int:
     """Rett kjente feil i Doffin-kunngjøringene (kontrakt, felt, verdi, begrunnelse). Returnerer antall rettet.
 
@@ -303,6 +323,8 @@ def main() -> int:
                          "kjøperne (doffin_buyers) for kunngjøringer som allerede er lagret")
     ap.add_argument("--max-new", type=int, help="Hent høyst så mange nye kunngjøringer (prøvekjøring)")
     ap.add_argument("--cache-dir", type=Path, default=ROOT / "data" / "doffin_cache")
+    ap.add_argument("--cpv-backfill", type=int, default=0, metavar="N",
+                    help="Fyll inn CPV-koder for høyst N eldre kontrakter som mangler dem (henter detaljvisningen)")
     ap.add_argument("--dry-run", action="store_true", help="Regn ut alt, men ikke skriv site-data/")
     ap.add_argument("--recheck-buyers", action="store_true",
                     help="Slå opp igjen kjøperne i orgnr_checked (etter nye regler for hvem som hører til kommunene); "
@@ -348,6 +370,10 @@ def main() -> int:
             conn.execute("DELETE FROM orgnr_parent WHERE kind = 'forgjenger'")  # kobles på nytt med dagens regler
         n_new = fetch_new_contracts(conn, years, DoffinClient(cache_dir=a.cache_dir), a.max_new)
         report.append(f"Doffin: {n_new} nye kontrakter ({', '.join(map(str, years))}).")
+        if a.cpv_backfill:
+            n_cpv = fill_cpv(conn, DoffinClient(cache_dir=a.cache_dir), a.cpv_backfill)
+            left = conn.execute("SELECT COUNT(*) FROM doffin_contracts WHERE cpv IS NULL").fetchone()[0]
+            report.append(f"CPV-koder fylt inn for {n_cpv} eldre kontrakter, {left} mangler fortsatt.")
         report += load_companies(conn)
 
         n_fixed = apply_corrections(conn)

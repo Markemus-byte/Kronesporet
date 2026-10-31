@@ -1,0 +1,87 @@
+# E-postvarsler om nye tildelinger og avtaler som løper ut (scripts/send_alerts.py, worker/).
+# - Hver dag og rett etter den månedlige oppdateringen: henter abonnentene fra Workeren og sender varsel til dem
+#   som har noe nytt. Nye abonnenter får velkomstvarselet dagen etter at de har bekreftet. Før Workeren er
+#   satt opp (ALERTS_API i src/web/build.py) gjør jobben ingenting.
+# - Pull requests som endrer varslene: tester for motoren og Workeren, og eksempelvarsler fra
+#   worker/eksempel-abonnenter.json som kan lastes ned fra kjøringen (ingenting sendes).
+name: Varsler
+
+on:
+  schedule:
+    - cron: "0 7 * * *"
+  workflow_run:
+    workflows: [Oppdatering]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "src/alerts/**"
+      - "scripts/send_alerts.py"
+      - "worker/**"
+      - "tests/test_alerts.py"
+      - ".github/workflows/varsler.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: varsler-${{ github.event_name == 'pull_request' && github.ref || 'send' }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Installer avhengigheter
+        run: pip install -r requirements.txt
+
+      - name: Test varselmotoren
+        run: python -m unittest tests.test_alerts -v
+
+      - name: Test Workeren
+        run: node --test worker/test/*.test.mjs
+
+      - name: Eksempelvarsler
+        run: python scripts/send_alerts.py --abonnenter worker/eksempel-abonnenter.json --preview varsel-eksempler
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: varsel-eksempler
+          path: varsel-eksempler/
+
+  send:
+    if: >-
+      github.event_name != 'pull_request' &&
+      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Installer avhengigheter
+        run: pip install -r requirements.txt
+
+      - name: Send varsler
+        env:
+          VARSLER_API: ${{ vars.VARSLER_API }}
+          VARSLER_API_TOKEN: ${{ secrets.VARSLER_API_TOKEN }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          STRIPE_PORTAL_URL: ${{ vars.STRIPE_PORTAL_URL }}
+        run: python scripts/send_alerts.py
