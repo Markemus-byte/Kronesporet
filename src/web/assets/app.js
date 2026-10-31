@@ -161,6 +161,10 @@
     el.addEventListener("change", function () { applyFilters(el.getAttribute("data-flag-filter")); });
   });
 
+  // Stripe sender kunden tilbake til varsler.html#takk etter betalingen.
+  var thanks = document.getElementById("takk");
+  if (thanks && window.location.hash === "#takk") thanks.hidden = false;
+
   // Påmeldingen til varsler (varsler.html): fyll inn ?kjoper=, ?leverandor= osv. og vis ?status= fra Workeren.
   var signup = document.getElementById("varsel-skjema");
   if (signup) {

@@ -57,12 +57,15 @@ Adressen til Worker-en står i oppsummeringen av kjøringen. Når den legges inn
 sende. Før det gjør den ingenting.
 
 **4. Stripe (fra betalingsoppsettet i #39)**
-1. Lag en Payment Link for abonnementet. Sett `STRIPE_PAYMENT_LINK` i `wrangler.toml` til lenken, og
-   `STRIPE_PORTAL_URL` til kundeportalen.
-2. Under *Developers → Webhooks*: legg til `https://<worker-adressen>/stripe/webhook` med hendelsene
-   `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`,
-   `customer.subscription.deleted` og `invoice.payment_failed`.
-3. Legg signeringsnøkkelen (`whsec_...`) inn som GitHub-secret `STRIPE_WEBHOOK_SECRET` og kjør *Worker* på nytt.
+1. Arbeidsflyten *Stripe-oppsett* (`scripts/stripe_setup.py`, nøkkel i GitHub-secret `STRIPE_SANDBOX_KEY`) lager
+   produktet, prisen, betalingslenken og kundeportalen. Lenkene står i oppsummeringen av kjøringen; de settes som
+   `STRIPE_PAYMENT_LINK` og `STRIPE_PORTAL_URL` i `wrangler.toml`. Betalingslenken sender kunden tilbake til
+   `varsler.html#takk`.
+2. Kjør *Worker* manuelt med *Stripe-webhook* huket av. Den lager webhook-endepunktet
+   `https://<worker-adressen>/stripe/webhook` med de fem hendelsene Worker-en bruker
+   (`checkout.session.completed`, `customer.subscription.created/updated/deleted`, `invoice.payment_failed`) og
+   legger signeringshemmeligheten rett inn i Worker-en. Den vises ingen steder. Kjør det bare når webhooken
+   mangler, for endepunktet lages på nytt med ny hemmelighet hver gang.
 
 Uten Stripe virker alt unntatt betalingen: bekreftede abonnenter får beskjed om at betalingen åpner snart, og
 gratisabonnenter kan settes opp for hånd.
