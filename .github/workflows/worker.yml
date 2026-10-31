@@ -1,11 +1,16 @@
-# Setter opp og oppdaterer Cloudflare Worker-en for varslene (worker/), så ingenting må installeres lokalt.
+# Setter opp og oppdaterer varslene (worker/) helt fra GitHub, så ingenting må installeres eller klikkes lokalt.
+# Det eneste som trengs, er nøklene i GitHub-secrets (worker/README.md). Hver kjøring gjør det som mangler:
+# - scripts/varsler_oppsett.py: Cloudflare-konto og workers.dev-underdomene, Brevo-domenet og avsenderen
+#   varsler@kronesporet.no, og DNS-postene for Brevo i cPanel (når CPANEL_USER og CPANEL_TOKEN finnes).
 # - Lager D1-databasen kronesporet-varsler første gang og legger inn tabellene (schema.sql tåler å kjøres på nytt).
-# - Publiserer Worker-en og legger inn hemmelighetene fra GitHub: VARSLER_API_TOKEN (som API_TOKEN), BREVO_API_KEY
-#   og STRIPE_WEBHOOK_SECRET (når de finnes). Adressen til Worker-en står i oppsummeringen av kjøringen.
-# - Manuelt med «Stripe-webhook» huket av: lager webhook-endepunktet i Stripe (scripts/stripe_setup.py, nøkkel fra
-#   STRIPE_SANDBOX_KEY) og legger signeringshemmeligheten rett inn i Worker-en, uten at den vises noe sted.
-#   Endepunktet lages på nytt hver gang, så kjør det bare når webhooken mangler eller adressen er endret.
-# Kjører ved endringer i worker/ på main og manuelt fra Actions-fanen. Uten CLOUDFLARE_API_TOKEN gjør den ingenting.
+# - Publiserer Worker-en og legger inn hemmelighetene API_TOKEN, BREVO_API_KEY og STRIPE_WEBHOOK_SECRET.
+# - Stripe-webhook: lages automatisk når Worker-en ikke har STRIPE_WEBHOOK_SECRET og STRIPE_SANDBOX_KEY finnes.
+#   Signeringshemmeligheten går rett inn i Worker-en og vises ingen steder. «Stripe-webhook» ved manuell kjøring
+#   lager den på nytt med ny hemmelighet.
+# - Når Brevo har godkjent domenet og Worker-en svarer: setter ALERTS_API i src/web/build.py på main og bygger
+#   nettsiden, så skjemaet og «Få varsel»-lenkene kommer ut, og arbeidsflyten Varsler begynner å sende.
+# Kjører ved endringer i worker/ på main, hver morgen (så ventetid på DNS hos Brevo tas igjen av seg selv) og
+# manuelt. Nettsiden slås bare på fra main. Uten CLOUDFLARE_API_TOKEN gjør den ingenting.
 name: Worker
 
 on:
@@ -13,16 +18,20 @@ on:
     branches: [main]
     paths:
       - "worker/**"
+      - "scripts/varsler_oppsett.py"
       - ".github/workflows/worker.yml"
+  schedule:
+    - cron: "30 5 * * *"
   workflow_dispatch:
     inputs:
       stripe_webhook:
-        description: "Lag Stripe-webhooken og legg hemmeligheten inn i Worker-en"
+        description: "Lag Stripe-webhooken på nytt og legg den nye hemmeligheten inn i Worker-en"
         type: boolean
         default: false
 
 permissions:
-  contents: read
+  contents: write
+  actions: write
 
 concurrency:
   group: worker
@@ -30,7 +39,6 @@ concurrency:
 
 env:
   CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
   WRANGLER: npx --yes wrangler@4
 
 jobs:
@@ -42,23 +50,32 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Sjekk oppsettet
-        id: sjekk
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Oppsett (Cloudflare, Brevo, DNS)
+        id: oppsett
+        working-directory: .
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          VARSLER_API_TOKEN: ${{ secrets.VARSLER_API_TOKEN }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          CPANEL_USER: ${{ secrets.CPANEL_USER }}
+          CPANEL_TOKEN: ${{ secrets.CPANEL_TOKEN }}
         run: |
-          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
-            echo "CLOUDFLARE_API_TOKEN eller CLOUDFLARE_ACCOUNT_ID mangler; se worker/README.md" | tee -a "$GITHUB_STEP_SUMMARY"
-            echo "klar=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "klar=true" >> "$GITHUB_OUTPUT"
-          fi
+          pip install -q -r requirements.txt
+          python scripts/varsler_oppsett.py
 
       - uses: actions/setup-node@v4
-        if: steps.sjekk.outputs.klar == 'true'
+        if: steps.oppsett.outputs.klar == 'true'
         with:
           node-version: "22"
 
       - name: Database
-        if: steps.sjekk.outputs.klar == 'true'
+        if: steps.oppsett.outputs.klar == 'true'
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ steps.oppsett.outputs.account_id }}
         run: |
           find_id() { $WRANGLER d1 list --json | jq -r '.[] | select(.name == "kronesporet-varsler") | .uuid'; }
           id=$(find_id)
@@ -72,45 +89,78 @@ jobs:
 
       - name: Publiser
         id: publiser
-        if: steps.sjekk.outputs.klar == 'true'
+        if: steps.oppsett.outputs.klar == 'true'
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ steps.oppsett.outputs.account_id }}
         run: |
           $WRANGLER deploy | tee deploy.log
           url=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' deploy.log | head -1)
-          echo "Worker-adresse: ${url:-ikke funnet i loggen}" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "- Worker-adresse: ${url:-ikke funnet i loggen}" | tee -a "$GITHUB_STEP_SUMMARY"
           echo "url=$url" >> "$GITHUB_OUTPUT"
 
       - name: Hemmeligheter
-        if: steps.sjekk.outputs.klar == 'true'
+        id: hemmeligheter
+        if: steps.oppsett.outputs.klar == 'true'
         env:
-          API_TOKEN: ${{ secrets.VARSLER_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ steps.oppsett.outputs.account_id }}
+          API_TOKEN: ${{ steps.oppsett.outputs.api_token }}
           BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
           STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
         run: |
           for name in API_TOKEN BREVO_API_KEY STRIPE_WEBHOOK_SECRET; do
             if [ -n "${!name}" ]; then
               printf '%s' "${!name}" | $WRANGLER secret put "$name"
-              echo "$name lagt inn" >> "$GITHUB_STEP_SUMMARY"
-            else
-              echo "$name er ikke i GitHub; Worker-en beholder det den har" >> "$GITHUB_STEP_SUMMARY"
+              echo "- $name lagt inn i Worker-en" >> "$GITHUB_STEP_SUMMARY"
             fi
           done
-
-      - uses: actions/setup-python@v6
-        if: steps.sjekk.outputs.klar == 'true' && inputs.stripe_webhook
-        with:
-          python-version: "3.12"
+          if $WRANGLER secret list | grep -q 'STRIPE_WEBHOOK_SECRET'; then
+            echo "webhook=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "webhook=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Stripe-webhook
-        if: steps.sjekk.outputs.klar == 'true' && inputs.stripe_webhook
+        if: >-
+          steps.oppsett.outputs.klar == 'true' && steps.publiser.outputs.url != '' &&
+          (inputs.stripe_webhook || steps.hemmeligheter.outputs.webhook == 'false')
         env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ steps.oppsett.outputs.account_id }}
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SANDBOX_KEY }}
           WORKER_URL: ${{ steps.publiser.outputs.url }}
         run: |
-          test -n "$STRIPE_SECRET_KEY" || { echo "STRIPE_SANDBOX_KEY mangler i GitHub" | tee -a "$GITHUB_STEP_SUMMARY"; exit 1; }
-          test -n "$WORKER_URL" || { echo "Fant ikke Worker-adressen" | tee -a "$GITHUB_STEP_SUMMARY"; exit 1; }
-          pip install -r ../requirements.txt
+          if [ -z "$STRIPE_SECRET_KEY" ]; then
+            echo "- Stripe-webhook: STRIPE_SANDBOX_KEY mangler i GitHub, hoppet over" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
           secret="$RUNNER_TEMP/whsec"
           python ../scripts/stripe_setup.py --webhook-url "$WORKER_URL/stripe/webhook" --webhook-secret-file "$secret"
           $WRANGLER secret put STRIPE_WEBHOOK_SECRET < "$secret"
           rm -f "$secret"
-          echo "Stripe-webhook: $WORKER_URL/stripe/webhook, hemmeligheten er lagt inn i Worker-en" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Stripe-webhook: $WORKER_URL/stripe/webhook, hemmeligheten er lagt inn i Worker-en" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Slå på varslene på nettsiden
+        if: >-
+          github.ref == 'refs/heads/main' &&
+          steps.oppsett.outputs.brevo_ok == 'true' && steps.publiser.outputs.url != ''
+        working-directory: .
+        env:
+          WORKER_URL: ${{ steps.publiser.outputs.url }}
+          API_TOKEN: ${{ steps.oppsett.outputs.api_token }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git checkout -- worker/wrangler.toml
+          if grep -q "^ALERTS_API = \"$WORKER_URL\"$" src/web/build.py; then
+            echo "- Nettsiden har allerede skjemaet for varsler" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          # Worker-en, databasen og API_TOKEN svarer (et nytt workers.dev-underdomene kan bruke noen minutter)
+          curl -fsS --retry 10 --retry-delay 30 --retry-all-errors -o /dev/null \
+            -H "Authorization: Bearer $API_TOKEN" "$WORKER_URL/api/abonnenter"
+          sed -i "s|^ALERTS_API = .*|ALERTS_API = \"$WORKER_URL\"|" src/web/build.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/web/build.py
+          git commit -m "Varsler: slå på påmeldingen ($WORKER_URL)"
+          git push origin HEAD:main
+          gh workflow run nettside.yml --ref main
+          echo "- Varslene er slått på: ALERTS_API = $WORKER_URL, nettsiden bygges på nytt" >> "$GITHUB_STEP_SUMMARY"
