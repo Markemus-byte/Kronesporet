@@ -8,7 +8,8 @@ dagen etter at de har bekreftet, og de andre får varsel når den månedlige opp
 
 Miljøvariabler:
   VARSLER_API         adressen til Workeren (standard: ALERTS_API i src/web/build.py)
-  VARSLER_API_TOKEN   samme verdi som API_TOKEN i Workeren
+  VARSLER_API_TOKEN   samme verdi som API_TOKEN i Workeren (uten den: avledet av CLOUDFLARE_API_TOKEN, som i
+                      scripts/varsler_oppsett.py)
   BREVO_API_KEY eller SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_PASSWORD   utsending (src/alerts/mail.py)
   STRIPE_PORTAL_URL   valgfri lenke til Stripe-kundeportalen i bunnen av e-posten
 
@@ -34,6 +35,7 @@ sys.path.insert(0, str(ROOT))
 from scripts.build_site import sql_to_db  # noqa: E402
 from src.alerts.engine import build_alert, children, load_contracts, load_subscribers, ref_date  # noqa: E402
 from src.alerts.mail import PreviewSender, build_message, sender_from_env  # noqa: E402
+from scripts.varsler_oppsett import derived_api_token  # noqa: E402
 from src.web.build import ALERTS_API  # noqa: E402
 
 log = logging.getLogger("varsler")
@@ -60,6 +62,8 @@ def main() -> int:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
     api, token = os.environ.get("VARSLER_API") or ALERTS_API, os.environ.get("VARSLER_API_TOKEN", "")
+    if not token and os.environ.get("CLOUDFLARE_API_TOKEN"):
+        token = derived_api_token(os.environ["CLOUDFLARE_API_TOKEN"])
     if not a.abonnenter and not api:
         print("- Varsler: Workeren er ikke satt opp (ALERTS_API), ingen varsler sendt.")
         return 0
