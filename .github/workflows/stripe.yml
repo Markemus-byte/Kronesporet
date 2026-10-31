@@ -3,6 +3,7 @@
 # - sandkasse: bruker secret STRIPE_SANDBOX_KEY (sk_test_...), ingen ekte betalinger.
 # - live: bruker secret STRIPE_LIVE_KEY (sk_live_...), når betalingen skal åpnes.
 # Betalingslenken og kundeportalen står i oppsummeringen av kjøringen. De er ikke hemmelige.
+# Fra andre grener enn main, eller med «status» huket av, vises bare abonnementene, og ingenting endres.
 name: Stripe-oppsett
 
 on:
