@@ -30,6 +30,7 @@ PRODUCT_DESCRIPTION = ("E-postvarsler om nye tildelinger og avtaler som løper u
                        "eller kategoriene du følger, med uttrekk som CSV.")
 PRICE_LOOKUP_KEY = "kronesporet_varsler_standard"
 PRICE_NOK = 490  # i måneden eks. mva, se PAID_ALERTS_PRICE i src/web/build.py
+TRIAL_DAYS = 14  # gratis prøveperiode på nye betalingslenker (TRIAL_DAYS i src/web/build.py)
 WEBHOOK_EVENTS = [
     "checkout.session.completed",
     "customer.subscription.created",
@@ -118,7 +119,8 @@ def ensure_price(stripe: Stripe) -> dict:
 
 def ensure_payment_link(stripe: Stripe, price_id: str) -> dict:
     links = [link for link in stripe.list_all("/payment_links", {"active": True}) if _tagged(link)]
-    current = [link for link in links if link["metadata"].get("price") == price_id]
+    current = [link for link in links if link["metadata"].get("price") == price_id
+               and link["metadata"].get("trial_days") == str(TRIAL_DAYS)]  # ny prøveperiode gir ny lenke
     for old in links:
         if old not in current[:1]:
             stripe.call("POST", f"/payment_links/{old['id']}", {"active": False})
@@ -136,10 +138,11 @@ def ensure_payment_link(stripe: Stripe, price_id: str) -> dict:
              "numeric": {"minimum_length": 9, "maximum_length": 9}},
         ],
         "custom_text": {"submit": {"message": (
-            "Abonnementet fornyes hver måned til du sier det opp, og selges bare til næringsdrivende. "
+            f"De første {TRIAL_DAYS} dagene er gratis. Abonnementet fornyes hver måned til du sier det opp, "
+            "og selges bare til næringsdrivende. "
             f"Vilkårene står på {SITE}/vilkar.html#abonnement")}},
-        "subscription_data": {"metadata": {**TAG, "plan": "standard"}},
-        "metadata": {**TAG, "price": price_id},
+        "subscription_data": {"trial_period_days": TRIAL_DAYS, "metadata": {**TAG, "plan": "standard"}},
+        "metadata": {**TAG, "price": price_id, "trial_days": str(TRIAL_DAYS)},
     })
     print(f"Betalingslenke laget: {link['id']}")
     return link
