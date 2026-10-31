@@ -7,10 +7,11 @@ compatibility_date = "2025-09-01"
 [vars]
 SITE_URL = "https://kronesporet.no"
 AVSENDER = "varsler@kronesporet.no"
-# Stripe Payment Link for abonnementet (fra betalingsoppsettet i #39). Tom = bekreftede abonnenter venter på betaling.
-STRIPE_PAYMENT_LINK = ""
+# Stripe Payment Link for abonnementet (scripts/stripe_setup.py). Tom = bekreftede abonnenter venter på betaling.
+# Testlenker fra sandkassen; byttes med live-lenkene når Stripe-oppsett kjøres i live-modus.
+STRIPE_PAYMENT_LINK = "https://buy.stripe.com/test_bJe3cnalvcydaqMcB37Re00"
 # Stripe-kundeportalen, lenket fra avmeldingssiden.
-STRIPE_PORTAL_URL = ""
+STRIPE_PORTAL_URL = "https://billing.stripe.com/p/login/test_bJe3cnalvcydaqMcB37Re00"
 
 [[d1_databases]]
 binding = "DB"
