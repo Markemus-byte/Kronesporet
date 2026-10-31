@@ -30,6 +30,7 @@ PRODUCT_DESCRIPTION = ("E-postvarsler om nye tildelinger og avtaler som løper u
                        "eller kategoriene du følger, med uttrekk som CSV.")
 PRICE_LOOKUP_KEY = "kronesporet_varsler_standard"
 PRICE_NOK = 490  # i måneden eks. mva, se PAID_ALERTS_PRICE i src/web/build.py
+TRIAL_DAYS = 14  # gratis prøveperiode på nye betalingslenker (TRIAL_DAYS i src/web/build.py)
 WEBHOOK_EVENTS = [
     "checkout.session.completed",
     "customer.subscription.created",
@@ -118,7 +119,8 @@ def ensure_price(stripe: Stripe) -> dict:
 
 def ensure_payment_link(stripe: Stripe, price_id: str) -> dict:
     links = [link for link in stripe.list_all("/payment_links", {"active": True}) if _tagged(link)]
-    current = [link for link in links if link["metadata"].get("price") == price_id]
+    current = [link for link in links if link["metadata"].get("price") == price_id
+               and link["metadata"].get("trial_days") == str(TRIAL_DAYS)]  # ny prøveperiode gir ny lenke
     for old in links:
         if old not in current[:1]:
             stripe.call("POST", f"/payment_links/{old['id']}", {"active": False})
@@ -136,10 +138,11 @@ def ensure_payment_link(stripe: Stripe, price_id: str) -> dict:
              "numeric": {"minimum_length": 9, "maximum_length": 9}},
         ],
         "custom_text": {"submit": {"message": (
-            "Abonnementet fornyes hver måned til du sier det opp, og selges bare til næringsdrivende. "
+            f"De første {TRIAL_DAYS} dagene er gratis. Abonnementet fornyes hver måned til du sier det opp, "
+            "og selges bare til næringsdrivende. "
             f"Vilkårene står på {SITE}/vilkar.html#abonnement")}},
-        "subscription_data": {"metadata": {**TAG, "plan": "standard"}},
-        "metadata": {**TAG, "price": price_id},
+        "subscription_data": {"trial_period_days": TRIAL_DAYS, "metadata": {**TAG, "plan": "standard"}},
+        "metadata": {**TAG, "price": price_id, "trial_days": str(TRIAL_DAYS)},
     })
     print(f"Betalingslenke laget: {link['id']}")
     return link
@@ -198,11 +201,32 @@ def ensure_webhook(stripe: Stripe, url: str, secret_file: str | None) -> dict:
     return hook
 
 
+def show_status(stripe: Stripe) -> None:
+    """Abonnementene på prisen, uten e-post eller navn (loggene er offentlige)."""
+    subs = stripe.list_all("/subscriptions", {"status": "all", "price": None})
+    ours = [s for s in subs if any(i["price"].get("lookup_key") == PRICE_LOOKUP_KEY or _tagged(i["price"])
+                                   for i in s["items"]["data"])]
+    print(f"Abonnementer på Kronesporet varsler: {len(ours)}")
+    for sub in ours:
+        amount = sum(i["price"]["unit_amount"] * i.get("quantity", 1) for i in sub["items"]["data"]) / 100
+        print(f"  {sub['id']}: {sub['status']}, {amount:.0f} kr, startet {_date(sub['created'])}"
+              + (", sagt opp fra periodens slutt" if sub.get("cancel_at_period_end") else ""))
+    paid = stripe.call("GET", "/checkout/sessions", {"limit": 20, "status": "complete"})["data"]
+    ref = sum(1 for c in paid if c.get("client_reference_id"))
+    print(f"Fullførte betalinger (siste 20): {len(paid)}, {ref} med kobling til påmeldingen (client_reference_id)")
+
+
+def _date(ts: int) -> str:
+    import datetime
+    return datetime.datetime.fromtimestamp(ts, datetime.timezone.utc).strftime("%d.%m.%Y %H:%M UTC")
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--live", action="store_true", help="tillat live-nøkkel (ekte betalinger)")
     ap.add_argument("--webhook-url", help="Workerens adresse til /stripe/webhook")
     ap.add_argument("--webhook-secret-file", help="fil som får signeringshemmeligheten (whsec_...)")
+    ap.add_argument("--status", action="store_true", help="bare vis abonnementene, endre ingenting")
     args = ap.parse_args(argv)
 
     key = os.environ.get("STRIPE_SECRET_KEY", "").strip()
@@ -214,6 +238,10 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Modus: {'LIVE' if live else 'test/sandkasse'}")
 
     stripe = Stripe(key)
+    # I GitHub Actions endres Stripe bare fra main; fra andre grener vises bare status.
+    if args.status or os.environ.get("GITHUB_REF", "refs/heads/main") != "refs/heads/main":
+        show_status(stripe)
+        return 0
     price = ensure_price(stripe)
     link = ensure_payment_link(stripe, price["id"])
     portal = ensure_portal(stripe)
