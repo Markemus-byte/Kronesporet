@@ -1942,6 +1942,30 @@ underlagt NLOD 2.0; oppgi kildene ved gjenbruk.</p>
 EXPIRING_SHOWN = 20
 
 
+# Ferdigutfylt e-post bak «Meld interesse på e-post» (varsler.html) til Workeren er satt opp.
+ALERTS_MAIL_SUBJECT = "Jeg vil gjerne ha varsler fra Kronesporet"
+ALERTS_MAIL_BODY = """Hei Kronesporet!
+
+Jeg er interessert i e-postvarsler om nye tildelinger og avtaler som løper ut. Si gjerne fra når påmeldingen åpner.
+
+Navn:
+Virksomhet (valgfritt):
+
+Dette vil jeg følge (fyll inn det som passer, resten kan stå tomt):
+- Kjøpere, f.eks. Statens vegvesen eller Oslo kommune:
+- Leverandører, f.eks. konkurrenter eller samarbeidspartnere:
+- Kategorier eller stikkord, f.eks. IT-tjenester, bygg og anlegg eller renhold:
+
+Hvor tidlig vil du vite om avtaler som løper ut (3, 6 eller 12 måneder før)?
+
+Er du fra en redaksjon, forskning eller en offentlig virksomhet? Da er varslene gratis:
+
+Andre ønsker eller spørsmål:
+
+Vennlig hilsen
+"""
+
+
 def _signup_form() -> str:
     """Påmeldingsskjemaet. Sendes som vanlig skjema til Workeren (worker/src/index.js), som sender en e-post for å
     bekrefte og så videre til betaling. app.js fyller inn ?kjoper= og ?leverandor= og viser ?status= etterpå."""
@@ -1978,8 +2002,7 @@ def alerts_page(ref_date: str, expiring: list[Expiring]) -> str:
     if ALERTS_API:
         signup = _signup_form()
     elif ALERTS_EMAIL:
-        mail = (f"mailto:{ALERTS_EMAIL}?subject=" + quote("Interesse for varsler fra Kronesporet")
-                + "&body=" + quote("Virksomhet:\nHva vil dere følge (kjøpere, leverandører eller kategorier):\n"))
+        mail = f"mailto:{ALERTS_EMAIL}?subject=" + quote(ALERTS_MAIL_SUBJECT) + "&body=" + quote(ALERTS_MAIL_BODY)
         signup = ('<h2 id="meld-interesse">Meld interesse</h2>\n<p>Påmeldingen åpner snart. Fortell oss hvem du vil '
                   'følge, så sier vi fra når den er klar.</p>\n'
                   f'<p><a class="button" href="{escape(mail)}">Meld interesse på e-post</a></p>'
