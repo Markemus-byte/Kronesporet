@@ -1,0 +1,39 @@
+# Setter opp betalingen for varslene i Stripe (#39): produkt, månedspris, betalingslenke og kundeportal.
+# Kjøres for hånd fra Actions-fanen. Trygt å kjøre flere ganger; det som finnes, gjenbrukes.
+# - sandkasse: bruker secret STRIPE_SANDBOX_KEY (sk_test_...), ingen ekte betalinger.
+# - live: bruker secret STRIPE_LIVE_KEY (sk_live_...), når betalingen skal åpnes.
+# Betalingslenken og kundeportalen står i oppsummeringen av kjøringen. De er ikke hemmelige.
+name: Stripe-oppsett
+
+on:
+  workflow_dispatch:
+    inputs:
+      modus:
+        description: "Sandkasse (test) eller live"
+        type: choice
+        options: [sandkasse, live]
+        default: sandkasse
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stripe-oppsett
+  cancel-in-progress: false
+
+jobs:
+  oppsett:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r requirements.txt
+
+      - name: Sett opp Stripe
+        env:
+          STRIPE_SECRET_KEY: ${{ inputs.modus == 'live' && secrets.STRIPE_LIVE_KEY || secrets.STRIPE_SANDBOX_KEY }}
+        run: python scripts/stripe_setup.py ${{ inputs.modus == 'live' && '--live' || '' }}

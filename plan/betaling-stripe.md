@@ -80,18 +80,25 @@ eks. mva**. Et årsabonnement til 4 900 kr (to måneder gratis) kan legges til s
 kundene, men vanskelig å heve den for dem som alt betaler. Stripe lar eksisterende kunder beholde gammel pris
 når en ny pris legges til.
 
-## Hva som må gjøres i Stripe (Morten)
+## Oppsett i Stripe
 
-1. Opprett konto på stripe.com med selskapet (ENK eller AS, se [sjekklisten](sjekkliste-lansering.md)) og
-   bankkontoen til selskapet.
-2. Lag produktet «Kronesporet varsler» med en månedspris (og eventuelt en årspris).
-3. Lag en Payment Link for prisen. Slå på «Collect tax ID» eller egne felt for firmanavn og orgnr, og sett
-   bekreftelsessiden til `https://kronesporet.no/varsler.html#takk`.
-4. Slå på kundeportalen (Settings → Billing → Customer portal) med oppsigelse ved periodens slutt.
-5. Legg inn webhooken (`https://<worker>/stripe/webhook`, de fire hendelsene over) når Workeren fra #38 er ute.
-   Signeringshemmeligheten legges inn med `wrangler secret put STRIPE_WEBHOOK_SECRET`, og Payment Link-adressen
-   som `STRIPE_PAYMENT_LINK`.
-6. Test hele flyten i testmodus med kort 4242 4242 4242 4242 før lenken legges på nettsiden.
+Produktet, prisen, betalingslenken og kundeportalen lages av `scripts/stripe_setup.py` via Stripe-API-et, kjørt
+av arbeidsflyten **Stripe-oppsett** (`.github/workflows/stripe.yml`). Ingen klikking i dashbordet utover kontoen.
+
+1. Morten lager Stripe-kontoen på ENK-et og legger inn bankkontoen der (ikke i repoet).
+2. Sandkassens hemmelige nøkkel (`sk_test_...`, under *Developers → API keys* i sandkassen) legges som
+   repository secret `STRIPE_SANDBOX_KEY` under *Settings → Secrets and variables → Actions*. Aldri i chatten.
+3. Kjør *Actions → Stripe-oppsett → Run workflow* med modus `sandkasse`. Oppsummeringen viser
+   `STRIPE_PAYMENT_LINK` og `STRIPE_PORTAL_URL`. Skriptet kan kjøres flere ganger; det gjenbruker det som finnes,
+   og en ny pris i `PRICE_NOK` gir ny pris og ny betalingslenke (gamle abonnenter beholder sin pris).
+4. Webhooken lages når Workeren fra #38 er ute: `stripe_setup.py --webhook-url https://<worker>/stripe/webhook
+   --webhook-secret-file <fil>` skriver signeringshemmeligheten til en fil, ikke til loggen, så Worker-oppsettet
+   kan legge den inn som `STRIPE_WEBHOOK_SECRET`.
+5. Test hele flyten i sandkassen med kort 4242 4242 4242 4242.
+6. For ekte betalinger: legg live-nøkkelen som `STRIPE_LIVE_KEY` og kjør med modus `live`.
+
+Offentlig navn («Kronesporet»), teksten på kontoutskriften (`KRONESPORET`) og support-e-post settes i
+dashbordet under *Settings → Business → Public details*; det kan ikke API-et gjøre for en vanlig konto.
 
 Lenken til kundeportalen og selgeropplysningene legges som konstanter øverst i `src/web/build.py`
 (`STRIPE_PORTAL_URL`, `SELLER`, `PAID_ALERTS_PRICE`), slik e-postene er. Selger og pris er fylt inn; vilkårene
