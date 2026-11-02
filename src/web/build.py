@@ -46,6 +46,7 @@ CONTACT_EMAIL = "post@kronesporet.no"  # kontakt i bunnteksten; tom = henvendels
 PRIVACY_EMAIL = "personvern@kronesporet.no"  # personvernhenvendelser (vilkar.html)
 ALERTS_EMAIL = "varsler@kronesporet.no"  # interessepåmelding for varsler (varsler.html)
 PRESS_EMAIL = "presse@kronesporet.no"
+SUPPORT_EMAIL = "support@kronesporet.no"  # kundestøtte for abonnementet (support.html), opprettet 02.11.2026
 # Workeren for varsler (worker/, f.eks. https://kronesporet-varsler.<konto>.workers.dev). Tom = varsler.html har
 # interessepåmelding på e-post, og sidene har ingen «Få varsel»-lenker.
 ALERTS_API = "https://kronesporet-varsler.kronesporet.workers.dev"
@@ -2197,8 +2198,10 @@ står fortsatt i Doffin. {contact}</li>
 
 def support_page() -> str:
     """Kundestøtte for abonnementet på varsler (lenket fra Stripe og bunnteksten)."""
-    mail = CONTACT_EMAIL or ALERTS_EMAIL
+    mail = SUPPORT_EMAIL or CONTACT_EMAIL or ALERTS_EMAIL
     link = f'<a href="mailto:{escape(mail)}">{escape(mail)}</a>'
+    other = (f' Du kan også skrive til <a href="mailto:{escape(CONTACT_EMAIL)}">{escape(CONTACT_EMAIL)}</a>.'
+             if CONTACT_EMAIL and CONTACT_EMAIL != mail else "")
     cancel = (f'Du endrer kort, ser kvitteringer og sier opp i <a href="{escape(STRIPE_PORTAL_URL)}">kundeportalen</a>. '
               "Logg inn med e-postadressen du betalte med."
               if STRIPE_PORTAL_URL else
@@ -2212,7 +2215,7 @@ def support_page() -> str:
 </section>
 <div class="prose">
 <h2 id="kontakt">Kontakt</h2>
-<p>E-post: {link}. Skriv gjerne hvilket firma og hvilken e-postadresse det gjelder.{seller}</p>
+<p>E-post: {link}. Skriv gjerne hvilket firma og hvilken e-postadresse det gjelder.{other}{seller}</p>
 
 <h2 id="varsler">Hva varslene er</h2>
 <p>Kronesporet sender e-postvarsler om nye offentlige tildelinger og om avtaler som løper ut om 12, 6 og 3
