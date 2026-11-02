@@ -22,6 +22,7 @@ on:
     paths:
       - "worker/**"
       - "scripts/varsler_oppsett.py"
+      - "scripts/varsler_e2e.py"
       - ".github/workflows/worker.yml"
   schedule:
     - cron: "30 5 * * *"
@@ -143,9 +144,22 @@ jobs:
           fi
           secret="$RUNNER_TEMP/whsec"
           python ../scripts/stripe_setup.py --webhook-url "$WORKER_URL/stripe/webhook" --webhook-secret-file "$secret"
+          if [ ! -s "$secret" ]; then  # stripe_setup.py endrer bare Stripe fra main
+            echo "- Stripe-webhook: lages ved neste kjøring fra main" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
           $WRANGLER secret put STRIPE_WEBHOOK_SECRET < "$secret"
           rm -f "$secret"
           echo "- Stripe-webhook: $WORKER_URL/stripe/webhook, hemmeligheten er lagt inn i Worker-en" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Prøv påmeldingen fra start til slutt
+        if: steps.oppsett.outputs.epost_ok == 'true' && steps.publiser.outputs.url != ''
+        working-directory: .
+        env:
+          WORKER_URL: ${{ steps.publiser.outputs.url }}
+          API_TOKEN: ${{ steps.oppsett.outputs.api_token }}
+          CPANEL_TOKEN: ${{ secrets.CPANEL_TOKEN }}
+        run: python scripts/varsler_e2e.py
 
       - name: Slå på varslene på nettsiden
         if: >-
