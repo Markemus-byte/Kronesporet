@@ -117,17 +117,16 @@ Dekningen: `dekning_2025_statsregnskap.csv` i prosjektmappen.
 
 ## Den ene sjekklista for å ta imot betaling
 
-E-postene kan sendes før noe av dette er gjort: med 14 dager gratis trengs betalingen først når den første kunden
-har prøvd. Alt gjøres i én økt, på samme side i GitHub:
-[Settings → Secrets → New repository secret](https://github.com/Markemus-byte/Kronesporet/settings/secrets/actions/new).
+Varslene er i drift: påmeldingen på kronesporet.no/varsler.html virker, og utsendingen går fra
+utsending@kronesporet.no på Domene.no-serveren (Cloudflare- og cPanel-nøklene er lagt inn, 02.11.2026).
+Med 14 dager gratis trengs betalingen først når den første kunden har prøvd.
+
+Det eneste som står igjen:
 
 1. **Stripe live** (5 min): i Stripe, slå av *Test mode*/sandkassen, fullfør det Stripe ber om for å aktivere
-   betalinger (bankkonto og legitimasjon), og trykk *Resend* på e-postbekreftelsen (e-posten virker nå). Under
-   *Developers → API keys*, kopier *Secret key* (`sk_live_...`) og lagre den som **STRIPE_LIVE_KEY**.
-2. **De fire nøklene for varslene** (10 min), som beskrevet i [worker/README.md](../worker/README.md):
-   **CLOUDFLARE_API_TOKEN**, **BREVO_API_KEY**, **CPANEL_TOKEN** og **CPANEL_USER**.
-3. Flett de åpne PR-ene.
+   betalinger (bankkonto og legitimasjon). Under *Developers → API keys*, kopier *Secret key* (`sk_live_...`) og
+   lagre den som **STRIPE_LIVE_KEY** på
+   [Settings → Secrets → New repository secret](https://github.com/Markemus-byte/Kronesporet/settings/secrets/actions/new).
 
-Resten gjøres fra GitHub Actions uten deg: *Stripe-oppsett* i modus `live` lager den ekte betalingslenken (med 14
-dager gratis) og kundeportalen, og *Worker* setter opp utsendingen. Den ekte betalingslenken byttes så inn i
-e-postmalen og nettsiden.
+Resten gjøres fra GitHub Actions: *Stripe-oppsett* i modus `live` lager den ekte betalingslenken (med 14 dager
+gratis) og kundeportalen, og live-lenkene og live-webhooken settes inn i Worker-en.
