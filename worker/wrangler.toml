@@ -14,7 +14,7 @@ STRIPE_PAYMENT_LINK = "https://buy.stripe.com/test_bJe3cnalvcydaqMcB37Re00"
 STRIPE_PORTAL_URL = "https://billing.stripe.com/p/login/test_bJe3cnalvcydaqMcB37Re00"
 # Live: betalingslenken er laget i Stripe-dashbordet (14 dager gratis, deretter 490 kr i måneden).
 STRIPE_PAYMENT_LINK_LIVE = "https://buy.stripe.com/8x200bgH06sFeARgnC5sA01"
-STRIPE_PORTAL_URL_LIVE = ""
+STRIPE_PORTAL_URL_LIVE = "https://billing.stripe.com/p/login/3cI28j3Ue5oB64l9Ze5sA00"
 
 [[d1_databases]]
 binding = "DB"

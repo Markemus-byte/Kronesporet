@@ -56,7 +56,7 @@ ALERTS_API = "https://kronesporet-varsler.kronesporet.workers.dev"
 SELLER = "Brafaring Thevik (enkeltpersonforetak), org.nr. 938 405 565, Multeveien 1, 1712 Grålum"
 PAID_ALERTS_PRICE = "490 kr i måneden eks. mva"  # valgt 29.10.2026
 TRIAL_DAYS = 14  # gratis prøveperiode; samme tall som TRIAL_DAYS i scripts/stripe_setup.py
-STRIPE_PORTAL_URL = ""  # Stripes kundeportal, der abonnenter sier opp og bytter kort
+STRIPE_PORTAL_URL = "https://billing.stripe.com/p/login/3cI28j3Ue5oB64l9Ze5sA00"  # Stripes kundeportal (live), satt av Stripe-oppsett
 
 
 def paid_alerts_live() -> bool:
