@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { DatabaseSync } from "node:sqlite";
 import { test } from "node:test";
 
-import worker, { mimeMessage, parseSelection, smtpSend, verifyStripe } from "../src/index.js";
+import worker, { mimeMessage, parseSelection, smtpSend, stripeMode, verifyStripe } from "../src/index.js";
 
 const SCHEMA = readFileSync(new URL("../schema.sql", import.meta.url), "utf8");
 
@@ -195,4 +195,30 @@ test("MIME: emne med æøå kodes, brødteksten er base64", () => {
   assert.ok(m.includes(`Subject: =?UTF-8?B?${Buffer.from("Bekreft påmeldingen").toString("base64")}?=`));
   assert.ok(m.includes(Buffer.from("Hei").toString("base64")));
   assert.ok(!/\r\n\./.test(m));
+});
+
+test("Stripe live: live-lenken brukes først når live-webhooken finnes, og testhendelser avvises", async () => {
+  const { env, mails, call } = setup();
+  assert.equal(stripeMode(env).live, false);
+  env.STRIPE_PAYMENT_LINK_LIVE = "https://buy.stripe.com/live_123";
+  env.STRIPE_PORTAL_URL_LIVE = "";
+  env.STRIPE_WEBHOOK_SECRET_LIVE = "whsec_live";
+  assert.equal(stripeMode(env).live, true);
+
+  await call("/pamelding", { method: "POST", body: form({ epost: "live@example.no", kjoper: "915429785" }) });
+  const token = mails[0].body.textContent.match(/bekreft\?t=([0-9a-f]{48})/)[1];
+  const r = await call(`/bekreft?t=${token}`, { method: "POST" });
+  assert.match(r.headers.get("location"), /^https:\/\/buy\.stripe\.com\/live_123\?/);
+
+  const { createHmac } = await import("node:crypto");
+  const t = Math.floor(Date.now() / 1000);
+  const send = (event, secret) => call("/stripe/webhook", { method: "POST", body: event, headers: {
+    "stripe-signature": `t=${t},v1=${createHmac("sha256", secret).update(`${t}.${event}`).digest("hex")}` } });
+  const ev = (id, livemode) => JSON.stringify({ id, type: "checkout.session.completed", livemode,
+    data: { object: { client_reference_id: token, customer: "cus_live", customer_details: { email: "live@example.no" } } } });
+  assert.equal((await send(ev("evt_t", false), "whsec_test")).status, 400);  // sandkassehemmeligheten gjelder ikke lenger
+  await send(ev("evt_t2", false), "whsec_live");
+  assert.equal(env.DB.raw.prepare("SELECT status FROM abonnenter").get().status, "ny");
+  await send(ev("evt_l", true), "whsec_live");
+  assert.equal(env.DB.raw.prepare("SELECT status FROM abonnenter").get().status, "active");
 });

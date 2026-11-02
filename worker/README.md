@@ -61,6 +61,12 @@ da til domenet og avsenderen og, med cPanel-nøkkel, DNS-postene). Egen SMTP-kon
 `VARSLER_API_TOKEN` og `CLOUDFLARE_ACCOUNT_ID` trengs ikke: tokenet mellom GitHub og Worker-en avledes av
 `CLOUDFLARE_API_TOKEN`, og konto-ID-en hentes fra Cloudflare. Finnes de, brukes de.
 
+**Live-betaling:** live-betalingslenken (laget i Stripe-dashbordet) står som `STRIPE_PAYMENT_LINK_LIVE` i
+`wrangler.toml`. Når `STRIPE_LIVE_KEY` er lagt inn i GitHub, lager *Worker* live-webhooken (`stripe_setup.py --live
+--webhook-only`) og legger hemmeligheten inn som `STRIPE_WEBHOOK_SECRET_LIVE`. Fra da bruker Worker-en live-lenken,
+og testhendelser fra sandkassen avvises. Før det går alt i sandkassen, så ingen kan betale uten at betalingen
+registreres.
+
 **Senere, før ekte betalinger (fra betalingsoppsettet i #39):** live-nøkkelen fra Stripe som secret
 `STRIPE_LIVE_KEY` når testen i sandkassen virker, og en advokat som ser over vilkårene og personvernerklæringen.
 

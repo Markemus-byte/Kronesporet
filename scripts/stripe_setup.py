@@ -227,6 +227,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--webhook-url", help="Workerens adresse til /stripe/webhook")
     ap.add_argument("--webhook-secret-file", help="fil som får signeringshemmeligheten (whsec_...)")
     ap.add_argument("--status", action="store_true", help="bare vis abonnementene, endre ingenting")
+    ap.add_argument("--webhook-only", action="store_true",
+                    help="bare webhooken (live-betalingslenken er laget i dashbordet, så det skal ikke lages en til)")
     args = ap.parse_args(argv)
 
     key = os.environ.get("STRIPE_SECRET_KEY", "").strip()
@@ -241,6 +243,11 @@ def main(argv: list[str] | None = None) -> int:
     # I GitHub Actions endres Stripe bare fra main; fra andre grener vises bare status.
     if args.status or os.environ.get("GITHUB_REF", "refs/heads/main") != "refs/heads/main":
         show_status(stripe)
+        return 0
+    if args.webhook_only:
+        if not args.webhook_url:
+            raise SystemExit("--webhook-only krever --webhook-url")
+        ensure_webhook(stripe, args.webhook_url, args.webhook_secret_file)
         return 0
     price = ensure_price(stripe)
     link = ensure_payment_link(stripe, price["id"])
