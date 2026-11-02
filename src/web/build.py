@@ -48,7 +48,7 @@ ALERTS_EMAIL = "varsler@kronesporet.no"  # interessepåmelding for varsler (vars
 PRESS_EMAIL = "presse@kronesporet.no"
 # Workeren for varsler (worker/, f.eks. https://kronesporet-varsler.<konto>.workers.dev). Tom = varsler.html har
 # interessepåmelding på e-post, og sidene har ingen «Få varsel»-lenker.
-ALERTS_API = ""
+ALERTS_API = "https://kronesporet-varsler.kronesporet.workers.dev"
 # Betalte varsler (#39). Vilkårene for abonnementet vises på vilkar.html først når selger, pris og kundeportal er
 # fylt inn, altså når betalingen i Stripe er klar.
 # Selger: ENK-et til innehaveren (Enhetsregisteret, ikke mva-registrert per 29.10.2026).

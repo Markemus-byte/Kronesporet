@@ -1,7 +1,7 @@
 # Varsler (Cloudflare Worker + D1)
 
 Workeren tar imot påmeldinger fra skjemaet på [kronesporet.no/varsler.html](https://kronesporet.no/varsler.html),
-sender e-post for å bekrefte adressen, sender bekreftede abonnenter videre til betaling i Stripe, tar imot
+sender e-post for å bekrefte adressen (via egen e-postserver eller Brevo), sender bekreftede abonnenter videre til betaling i Stripe, tar imot
 betalingsstatus fra Stripe og gir abonnentlisten til utsendingen i GitHub Actions.
 
 ```
@@ -24,48 +24,45 @@ Ingen e-postadresser ligger i repoet. De ligger bare i D1 (og i Stripe for dem s
 
 ## Sjekkliste for oppsett (Morten)
 
-Alt under gjøres én gang. Tallene i parentes er omtrentlig tid.
+Alt annet gjør arbeidsflyten [*Worker*](https://github.com/Markemus-byte/Kronesporet/actions/workflows/worker.yml)
+selv (`scripts/varsler_oppsett.py`): Cloudflare-konto-ID og workers.dev-underdomene, databasen, Worker-en,
+postkassen utsending@kronesporet.no som e-posten sendes fra, Stripe-webhooken og til slutt skjemaet på nettsiden.
+Den kjører hver morgen til alt er på plass, og prøver påmeldingen fra start til slutt hver gang
+(`scripts/varsler_e2e.py`). Du trenger bare å lage to nøkler og lime dem inn som
+GitHub-secrets under [*Settings → Secrets and variables → Actions → New repository secret*](https://github.com/Markemus-byte/Kronesporet/settings/secrets/actions/new).
+Lim aldri nøklene inn noe annet sted.
 
-**1. E-post: Brevo (15 min + venting på DNS)**
-1. Lag en gratis konto på [brevo.com](https://www.brevo.com) med post@kronesporet.no. Gratisplanen gir 300 e-poster
-   om dagen, som holder lenge.
-2. Under *Senders, Domains & Dedicated IPs → Domains*: legg til `kronesporet.no`. Brevo viser 3–4 DNS-poster
-   (TXT for `brevo-code`, DKIM og DMARC). Legg dem inn i cPanel hos Domene.no under *Zone Editor*, som A-postene.
-   Ikke rør MX-postene. Trykk *Authenticate* i Brevo når postene er lagt inn.
-3. Legg til avsenderen `varsler@kronesporet.no` under *Senders*.
-4. Lag en API-nøkkel under *SMTP & API → API Keys*. Ta vare på den til steg 2 og 3.
+**1. Cloudflare (5 min)**
+1. Lag en gratis konto på [dash.cloudflare.com/sign-up](https://dash.cloudflare.com/sign-up) med post@kronesporet.no
+   og bekreft e-posten. Domenet skal ikke flyttes dit; hopp over spørsmål om å legge til et nettsted.
+2. Klikk personikonet øverst til høyre → *My Profile* → *API Tokens* → *Create Token*.
+3. Ved *Edit Cloudflare Workers* klikker du *Use template*.
+4. Under *Permissions* klikker du *+ Add more* og velger `Account` · `D1` · `Edit`.
+5. *Account Resources*: `Include` · kontoen din. *Zone Resources*: `Include` · `All zones`.
+6. *Continue to summary* → *Create Token* → *Copy*. Lagre som secret `CLOUDFLARE_API_TOKEN`.
 
-**2. Cloudflare-konto og API-token (10 min)**
-1. Lag en gratis konto på [dash.cloudflare.com](https://dash.cloudflare.com). Domenet trenger ikke flyttes dit.
-2. Gå til *Workers & Pages* og velg et workers.dev-underdomene når du blir spurt (f.eks. `kronesporet`).
-3. Kopier *Account ID* fra høyre kolonne på oversikten (eller fra *Workers & Pages*).
-4. Gå til *My Profile → API Tokens → Create Token*, velg malen *Edit Cloudflare Workers*, legg til tillatelsen
-   *Account → D1 → Edit*, og lag tokenet. Det vises bare én gang.
+**2. cPanel hos Domene.no (3 min)**, så e-posten sendes fra din egen e-postserver
+1. Logg inn i cPanel → *Security* → *Manage API Tokens* → *Create*. Navn `github`, la utløpsdato stå tom → *Create*
+   → kopier tokenet (vises bare én gang). Lagre som secret `CPANEL_TOKEN`.
+Brukernavnet (`qkggefaf`) står som `CPANEL_USERNAME` i `scripts/varsler_oppsett.py`, så det trengs ikke i GitHub.
 
-**3. GitHub (5 min)**, under [*Settings → Secrets and variables → Actions*](https://github.com/Markemus-byte/Kronesporet/settings/secrets/actions)
-→ *New repository secret*:
-- `CLOUDFLARE_API_TOKEN` = tokenet fra steg 2
-- `CLOUDFLARE_ACCOUNT_ID` = Account ID fra steg 2
-- `BREVO_API_KEY` = nøkkelen fra Brevo
-- `VARSLER_API_TOKEN` = en lang tilfeldig streng du finner på (f.eks. fra en passordgenerator). Den brukes bare
-  mellom GitHub og Worker-en, og du trenger aldri å skrive den inn andre steder.
+Arbeidsflyten lager da postkassen utsending@kronesporet.no med et passord den regner ut av tokenet, og sender
+bekreftelser og varsler gjennom mail.kronesporet.no (port 465), «fra» varsler@kronesporet.no. Serveren har SPF og
+DKIM for domenet fra før. Ingen av de vanlige adressene får nytt passord.
 
-Kjør så arbeidsflyten [*Worker*](https://github.com/Markemus-byte/Kronesporet/actions/workflows/worker.yml)
-(*Run workflow*). Den lager databasen, legger inn tabellene, publiserer Worker-en og legger inn hemmelighetene.
-Adressen til Worker-en står i oppsummeringen av kjøringen. Når den legges inn som `ALERTS_API` i
-`src/web/build.py`, kommer skjemaet og «Få varsel»-lenkene på nettsiden, og arbeidsflyten *Varsler* begynner å
-sende. Før det gjør den ingenting.
+Når nøklene er lagt inn, kjører Worker-arbeidsflyten neste morgen, eller med en gang via *Run workflow*. Når
+e-posten virker og Worker-en svarer, setter arbeidsflyten `ALERTS_API` i `src/web/build.py` og bygger nettsiden
+på nytt.
 
-**4. Stripe (fra betalingsoppsettet i #39)**
-1. Arbeidsflyten *Stripe-oppsett* (`scripts/stripe_setup.py`, nøkkel i GitHub-secret `STRIPE_SANDBOX_KEY`) lager
-   produktet, prisen, betalingslenken og kundeportalen. Lenkene står i oppsummeringen av kjøringen; de settes som
-   `STRIPE_PAYMENT_LINK` og `STRIPE_PORTAL_URL` i `wrangler.toml`. Betalingslenken sender kunden tilbake til
-   `varsler.html#takk`.
-2. Kjør *Worker* manuelt med *Stripe-webhook* huket av. Den lager webhook-endepunktet
-   `https://<worker-adressen>/stripe/webhook` med de fem hendelsene Worker-en bruker
-   (`checkout.session.completed`, `customer.subscription.created/updated/deleted`, `invoice.payment_failed`) og
-   legger signeringshemmeligheten rett inn i Worker-en. Den vises ingen steder. Kjør det bare når webhooken
-   mangler, for endepunktet lages på nytt med ny hemmelighet hver gang.
+**Brevo er valgfritt.** Uten cPanel-nøkkel kan e-posten gå via Brevo i stedet (`BREVO_API_KEY`; arbeidsflyten legger
+da til domenet og avsenderen og, med cPanel-nøkkel, DNS-postene). Egen SMTP-konto virker også: `SMTP_HOST`,
+`SMTP_USER` og `SMTP_PASSWORD`. Finnes både SMTP og Brevo, brukes SMTP.
+
+`VARSLER_API_TOKEN` og `CLOUDFLARE_ACCOUNT_ID` trengs ikke: tokenet mellom GitHub og Worker-en avledes av
+`CLOUDFLARE_API_TOKEN`, og konto-ID-en hentes fra Cloudflare. Finnes de, brukes de.
+
+**Senere, før ekte betalinger (fra betalingsoppsettet i #39):** live-nøkkelen fra Stripe som secret
+`STRIPE_LIVE_KEY` når testen i sandkassen virker, og en advokat som ser over vilkårene og personvernerklæringen.
 
 Uten Stripe virker alt unntatt betalingen: bekreftede abonnenter får beskjed om at betalingen åpner snart, og
 gratisabonnenter kan settes opp for hånd.

@@ -9,7 +9,8 @@
 //   POST /api/sendt        scripts/send_alerts.py melder inn sendte varsler (Bearer API_TOKEN)
 //   POST /stripe/webhook   betalingsstatus fra Stripe (STRIPE_WEBHOOK_SECRET)
 //
-// Datamodellen er i schema.sql. Hemmeligheter (wrangler secret put): API_TOKEN, BREVO_API_KEY, STRIPE_WEBHOOK_SECRET.
+// Datamodellen er i schema.sql. Hemmeligheter (wrangler secret put): API_TOKEN, STRIPE_WEBHOOK_SECRET, og for e-post
+// enten SMTP_HOST/SMTP_USER/SMTP_PASSWORD (egen e-postserver) eller BREVO_API_KEY.
 
 const TYPES = ["kjoper", "leverandor", "cpv", "sokeord"];
 const HORIZONS = ["3", "6", "12"];
@@ -84,8 +85,10 @@ export function parseSelection(form) {
   return { utvalg: out, horisonter: (horizons.length ? horizons : HORIZONS).join(","), csv: form.get("csv") ? 1 : 0 };
 }
 
+// E-post: via SMTP på egen e-postserver (cPanel hos Domene.no) når SMTP_PASSWORD finnes, ellers via Brevo.
 async function sendMail(env, to, subject, text, html) {
-  if (!env.BREVO_API_KEY) throw new Error("BREVO_API_KEY mangler");
+  if (env.SMTP_PASSWORD) return smtpSend(env, to, subject, text, html);
+  if (!env.BREVO_API_KEY) throw new Error("verken SMTP_PASSWORD eller BREVO_API_KEY er satt");
   const r = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: { "api-key": env.BREVO_API_KEY, "content-type": "application/json", accept: "application/json" },
@@ -93,6 +96,73 @@ async function sendMail(env, to, subject, text, html) {
                            subject, textContent: text, htmlContent: html }),
   });
   if (!r.ok) throw new Error(`Brevo svarte ${r.status}: ${(await r.text()).slice(0, 300)}`);
+}
+
+const utf8 = new TextEncoder();
+
+function b64(input) {
+  const bytes = typeof input === "string" ? utf8.encode(input) : input;
+  let bin = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+
+const wrap = (s) => s.replace(/.{1,76}/g, "$&\r\n");
+const encodeWord = (s) => (/^[\x20-\x7e]*$/.test(s) ? s : `=?UTF-8?B?${b64(s)}?=`);
+
+// MIME-melding med ren tekst og HTML (base64, så ingen linjer starter med punktum).
+export function mimeMessage({ from, to, subject, text, html, date = new Date(), id = crypto.randomUUID() }) {
+  const boundary = `ks-${id}`;
+  const domain = from.split("@")[1] || "kronesporet.no";
+  return [
+    `From: Kronesporet <${from}>`, `To: <${to}>`, `Subject: ${encodeWord(subject)}`, `Date: ${date.toUTCString()}`,
+    `Message-ID: <${id}@${domain}>`, "MIME-Version: 1.0", `Content-Type: multipart/alternative; boundary="${boundary}"`,
+    "", `--${boundary}`, "Content-Type: text/plain; charset=utf-8", "Content-Transfer-Encoding: base64", "",
+    wrap(b64(text)), `--${boundary}`, "Content-Type: text/html; charset=utf-8", "Content-Transfer-Encoding: base64", "",
+    wrap(b64(html)), `--${boundary}--`, "",
+  ].join("\r\n");
+}
+
+// Minimal SMTP-klient over TLS (port 465) med Cloudflares TCP-sockets. connect kan byttes ut i tester.
+export async function smtpSend(env, to, subject, text, html, connect = null) {
+  if (!connect) ({ connect } = await import("cloudflare:sockets"));
+  const user = env.SMTP_USER || env.AVSENDER;
+  const sock = connect({ hostname: env.SMTP_HOST || "mail.kronesporet.no", port: Number(env.SMTP_PORT || 465) },
+                       { secureTransport: "on" });
+  const writer = sock.writable.getWriter();
+  const reader = sock.readable.getReader();
+  const decoder = new TextDecoder();
+  let buf = "";
+  const reply = async () => {
+    for (;;) {
+      const lines = buf.split("\r\n");
+      const end = lines.findIndex((l, i) => i < lines.length - 1 && /^\d{3} /.test(l));
+      if (end >= 0) {
+        buf = lines.slice(end + 1).join("\r\n");
+        return { code: Number(lines[end].slice(0, 3)), text: lines.slice(0, end + 1).join(" | ") };
+      }
+      const { value, done } = await reader.read();
+      if (done) throw new Error("SMTP: serveren lukket forbindelsen");
+      buf += decoder.decode(value, { stream: true });
+    }
+  };
+  const step = async (line, want) => {
+    if (line !== null) await writer.write(utf8.encode(`${line}\r\n`));
+    const r = await reply();
+    if (Math.floor(r.code / 100) !== want) throw new Error(`SMTP ${line?.split(" ")[0] || "hilsen"}: ${r.text.slice(0, 200)}`);
+  };
+  try {
+    await step(null, 2);
+    await step("EHLO kronesporet.no", 2);
+    await step(`AUTH PLAIN ${b64(`\0${user}\0${env.SMTP_PASSWORD}`)}`, 2);
+    await step(`MAIL FROM:<${user}>`, 2);
+    await step(`RCPT TO:<${to}>`, 2);
+    await step("DATA", 3);
+    await step(`${mimeMessage({ from: env.AVSENDER, to, subject, text, html })}\r\n.`, 2);
+    await writer.write(utf8.encode("QUIT\r\n")).catch(() => {});
+  } finally {
+    await sock.close().catch(() => {});
+  }
 }
 
 function describe(sel) {
