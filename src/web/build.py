@@ -168,6 +168,9 @@ def page(title: str, body: str, root: str = "", active: str = "", description: s
         url_meta = (f'<link rel="canonical" href="{escape(url)}">\n'
                     f'<meta property="og:url" content="{escape(url)}">\n'
                     f'<meta property="og:image" content="{escape(base)}assets/og-bilde.png">\n'
+                    '<meta property="og:image:width" content="1200">\n'
+                    '<meta property="og:image:height" content="630">\n'
+                    '<meta property="og:image:alt" content="Kronesporet: Hvor går statens penger?">\n'
                     '<meta name="twitter:card" content="summary_large_image">\n')
     data_date = f"Data hentet {_SITE['data_date']}. " if _SITE["data_date"] else ""
     sources = ('<a href="https://doffin.no">Doffin</a> (Digdir), '
@@ -195,13 +198,15 @@ def page(title: str, body: str, root: str = "", active: str = "", description: s
 <meta property="og:locale" content="nb_NO">
 <meta name="theme-color" content="#0f5c4d">
 <link rel="icon" href="{root}assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="{root}assets/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="{root}assets/apple-touch-icon.png">
 <link rel="stylesheet" href="{root}assets/style.css">
 {head}</head>
 <body>
 <a class="skip-link" href="#innhold">Hopp til innholdet</a>
 <header class="site-header">
   <div class="wrap">
-    <a class="brand" href="{root}index.html"><span class="mark" aria-hidden="true">kr</span>Kronesporet</a>
+    <a class="brand" href="{root}index.html"><img class="mark" src="{root}assets/favicon.svg" alt="" width="30" height="30">Krone<span class="brand-accent">sporet</span></a>
     <nav aria-label="Hovedmeny">{links}</nav>
   </div>
 </header>
