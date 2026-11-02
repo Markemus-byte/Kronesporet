@@ -54,6 +54,7 @@ ALERTS_API = ""
 # Selger: ENK-et til innehaveren (Enhetsregisteret, ikke mva-registrert per 29.10.2026).
 SELLER = "Brafaring Thevik (enkeltpersonforetak), org.nr. 938 405 565, Multeveien 1, 1712 Grålum"
 PAID_ALERTS_PRICE = "490 kr i måneden eks. mva"  # valgt 29.10.2026
+TRIAL_DAYS = 14  # gratis prøveperiode; samme tall som TRIAL_DAYS i scripts/stripe_setup.py
 STRIPE_PORTAL_URL = ""  # Stripes kundeportal, der abonnenter sier opp og bytter kort
 
 
@@ -2083,7 +2084,8 @@ Reglene for forbrukerkjøp, digitale ytelser og angrerett gjelder derfor ikke. R
 varslene gratis. Send en e-post til {mail} og fortell hvem du er.</p>
 <h3 id="abonnement-pris">Pris og betaling</h3>
 <p>Prisen er {escape(PAID_ALERTS_PRICE)}. Når Kronesporet er registrert i Merverdiavgiftsregisteret, kommer
-merverdiavgift i tillegg. Abonnementet betales forskuddsvis for én måned om gangen med kort via Stripe, og fornyes
+merverdiavgift i tillegg. De første {TRIAL_DAYS} dagene er gratis. Sier du opp i prøveperioden, betaler du ingenting.
+Etter prøveperioden betales abonnementet forskuddsvis for én måned om gangen med kort via Stripe, og det fornyes
 automatisk til du sier det opp. Kronesporet ser ikke kortnummeret ditt. Hvis en betaling ikke går gjennom, prøver
 Stripe på nytt i noen dager før abonnementet stopper.</p>
 <h3 id="abonnement-oppsigelse">Oppsigelse</h3>
