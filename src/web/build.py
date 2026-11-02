@@ -206,7 +206,7 @@ def page(title: str, body: str, root: str = "", active: str = "", description: s
 <a class="skip-link" href="#innhold">Hopp til innholdet</a>
 <header class="site-header">
   <div class="wrap">
-    <a class="brand" href="{root}index.html"><img class="mark" src="{root}assets/favicon.svg" alt="" width="30" height="30">Krone<span class="brand-accent">sporet</span></a>
+    <a class="brand" href="{root}index.html"><img class="mark" src="{root}assets/favicon.svg" alt="" width="30" height="30"><span>Krone<span class="brand-accent">sporet</span></span></a>
     <nav aria-label="Hovedmeny">{links}</nav>
   </div>
 </header>
