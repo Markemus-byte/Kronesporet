@@ -123,11 +123,18 @@ jobs:
               echo "- $name lagt inn i Worker-en" >> "$GITHUB_STEP_SUMMARY"
             fi
           done
-          if $WRANGLER secret list | grep -q 'STRIPE_WEBHOOK_SECRET'; then
+          $WRANGLER secret list > secrets.json
+          if grep -q '"STRIPE_WEBHOOK_SECRET"' secrets.json; then
             echo "webhook=true" >> "$GITHUB_OUTPUT"
           else
             echo "webhook=false" >> "$GITHUB_OUTPUT"
           fi
+          if grep -q 'STRIPE_WEBHOOK_SECRET_LIVE' secrets.json; then
+            echo "webhook_live=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "webhook_live=false" >> "$GITHUB_OUTPUT"
+          fi
+          rm -f secrets.json
 
       - name: Stripe-webhook
         if: >-
@@ -151,6 +158,28 @@ jobs:
           $WRANGLER secret put STRIPE_WEBHOOK_SECRET < "$secret"
           rm -f "$secret"
           echo "- Stripe-webhook: $WORKER_URL/stripe/webhook, hemmeligheten er lagt inn i Worker-en" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Stripe-webhook (live)
+        # Lages én gang når STRIPE_LIVE_KEY finnes. Fra da bruker Worker-en live-betalingslenken (wrangler.toml).
+        if: >-
+          github.ref == 'refs/heads/main' && steps.oppsett.outputs.klar == 'true' &&
+          steps.publiser.outputs.url != '' && steps.hemmeligheter.outputs.webhook_live == 'false'
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ steps.oppsett.outputs.account_id }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_LIVE_KEY }}
+          WORKER_URL: ${{ steps.publiser.outputs.url }}
+        run: |
+          if [ -z "$STRIPE_SECRET_KEY" ]; then
+            echo "- Stripe live: STRIPE_LIVE_KEY er ikke i GitHub ennå, betalingen går i sandkassen" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          secret="$RUNNER_TEMP/whsec_live"
+          python ../scripts/stripe_setup.py --live --webhook-only --webhook-url "$WORKER_URL/stripe/webhook" \
+            --webhook-secret-file "$secret"
+          test -s "$secret"
+          $WRANGLER secret put STRIPE_WEBHOOK_SECRET_LIVE < "$secret"
+          rm -f "$secret"
+          echo "- Stripe live: webhooken er laget, og Worker-en bruker nå live-betalingslenken" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Prøv påmeldingen fra start til slutt
         if: steps.oppsett.outputs.epost_ok == 'true' && steps.publiser.outputs.url != ''

@@ -16,6 +16,9 @@
   nettsiden (`ALERTS_API`) når e-posten virker. Brevo er nå valgfritt. Den kjører hver morgen til alt er på
   plass, og prøver påmeldingen fra start til slutt hver gang (`scripts/varsler_e2e.py`). Det som trengs for
   hånd, er to secrets: `CLOUDFLARE_API_TOKEN` og `CPANEL_TOKEN` (`worker/README.md`).
+- **Live-betaling for varslene:** Worker-en går over til live-betalingslenken (14 dager gratis, deretter 490 kr i
+  måneden) først når live-webhooken finnes. Den lages av arbeidsflyten `Worker` når `STRIPE_LIVE_KEY` er i GitHub
+  (`stripe_setup.py --webhook-only`, så det ikke lages en betalingslenke til). Etter det avvises testhendelser.
 - **CPV-koder:** `doffin_contracts` har en ny kolonne `cpv` med CPV-kodene fra kunngjøringen. Nye kontrakter får
   dem med en gang, og den månedlige oppdateringen fyller inn opptil 2 000 eldre kontrakter per kjøring
   (`--cpv-backfill`). 20 502 av 30 867 kontrakter har kodene nå: alle fra 2022 og senere, og 4 384 av 14 743 fra
