@@ -29,9 +29,9 @@
 </header>
 <main class="wrap" id="innhold" tabindex="-1">
 <section class="hero">
-  <p class="eyebrow eyebrow-dark">Planlagt</p>
+  <p class="eyebrow eyebrow-dark">Nytt</p>
   <h1>Varsler om statens avtaler</h1>
-  <p class="lede">Kronesporet planlegger e-postvarsler for leverandører og
+  <p class="lede">Kronesporet sender e-postvarsler for leverandører og
   rådgivere som følger statens innkjøp. Nettsiden og tallene her forblir gratis. Varslene sparer deg for å lete selv.</p>
 </section>
 <p class="signup-status prose" id="takk" role="status" hidden>Takk for betalingen! Abonnementet er i gang, og det første
@@ -46,9 +46,29 @@ konkurranse.</li>
 <li><strong>Fullt uttrekk</strong> av kontraktene med leverandører og historikk fra 2017 som CSV.</li>
 </ul>
 <p>Redaksjoner, forskere og offentlige virksomheter får varslene gratis.</p>
-<h2 id="meld-interesse">Meld interesse</h2>
-<p>Påmeldingen åpner snart. Fortell oss hvem du vil følge, så sier vi fra når den er klar.</p>
-<p><a class="button" href="mailto:varsler@kronesporet.no?subject=Jeg%20vil%20gjerne%20ha%20varsler%20fra%20Kronesporet&amp;body=Hei%20Kronesporet%21%0A%0AJeg%20er%20interessert%20i%20e-postvarsler%20om%20nye%20tildelinger%20og%20avtaler%20som%20l%C3%B8per%20ut.%20Si%20gjerne%20fra%20n%C3%A5r%20p%C3%A5meldingen%20%C3%A5pner.%0A%0ANavn%3A%0AVirksomhet%20%28valgfritt%29%3A%0A%0ADette%20vil%20jeg%20f%C3%B8lge%20%28fyll%20inn%20det%20som%20passer%2C%20resten%20kan%20st%C3%A5%20tomt%29%3A%0A-%20Kj%C3%B8pere%2C%20f.eks.%20Statens%20vegvesen%20eller%20Oslo%20kommune%3A%0A-%20Leverand%C3%B8rer%2C%20f.eks.%20konkurrenter%20eller%20samarbeidspartnere%3A%0A-%20Kategorier%20eller%20stikkord%2C%20f.eks.%20IT-tjenester%2C%20bygg%20og%20anlegg%20eller%20renhold%3A%0A%0AHvor%20tidlig%20vil%20du%20vite%20om%20avtaler%20som%20l%C3%B8per%20ut%20%283%2C%206%20eller%2012%20m%C3%A5neder%20f%C3%B8r%29%3F%0A%0AEr%20du%20fra%20en%20redaksjon%2C%20forskning%20eller%20en%20offentlig%20virksomhet%3F%20Da%20er%20varslene%20gratis%3A%0A%0AAndre%20%C3%B8nsker%20eller%20sp%C3%B8rsm%C3%A5l%3A%0A%0AVennlig%20hilsen%0A">Meld interesse på e-post</a></p><p class="muted small">Det er gratis og forplikter ikke. Vi bruker adressen bare til å si fra når varslene er klare, og sletter den hvis du ber om det. Se <a href="vilkar.html#personvern">personvern</a>.</p>
+<h2 id="meld-interesse">Meld deg på</h2>
+<form class="signup" id="varsel-skjema" method="post" action="https://kronesporet-varsler.kronesporet.workers.dev/pamelding">
+  <p class="signup-status" role="status" hidden></p>
+  <label for="v-epost">E-post</label>
+  <input id="v-epost" name="epost" type="email" autocomplete="email" required>
+  <label for="v-kjoper">Kjøpere <span class="muted">(organisasjonsnummer, ett per linje)</span></label>
+  <textarea id="v-kjoper" name="kjoper" rows="2" placeholder="915429785"></textarea>
+  <label for="v-leverandor">Leverandører <span class="muted">(organisasjonsnummer eller navn)</span></label>
+  <textarea id="v-leverandor" name="leverandor" rows="2"></textarea>
+  <label for="v-cpv">Kategorier <span class="muted">(CPV-kode eller begynnelsen av den, f.eks. 72 for IT-tjenester
+  eller 45 for bygg og anlegg)</span></label>
+  <input id="v-cpv" name="cpv" inputmode="numeric">
+  <label for="v-sokeord">Søkeord i tittelen <span class="muted">(skill med komma)</span></label>
+  <input id="v-sokeord" name="sokeord">
+  <fieldset><legend>Varsle om avtaler som løper ut innen</legend><label class="check"><input type="checkbox" name="horisont" value="3" checked> 3 måneder</label><label class="check"><input type="checkbox" name="horisont" value="6" checked> 6 måneder</label><label class="check"><input type="checkbox" name="horisont" value="12" checked> 12 måneder</label></fieldset>
+  <label class="check"><input type="checkbox" name="csv" value="1" checked> Legg ved alle treffene med historikk fra
+  2017 som CSV</label>
+  <div class="hp" aria-hidden="true"><label>Nettside <input name="nettside" tabindex="-1" autocomplete="off"></label></div>
+  <p><button class="button" type="submit">Meld meg på</button></p>
+  <p class="muted small">Velger du både kjøpere eller leverandører og kategorier eller søkeord, får du avtalene som
+  treffer begge. Kjøpere tar med underenhetene sine. Du får en e-post for å bekrefte adressen, og hver e-post har en
+  lenke for å avslutte. Se <a href="vilkar.html#personvern">personvern</a>.</p>
+</form>
 </div>
 
 <section aria-labelledby="utlop">
