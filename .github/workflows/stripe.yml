@@ -4,6 +4,9 @@
 # - live: bruker secret STRIPE_LIVE_KEY (sk_live_...), når betalingen skal åpnes.
 # Betalingslenken og kundeportalen står i oppsummeringen av kjøringen. De er ikke hemmelige.
 # Fra andre grener enn main, eller med «status» huket av, vises bare abonnementene, og ingenting endres.
+# «Bare kundeportal» (live): lager kundeportalen uten ny betalingslenke (lenken er laget i dashbordet), skriver
+# adressen inn som STRIPE_PORTAL_URL i src/web/build.py og STRIPE_PORTAL_URL_LIVE i worker/wrangler.toml på main,
+# og bygger nettsiden og Worker-en på nytt. Da kommer vilkårene for abonnementet og oppsigelseslenken ut.
 name: Stripe-oppsett
 
 on:
@@ -14,9 +17,14 @@ on:
         type: choice
         options: [sandkasse, live]
         default: sandkasse
+      bare_kundeportal:
+        description: "Bare kundeportalen (ingen ny betalingslenke), og sett adressen inn på nettsiden"
+        type: boolean
+        default: false
 
 permissions:
-  contents: read
+  contents: write
+  actions: write
 
 concurrency:
   group: stripe-oppsett
@@ -35,6 +43,34 @@ jobs:
       - run: pip install -r requirements.txt
 
       - name: Sett opp Stripe
+        if: ${{ !inputs.bare_kundeportal }}
         env:
           STRIPE_SECRET_KEY: ${{ inputs.modus == 'live' && secrets.STRIPE_LIVE_KEY || secrets.STRIPE_SANDBOX_KEY }}
         run: python scripts/stripe_setup.py ${{ inputs.modus == 'live' && '--live' || '' }}
+
+      - name: Bare kundeportal
+        if: ${{ inputs.bare_kundeportal }}
+        env:
+          STRIPE_SECRET_KEY: ${{ inputs.modus == 'live' && secrets.STRIPE_LIVE_KEY || secrets.STRIPE_SANDBOX_KEY }}
+        run: python scripts/stripe_setup.py ${{ inputs.modus == 'live' && '--live' || '' }} --portal-only --portal-url-file "$RUNNER_TEMP/portal.txt"
+
+      - name: Sett kundeportalen inn på nettsiden og i Worker-en
+        if: ${{ inputs.bare_kundeportal && inputs.modus == 'live' && github.ref == 'refs/heads/main' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          URL="$(cat "$RUNNER_TEMP/portal.txt")"
+          case "$URL" in https://billing.stripe.com/*) ;; *) echo "Ingen gyldig portal-adresse: '$URL'"; exit 1;; esac
+          sed -i "s|^STRIPE_PORTAL_URL = .*|STRIPE_PORTAL_URL = \"$URL\"  # Stripes kundeportal (live), satt av Stripe-oppsett|" src/web/build.py
+          sed -i "s|^STRIPE_PORTAL_URL_LIVE = .*|STRIPE_PORTAL_URL_LIVE = \"$URL\"|" worker/wrangler.toml
+          if git diff --quiet; then
+            echo "- Kundeportalen var allerede satt inn: $URL" >> "$GITHUB_STEP_SUMMARY"; exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/web/build.py worker/wrangler.toml
+          git commit -m "Stripe: kundeportalen (live) på nettsiden og i Worker-en"
+          git push origin HEAD:main
+          gh workflow run nettside.yml --ref main
+          gh workflow run worker.yml --ref main
+          echo "- Satt inn på main: STRIPE_PORTAL_URL = $URL. Nettsiden og Worker-en bygges på nytt." >> "$GITHUB_STEP_SUMMARY"

@@ -17,6 +17,7 @@ import argparse
 import json
 import os
 import sys
+from pathlib import Path
 from urllib.parse import urlencode
 
 import requests
@@ -227,6 +228,10 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--webhook-url", help="Workerens adresse til /stripe/webhook")
     ap.add_argument("--webhook-secret-file", help="fil som får signeringshemmeligheten (whsec_...)")
     ap.add_argument("--status", action="store_true", help="bare vis abonnementene, endre ingenting")
+    ap.add_argument("--portal-only", action="store_true",
+                    help="bare kundeportalen (live-betalingslenken er laget i dashbordet); skriver URL-en til "
+                         "--portal-url-file")
+    ap.add_argument("--portal-url-file", help="fil som får adressen til kundeportalen")
     ap.add_argument("--webhook-only", action="store_true",
                     help="bare webhooken (live-betalingslenken er laget i dashbordet, så det skal ikke lages en til)")
     args = ap.parse_args(argv)
@@ -243,6 +248,17 @@ def main(argv: list[str] | None = None) -> int:
     # I GitHub Actions endres Stripe bare fra main; fra andre grener vises bare status.
     if args.status or os.environ.get("GITHUB_REF", "refs/heads/main") != "refs/heads/main":
         show_status(stripe)
+        return 0
+    if args.portal_only:
+        portal = ensure_portal(stripe)
+        url = (portal.get("login_page") or {}).get("url") or ""
+        print(f"STRIPE_PORTAL_URL: {url}")
+        if args.portal_url_file:
+            Path(args.portal_url_file).write_text(url, encoding="utf-8")
+        summary = os.environ.get("GITHUB_STEP_SUMMARY")
+        if summary:
+            with open(summary, "a", encoding="utf-8") as f:
+                f.write(f"## Stripe ({'live' if live else 'test'}): kundeportal\n\n- `STRIPE_PORTAL_URL`: {url}\n")
         return 0
     if args.webhook_only:
         if not args.webhook_url:
