@@ -254,7 +254,7 @@ class SmtpSender:
             if self.port != 465:
                 s.starttls()
             s.login(self.user, self.password)
-            s.send_message(to_email(msg))
+            s.send_message(to_email(msg), from_addr=self.user)  # konvolutten fra kontoen, «Fra» er varsler@
 
 
 class BrevoSender:
@@ -277,10 +277,10 @@ class BrevoSender:
 
 
 def sender_from_env():
-    """BrevoSender eller SmtpSender ut fra miljøvariablene, ellers None."""
+    """SmtpSender (egen e-postserver) når SMTP_HOST og SMTP_PASSWORD finnes, ellers BrevoSender, ellers None."""
+    if os.environ.get("SMTP_HOST") and os.environ.get("SMTP_PASSWORD"):
+        return SmtpSender(os.environ["SMTP_HOST"], int(os.environ.get("SMTP_PORT") or 465),
+                          os.environ.get("SMTP_USER") or SENDER[1], os.environ["SMTP_PASSWORD"])
     if os.environ.get("BREVO_API_KEY"):
         return BrevoSender(os.environ["BREVO_API_KEY"])
-    if os.environ.get("SMTP_HOST"):
-        return SmtpSender(os.environ["SMTP_HOST"], int(os.environ.get("SMTP_PORT") or 465),
-                          os.environ.get("SMTP_USER") or SENDER[1], os.environ.get("SMTP_PASSWORD") or "")
     return None

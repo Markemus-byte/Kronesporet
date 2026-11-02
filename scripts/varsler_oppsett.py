@@ -1,0 +1,372 @@
+"""Gjør oppsettet rundt varslene via API-er, så det eneste som må gjøres for hånd er å lage nøklene (worker/README.md).
+
+Kjøres av .github/workflows/worker.yml før Worker-en publiseres. Kan kjøres så ofte man vil; det som allerede er
+på plass, blir stående.
+
+  - Cloudflare (CLOUDFLARE_API_TOKEN): finner konto-ID-en og velger et workers.dev-underdomene hvis kontoen
+    ikke har et.
+  - Brevo (BREVO_API_KEY, valgfritt): legger til domenet kronesporet.no og avsenderen varsler@kronesporet.no, og ber Brevo
+    sjekke domenet.
+  - DNS (CPANEL_USER og CPANEL_TOKEN, valgfritt): legger postene Brevo trenger inn i sonen hos Domene.no via
+    cPanel-API-et. En DMARC- eller SPF-post som allerede finnes, beholdes (SPF får Brevo lagt til). Uten
+    cPanel-nøkkel står postene som mangler, i oppsummeringen av kjøringen.
+
+  - E-post via egen server (CPANEL_USER og CPANEL_TOKEN, eller SMTP_PASSWORD): lager postkassen
+    utsending@kronesporet.no med et passord avledet av cPanel-tokenet og sjekker at innloggingen virker. Da sendes
+    e-posten fra Domene.no-serveren, og Brevo trengs ikke. Uten den brukes Brevo.
+
+Skriver account_id, brevo_ok (true når Brevo har godkjent domenet), epost_ok (SMTP virker eller Brevo er godkjent),
+smtp_host/smtp_user/smtp_password og api_token til GITHUB_OUTPUT. api_token er
+VARSLER_API_TOKEN hvis den finnes i GitHub, ellers avledet av CLOUDFLARE_API_TOKEN (scripts/send_alerts.py
+regner ut det samme), så den ikke må lages for hånd. Ingen nøkler skrives til loggen.
+"""
+from __future__ import annotations
+
+import base64
+import hashlib
+import json
+import os
+import re
+import sys
+import time
+
+import smtplib
+import ssl
+
+import requests
+
+DOMAIN = "kronesporet.no"
+SENDER = ("Kronesporet", "varsler@kronesporet.no")
+SUBDOMAINS = ["kronesporet", "kronesporet-no", "kronesporet-varsler"]  # workers.dev, første ledige
+CF = "https://api.cloudflare.com/client/v4"
+BREVO = "https://api.brevo.com/v3"
+CPANEL = f"https://cpanel.{DOMAIN}"  # cPanel-proxyen på port 443 (2083 er ofte stengt)
+# Egen postkasse for utsendingen, så ingen av de vanlige adressene får nytt passord. E-postene sendes likevel
+# «fra» varsler@kronesporet.no. Serveren til Domene.no har SPF og DKIM for domenet fra før.
+SMTP_USER = f"utsending@{DOMAIN}"
+# cPanel-brukernavnet er ikke hemmelig (cPanel-forsiden, «Current User»), så bare tokenet må ligge i GitHub.
+CPANEL_USERNAME = "qkggefaf"
+SMTP_HOSTS = [f"mail.{DOMAIN}", "loke.domene.no"]  # det andre er servernavnet, i tilfelle sertifikatet mangler
+
+summary: list[str] = []
+
+
+def say(text: str) -> None:
+    print(text)
+    summary.append(text)
+
+
+def derived_api_token(cloudflare_token: str) -> str:
+    """Samme verdi i worker.yml og scripts/send_alerts.py, så VARSLER_API_TOKEN ikke må lages for hånd."""
+    return hashlib.sha256(f"kronesporet-varsler|{cloudflare_token}".encode()).hexdigest()
+
+
+# ---------------------------------------------------------------- Cloudflare
+
+
+def cloudflare(token: str) -> str:
+    s = requests.Session()
+    s.headers["Authorization"] = f"Bearer {token}"
+    r = s.get(f"{CF}/accounts", timeout=30)
+    r.raise_for_status()
+    accounts = r.json()["result"]
+    if not accounts:
+        say("Cloudflare: tokenet ser ingen konto. Lag det på nytt med malen «Edit Cloudflare Workers».")
+        raise SystemExit(1)
+    account = os.environ.get("CLOUDFLARE_ACCOUNT_ID") or accounts[0]["id"]
+    r = s.get(f"{CF}/accounts/{account}/workers/subdomain", timeout=30)
+    sub = r.json().get("result", {}).get("subdomain") if r.ok else None
+    for name in [] if sub else SUBDOMAINS:
+        r = s.put(f"{CF}/accounts/{account}/workers/subdomain", json={"subdomain": name}, timeout=30)
+        if r.ok:
+            sub = name
+            break
+    say(f"Cloudflare: konto funnet, workers.dev-underdomene {sub or 'ikke satt (velg et under Workers & Pages)'}")
+    return account
+
+
+# ---------------------------------------------------------------- Brevo
+
+
+class Brevo:
+    def __init__(self, key: str) -> None:
+        self.s = requests.Session()
+        self.s.headers.update({"api-key": key, "accept": "application/json"})
+
+    def call(self, method: str, path: str, body: dict | None = None) -> dict:
+        r = self.s.request(method, f"{BREVO}{path}", json=body, timeout=30)
+        if r.status_code == 401 and "IP" in r.text:
+            say("Brevo avviser GitHub sin IP-adresse. Slå av blokkeringen under Security → Authorised IPs i Brevo.")
+            raise SystemExit(1)
+        if r.status_code == 404:
+            return {}
+        r.raise_for_status()
+        return r.json() if r.content else {}
+
+
+def records(dns_records: dict) -> list[dict]:
+    """Postene Brevo ber om, som {type, name, value}; name er fullt navn uten punktum til slutt."""
+    out = []
+    for rec in (dns_records or {}).values():
+        if not isinstance(rec, dict) or not rec.get("value"):
+            continue
+        host = (rec.get("host_name") or "").strip().rstrip(".")
+        name = DOMAIN if host in ("", "@", DOMAIN) else host if host.endswith("." + DOMAIN) else f"{host}.{DOMAIN}"
+        out.append({"type": rec.get("type", "TXT").upper(), "name": name.lower(), "value": rec["value"].strip(),
+                    "ok": rec.get("status") is True})
+    return out
+
+
+def brevo_domain(brevo: Brevo) -> dict:
+    info = brevo.call("GET", f"/senders/domains/{DOMAIN}")
+    if not info:
+        brevo.call("POST", "/senders/domains", {"name": DOMAIN})
+        say(f"Brevo: domenet {DOMAIN} lagt til")
+        info = brevo.call("GET", f"/senders/domains/{DOMAIN}")
+    return info
+
+
+def brevo_sender(brevo: Brevo) -> None:
+    senders = brevo.call("GET", "/senders").get("senders", [])
+    if not any(s.get("email", "").lower() == SENDER[1] for s in senders):
+        brevo.call("POST", "/senders", {"name": SENDER[0], "email": SENDER[1]})
+        say(f"Brevo: avsenderen {SENDER[1]} lagt til")
+
+
+# ---------------------------------------------------------------- DNS i cPanel
+
+
+def cpanel_user() -> str:
+    """Brukernavnet: CPANEL_USERNAME, ellers CPANEL_USER fra GitHub hvis det ser ut som et brukernavn."""
+    for name in (CPANEL_USERNAME, os.environ.get("CPANEL_USER", "")):
+        if re.fullmatch(r"[a-z][a-z0-9_]{0,31}", name or ""):
+            return name
+    return ""
+
+
+def _norm(name: str) -> str:
+    name = name.strip().rstrip(".").lower()
+    if name in ("", "@"):
+        return DOMAIN
+    return name if name == DOMAIN or name.endswith("." + DOMAIN) else f"{name}.{DOMAIN}"
+
+
+def _relative(name: str) -> str:
+    return "@" if name == DOMAIN else name[: -len(DOMAIN) - 1]
+
+
+def plan_dns(wanted: list[dict], zone: list[dict]) -> list[dict]:
+    """Endringene som trengs. zone er [{type, name, value, line}]. Gir {op: add|edit, ...}."""
+    changes = []
+    for rec in wanted:
+        same = [z for z in zone if z["type"] == rec["type"] and z["name"] == rec["name"]]
+        if rec["type"] == "CNAME":
+            if any(z["value"].rstrip(".").lower() == rec["value"].rstrip(".").lower() for z in same):
+                continue
+            if same:  # en annen CNAME på samme navn må byttes ut; to CNAME-er på ett navn er ugyldig
+                changes.append({"op": "edit", "line": same[0]["line"], **rec})
+            else:
+                changes.append({"op": "add", **rec})
+            continue
+        if any(z["value"] == rec["value"] for z in same):
+            continue
+        if rec["value"].startswith("v=DMARC1") and any(z["value"].startswith("v=DMARC1") for z in same):
+            continue  # én DMARC-post per domene; den som finnes, holder for Brevo
+        spf = [z for z in same if z["value"].startswith("v=spf1")]
+        if rec["value"].startswith("v=spf1") and spf:
+            includes = [p for p in rec["value"].split() if p.startswith("include:")]
+            old = spf[0]["value"].split()
+            missing = [p for p in includes if p not in old]
+            if missing:
+                tail = [p for p in old if p.endswith("all")]
+                merged = [p for p in old if not p.endswith("all")] + missing + tail
+                changes.append({"op": "edit", "line": spf[0]["line"], "type": "TXT", "name": rec["name"],
+                                "value": " ".join(merged)})
+            continue
+        changes.append({"op": "add", **rec})
+    return changes
+
+
+class CPanel:
+    def __init__(self, user: str, token: str) -> None:
+        self.s = requests.Session()
+        self.s.headers["Authorization"] = f"cpanel {user}:{token}"
+
+    def call(self, func: str, params: dict, module: str = "DNS") -> dict:
+        r = self.s.get(f"{CPANEL}/execute/{module}/{func}", params=params, timeout=60)
+        r.raise_for_status()
+        data = r.json()
+        if not data.get("status"):
+            raise RuntimeError(f"cPanel {func}: {'; '.join(data.get('errors') or ['ukjent feil'])}")
+        return data
+
+    def zone(self) -> tuple[int, list[dict]]:
+        serial, out = 0, []
+        for z in self.call("parse_zone", {"zone": DOMAIN})["data"]:
+            if z.get("type") != "record":
+                continue
+            values = [base64.b64decode(v).decode() for v in z.get("data_b64", [])]
+            if z["record_type"] == "SOA":
+                serial = int(values[2])
+                continue
+            name = _norm(base64.b64decode(z["dname_b64"]).decode())
+            out.append({"type": z["record_type"], "name": name, "value": "".join(values), "line": z["line_index"]})
+        return serial, out
+
+    def apply(self, change: dict) -> None:
+        serial, _ = self.zone()
+        rec = {"dname": _relative(change["name"]), "ttl": 3600, "record_type": change["type"],
+               "data": [change["value"] if change["type"] == "TXT" else change["value"].rstrip(".") + "."]}
+        if change["op"] == "edit":
+            rec["line_index"] = change["line"]
+        self.call("mass_edit_zone", {"zone": DOMAIN, "serial": serial, change["op"]: json.dumps(rec)})
+
+
+def fix_dns(wanted: list[dict]) -> bool:
+    """True når postene er lagt inn (eller fantes fra før)."""
+    user, token = cpanel_user(), os.environ.get("CPANEL_TOKEN", "")
+    if not (user and token):
+        say("DNS: CPANEL_TOKEN mangler i GitHub, så postene må legges inn for hånd:")
+        for rec in wanted:
+            if not rec["ok"]:
+                say(f"  {rec['type']}  {rec['name']}  →  {rec['value']}")
+        return False
+    cp = CPanel(user, token)
+    _, zone = cp.zone()
+    changes = plan_dns(wanted, zone)
+    for c in changes:
+        cp.apply(c)
+        say(f"DNS: {'la inn' if c['op'] == 'add' else 'endret'} {c['type']} {c['name']} → {c['value']}")
+    if not changes:
+        say("DNS: postene Brevo trenger, er på plass")
+    return True
+
+
+# ---------------------------------------------------------------- SMTP på egen e-postserver
+
+
+def derived_smtp_password(cpanel_token: str) -> str:
+    """Passordet til utsending@ avledes av cPanel-tokenet, så det ikke må lages eller lagres for hånd."""
+    return "Ks-" + hashlib.sha256(f"kronesporet-smtp|{cpanel_token}".encode()).hexdigest()[:32] + "-9q"
+
+
+def ensure_mailbox(cp: CPanel, password: str) -> None:
+    local = SMTP_USER.split("@")[0]
+    pops = cp.call("list_pops", {}, module="Email").get("data") or []
+    if any((p.get("email") or "").lower() == SMTP_USER for p in pops):
+        cp.call("passwd_pop", {"email": local, "domain": DOMAIN, "password": password}, module="Email")
+    else:
+        cp.call("add_pop", {"email": local, "domain": DOMAIN, "password": password, "quota": 250}, module="Email")
+        say(f"E-post: postkassen {SMTP_USER} er laget for utsendingen")
+
+
+def smtp_login(host: str, user: str, password: str) -> str | None:
+    """None når innloggingen virker, ellers feilen."""
+    try:
+        with smtplib.SMTP_SSL(host, 465, timeout=30, context=ssl.create_default_context()) as smtp:
+            smtp.login(user, password)
+        return None
+    except (OSError, smtplib.SMTPException) as e:
+        return f"{type(e).__name__}: {str(e)[:160]}"
+
+
+def smtp_config(ensure: bool = False) -> dict | None:
+    """{host, user, password} for SMTP, fra SMTP_PASSWORD eller cPanel-nøkkelen. None når ingen av dem virker."""
+    env = os.environ
+    user, password, host = env.get("SMTP_USER") or "", env.get("SMTP_PASSWORD") or "", env.get("SMTP_HOST") or ""
+    if not password and cpanel_user() and env.get("CPANEL_TOKEN"):
+        user, password = SMTP_USER, derived_smtp_password(env["CPANEL_TOKEN"])
+        if ensure:
+            try:
+                ensure_mailbox(CPanel(cpanel_user(), env["CPANEL_TOKEN"]), password)
+            except (requests.RequestException, RuntimeError) as e:
+                say(f"E-post: fikk ikke laget postkassen {SMTP_USER} i cPanel ({str(e)[:200]})")
+                return None
+    if not password:
+        return None
+    print(f"::add-mask::{password}")
+    user = user or SMTP_USER
+    errors = []
+    for attempt in range(2):  # en ny postkasse kan bruke noen sekunder før den tar imot innlogging
+        for h in [host] if host else SMTP_HOSTS:
+            err = smtp_login(h, user, password)
+            if err is None:
+                return {"host": h, "user": user, "password": password}
+            errors.append(f"{h}: {err}")
+        time.sleep(15 if attempt == 0 else 0)
+    say("E-post: innloggingen på e-postserveren feilet (" + "; ".join(errors[-2:]) + ")")
+    return None
+
+
+# ---------------------------------------------------------------- hovedløp
+
+
+def output(**values: str) -> None:
+    path = os.environ.get("GITHUB_OUTPUT")
+    if path:
+        with open(path, "a", encoding="utf-8") as f:
+            for k, v in values.items():
+                f.write(f"{k}={v}\n")
+
+
+def write_summary() -> None:
+    if os.environ.get("GITHUB_STEP_SUMMARY"):
+        with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as f:
+            f.write("## Oppsett\n\n" + "\n".join(f"  - `{line.strip()}`" if line.startswith("  ") else f"- {line}"
+                                                for line in summary) + "\n\n")
+
+
+def main() -> int:
+    try:
+        return run()
+    finally:
+        write_summary()
+
+
+def run() -> int:
+    present = [n for n in ("CLOUDFLARE_API_TOKEN", "CPANEL_TOKEN", "BREVO_API_KEY", "STRIPE_SANDBOX_KEY", "SMTP_PASSWORD")
+               if os.environ.get(n)]
+    say("Secrets i GitHub: " + (", ".join(present) or "ingen") + f"; cPanel-bruker: {cpanel_user() or 'mangler'}")
+    cf_token = os.environ.get("CLOUDFLARE_API_TOKEN", "")
+    if not cf_token:
+        say("CLOUDFLARE_API_TOKEN mangler i GitHub; se worker/README.md")
+        output(klar="false")
+        return 0
+    api_token = os.environ.get("VARSLER_API_TOKEN") or derived_api_token(cf_token)
+    print(f"::add-mask::{api_token}")
+    account = cloudflare(cf_token)
+
+    smtp = smtp_config(ensure=True)
+    if smtp:
+        say(f"E-post: sendes fra egen e-postserver ({smtp['host']}, som {smtp['user']}), Brevo trengs ikke")
+
+    brevo_ok = False
+    key = os.environ.get("BREVO_API_KEY", "")
+    if not key and not smtp:
+        say("CPANEL_TOKEN mangler i GitHub, så Worker-en kan ikke sende e-post ennå")
+    elif key and not smtp:
+        try:
+            brevo = Brevo(key)
+            info = brevo_domain(brevo)
+            brevo_ok = bool(info.get("authenticated"))
+            if not brevo_ok:
+                if fix_dns(records(info.get("dns_records", {}))):
+                    for _ in range(3):  # Brevo slår opp DNS selv; nye poster kan bruke litt tid
+                        brevo.call("PUT", f"/senders/domains/{DOMAIN}/authenticate")
+                        brevo_ok = bool(brevo.call("GET", f"/senders/domains/{DOMAIN}").get("authenticated"))
+                        if brevo_ok:
+                            break
+                        time.sleep(60)
+            brevo_sender(brevo)
+            say(f"Brevo: domenet er {'godkjent' if brevo_ok else 'ikke godkjent ennå (sjekkes igjen ved neste kjøring)'}")
+        except (requests.RequestException, RuntimeError) as e:  # Brevo er bare reserve; feil der stopper ikke resten
+            say(f"Brevo: {str(e)[:200]}")
+
+    output(klar="true", account_id=account, brevo_ok=str(brevo_ok).lower(), api_token=api_token,
+           epost_ok=str(bool(smtp) or brevo_ok).lower(), smtp_host=smtp["host"] if smtp else "",
+           smtp_user=smtp["user"] if smtp else "", smtp_password=smtp["password"] if smtp else "")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

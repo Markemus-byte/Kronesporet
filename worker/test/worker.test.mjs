@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { DatabaseSync } from "node:sqlite";
 import { test } from "node:test";
 
-import worker, { parseSelection, verifyStripe } from "../src/index.js";
+import worker, { mimeMessage, parseSelection, smtpSend, verifyStripe } from "../src/index.js";
 
 const SCHEMA = readFileSync(new URL("../schema.sql", import.meta.url), "utf8");
 
@@ -146,4 +146,53 @@ test("Stripe-signatur med gammelt tidsstempel avvises", async () => {
   const sig = createHmac("sha256", "s").update(`${t}.{}`).digest("hex");
   assert.equal(await verifyStripe("{}", `t=${t},v1=${sig}`, "s", 300, t + 10), true);
   assert.equal(await verifyStripe("{}", `t=${t},v1=${sig}`, "s", 300, t + 1000), false);
+});
+
+// Falsk SMTP-server: svarer på hver kommando og tar vare på det klienten skriver.
+function fakeSmtp(replies) {
+  const sent = [];
+  let push;
+  const readable = new ReadableStream({ start(c) { push = (s) => c.enqueue(new TextEncoder().encode(s)); } });
+  const queue = [...replies];
+  const writable = new WritableStream({
+    write(chunk) {
+      const line = new TextDecoder().decode(chunk);
+      sent.push(line);
+      if (!line.startsWith("QUIT") && queue.length) push(queue.shift());
+    },
+  });
+  const connect = (addr, opts) => {
+    sent.push(`connect ${addr.hostname}:${addr.port} ${opts.secureTransport}`);
+    push(queue.shift());
+    return { readable, writable, close: async () => {} };
+  };
+  return { sent, connect };
+}
+
+test("SMTP: logger inn, sender og koder norske tegn", async () => {
+  const smtp = fakeSmtp(["220 loke ESMTP\r\n", "250-loke\r\n250 AUTH PLAIN LOGIN\r\n", "235 ok\r\n", "250 ok\r\n",
+                         "250 ok\r\n", "354 go\r\n", "250 queued\r\n"]);
+  const env = { SMTP_HOST: "mail.kronesporet.no", SMTP_USER: "utsending@kronesporet.no", SMTP_PASSWORD: "pw",
+                AVSENDER: "varsler@kronesporet.no" };
+  await smtpSend(env, "a@example.no", "Bekreft påmeldingen", "Hei på deg", "<p>Hei</p>", smtp.connect);
+  assert.equal(smtp.sent[0], "connect mail.kronesporet.no:465 on");
+  assert.equal(smtp.sent[2], `AUTH PLAIN ${btoa("\0utsending@kronesporet.no\0pw")}\r\n`);
+  assert.equal(smtp.sent[3], "MAIL FROM:<utsending@kronesporet.no>\r\n");
+  assert.ok(smtp.sent[6].includes("From: Kronesporet <varsler@kronesporet.no>"));
+  assert.ok(smtp.sent[6].endsWith("\r\n.\r\n"));
+  assert.equal(smtp.sent.at(-1), "QUIT\r\n");
+});
+
+test("SMTP: feil fra serveren stopper sendingen", async () => {
+  const smtp = fakeSmtp(["220 hei\r\n", "250 ok\r\n", "535 Incorrect authentication data\r\n"]);
+  await assert.rejects(smtpSend({ SMTP_PASSWORD: "feil", AVSENDER: "varsler@kronesporet.no" }, "a@example.no", "x", "y",
+                                "z", smtp.connect), /SMTP AUTH: 535/);
+});
+
+test("MIME: emne med æøå kodes, brødteksten er base64", () => {
+  const m = mimeMessage({ from: "varsler@kronesporet.no", to: "a@example.no", subject: "Bekreft påmeldingen",
+                          text: "Hei", html: "<p>Hei</p>", id: "x" });
+  assert.ok(m.includes(`Subject: =?UTF-8?B?${Buffer.from("Bekreft påmeldingen").toString("base64")}?=`));
+  assert.ok(m.includes(Buffer.from("Hei").toString("base64")));
+  assert.ok(!/\r\n\./.test(m));
 });
