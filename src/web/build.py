@@ -213,7 +213,8 @@ def page(title: str, body: str, root: str = "", active: str = "", description: s
     <a href="https://data.norge.no/nlod/no/2.0">Norsk lisens for offentlige data (NLOD 2.0)</a>.
     Kronesporet er ikke tilknyttet DFØ, Digdir eller Brønnøysundregistrene.</p>
     <p>{data_date}<a href="{root}om.html">Om dataene og metoden</a> ·
-    <a href="{root}vilkar.html">Vilkår og personvern</a>{
+    <a href="{root}vilkar.html">Vilkår og personvern</a> ·
+    <a href="{root}support.html">Kundestøtte</a>{
     f' · Kontakt: <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>' if CONTACT_EMAIL else ""}.</p>
     <p>{COPYRIGHT}</p>
   </div>
@@ -2194,6 +2195,51 @@ står fortsatt i Doffin. {contact}</li>
                 description="Vilkår for bruk av Kronesporet, forbehold, retting av feil og personvern.")
 
 
+def support_page() -> str:
+    """Kundestøtte for abonnementet på varsler (lenket fra Stripe og bunnteksten)."""
+    mail = CONTACT_EMAIL or ALERTS_EMAIL
+    link = f'<a href="mailto:{escape(mail)}">{escape(mail)}</a>'
+    cancel = (f'Du endrer kort, ser kvitteringer og sier opp i <a href="{escape(STRIPE_PORTAL_URL)}">kundeportalen</a>. '
+              "Logg inn med e-postadressen du betalte med."
+              if STRIPE_PORTAL_URL else
+              f"Send en e-post til {link} fra adressen du abonnerer med, så sier vi opp abonnementet eller bytter "
+              "kort for deg samme dag.")
+    seller = f" Selger er {escape(SELLER)}." if SELLER else ""
+    body = f"""<section class="hero">
+  <h1>Kundestøtte</h1>
+  <p class="lede">Spørsmål om varslene, en betaling eller abonnementet? Skriv til {link}. Vi svarer innen én
+  virkedag.</p>
+</section>
+<div class="prose">
+<h2 id="kontakt">Kontakt</h2>
+<p>E-post: {link}. Skriv gjerne hvilket firma og hvilken e-postadresse det gjelder.{seller}</p>
+
+<h2 id="varsler">Hva varslene er</h2>
+<p>Kronesporet sender e-postvarsler om nye offentlige tildelinger og om avtaler som løper ut om 12, 6 og 3
+måneder, hos kjøperne, leverandørene eller kategoriene du følger. Les mer på <a href="varsler.html">varslingssiden</a>.</p>
+
+<h2 id="pris">Pris og prøveperiode</h2>
+<p>{escape(PAID_ALERTS_PRICE) if PAID_ALERTS_PRICE else "Prisen står på varslingssiden"}. De første {TRIAL_DAYS} dagene
+er gratis, og sier du opp i prøveperioden, betaler du ingenting. Betalingen går via Stripe, og Kronesporet ser
+ikke kortnummeret ditt.</p>
+
+<h2 id="endre">Endre eller si opp</h2>
+<p>{cancel} Oppsigelsen gjelder fra slutten av perioden du har betalt for. Vil du endre hva du følger, svarer du
+på et av varslene eller skriver til {link}.</p>
+
+<h2 id="faktura">Faktura og kvittering</h2>
+<p>Stripe sender kvittering på e-post for hver betaling. Trenger du faktura til regnskapet, eller vil du heller
+betale med faktura, skriver du til {link}.</p>
+
+<h2 id="vilkar">Vilkår og personvern</h2>
+<p>Vilkårene for abonnementet og hvordan vi behandler opplysninger, står på
+<a href="vilkar.html">vilkårsiden</a> og under <a href="vilkar.html#personvern">personvern</a>.</p>
+</div>
+"""
+    return page("Kundestøtte", body, path="support.html",
+                description="Kontakt, prøveperiode, oppsigelse og faktura for varsler fra Kronesporet.")
+
+
 def not_found_page() -> str:
     """404-siden. Den vises på vilkårlige adresser, så lenkene må være absolutte når adressen er kjent."""
     root = _SITE["base_url"]
@@ -2371,8 +2417,9 @@ def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "",
     (out / "om.html").write_text(about_page(latest), encoding="utf-8")
     (out / "404.html").write_text(not_found_page(), encoding="utf-8")
     (out / "vilkar.html").write_text(terms_page(), encoding="utf-8")
+    (out / "support.html").write_text(support_page(), encoding="utf-8")
     (out / "varsler.html").write_text(alerts_page(*(expiring or ("", []))), encoding="utf-8")
-    pages += 2
+    pages += 3
     if len(datasets) > 1:
         (out / "ar").mkdir()
         for ds in (d for d in datasets if d is not latest):
