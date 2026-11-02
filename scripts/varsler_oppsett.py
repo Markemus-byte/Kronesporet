@@ -26,6 +26,7 @@ import base64
 import hashlib
 import json
 import os
+import re
 import sys
 import time
 
@@ -43,6 +44,8 @@ CPANEL = f"https://cpanel.{DOMAIN}"  # cPanel-proxyen på port 443 (2083 er ofte
 # Egen postkasse for utsendingen, så ingen av de vanlige adressene får nytt passord. E-postene sendes likevel
 # «fra» varsler@kronesporet.no. Serveren til Domene.no har SPF og DKIM for domenet fra før.
 SMTP_USER = f"utsending@{DOMAIN}"
+# cPanel-brukernavnet er ikke hemmelig (cPanel-forsiden, «Current User»), så bare tokenet må ligge i GitHub.
+CPANEL_USERNAME = "qkggefaf"
 SMTP_HOSTS = [f"mail.{DOMAIN}", "loke.domene.no"]  # det andre er servernavnet, i tilfelle sertifikatet mangler
 
 summary: list[str] = []
@@ -133,6 +136,14 @@ def brevo_sender(brevo: Brevo) -> None:
 # ---------------------------------------------------------------- DNS i cPanel
 
 
+def cpanel_user() -> str:
+    """Brukernavnet: CPANEL_USERNAME, ellers CPANEL_USER fra GitHub hvis det ser ut som et brukernavn."""
+    for name in (CPANEL_USERNAME, os.environ.get("CPANEL_USER", "")):
+        if re.fullmatch(r"[a-z][a-z0-9_]{0,31}", name or ""):
+            return name
+    return ""
+
+
 def _norm(name: str) -> str:
     name = name.strip().rstrip(".").lower()
     if name in ("", "@"):
@@ -213,9 +224,9 @@ class CPanel:
 
 def fix_dns(wanted: list[dict]) -> bool:
     """True når postene er lagt inn (eller fantes fra før)."""
-    user, token = os.environ.get("CPANEL_USER", ""), os.environ.get("CPANEL_TOKEN", "")
+    user, token = cpanel_user(), os.environ.get("CPANEL_TOKEN", "")
     if not (user and token):
-        say("DNS: ingen cPanel-nøkkel i GitHub (CPANEL_USER og CPANEL_TOKEN), så postene må legges inn for hånd:")
+        say("DNS: CPANEL_TOKEN mangler i GitHub, så postene må legges inn for hånd:")
         for rec in wanted:
             if not rec["ok"]:
                 say(f"  {rec['type']}  {rec['name']}  →  {rec['value']}")
@@ -263,10 +274,14 @@ def smtp_config(ensure: bool = False) -> dict | None:
     """{host, user, password} for SMTP, fra SMTP_PASSWORD eller cPanel-nøkkelen. None når ingen av dem virker."""
     env = os.environ
     user, password, host = env.get("SMTP_USER") or "", env.get("SMTP_PASSWORD") or "", env.get("SMTP_HOST") or ""
-    if not password and env.get("CPANEL_USER") and env.get("CPANEL_TOKEN"):
+    if not password and cpanel_user() and env.get("CPANEL_TOKEN"):
         user, password = SMTP_USER, derived_smtp_password(env["CPANEL_TOKEN"])
         if ensure:
-            ensure_mailbox(CPanel(env["CPANEL_USER"], env["CPANEL_TOKEN"]), password)
+            try:
+                ensure_mailbox(CPanel(cpanel_user(), env["CPANEL_TOKEN"]), password)
+            except (requests.RequestException, RuntimeError) as e:
+                say(f"E-post: fikk ikke laget postkassen {SMTP_USER} i cPanel ({str(e)[:200]})")
+                return None
     if not password:
         return None
     print(f"::add-mask::{password}")
@@ -309,6 +324,9 @@ def main() -> int:
 
 
 def run() -> int:
+    present = [n for n in ("CLOUDFLARE_API_TOKEN", "CPANEL_TOKEN", "BREVO_API_KEY", "STRIPE_SANDBOX_KEY", "SMTP_PASSWORD")
+               if os.environ.get(n)]
+    say("Secrets i GitHub: " + (", ".join(present) or "ingen") + f"; cPanel-bruker: {cpanel_user() or 'mangler'}")
     cf_token = os.environ.get("CLOUDFLARE_API_TOKEN", "")
     if not cf_token:
         say("CLOUDFLARE_API_TOKEN mangler i GitHub; se worker/README.md")
@@ -325,22 +343,24 @@ def run() -> int:
     brevo_ok = False
     key = os.environ.get("BREVO_API_KEY", "")
     if not key and not smtp:
-        say("Verken cPanel-nøkkel (CPANEL_USER og CPANEL_TOKEN) eller BREVO_API_KEY i GitHub, så Worker-en kan ikke "
-            "sende e-post ennå")
-    elif key:
-        brevo = Brevo(key)
-        info = brevo_domain(brevo)
-        brevo_ok = bool(info.get("authenticated"))
-        if not brevo_ok:
-            if fix_dns(records(info.get("dns_records", {}))):
-                for _ in range(3):  # Brevo slår opp DNS selv; nye poster kan bruke litt tid
-                    brevo.call("PUT", f"/senders/domains/{DOMAIN}/authenticate")
-                    brevo_ok = bool(brevo.call("GET", f"/senders/domains/{DOMAIN}").get("authenticated"))
-                    if brevo_ok:
-                        break
-                    time.sleep(60)
-        brevo_sender(brevo)
-        say(f"Brevo: domenet er {'godkjent' if brevo_ok else 'ikke godkjent ennå (sjekkes igjen ved neste kjøring)'}")
+        say("CPANEL_TOKEN mangler i GitHub, så Worker-en kan ikke sende e-post ennå")
+    elif key and not smtp:
+        try:
+            brevo = Brevo(key)
+            info = brevo_domain(brevo)
+            brevo_ok = bool(info.get("authenticated"))
+            if not brevo_ok:
+                if fix_dns(records(info.get("dns_records", {}))):
+                    for _ in range(3):  # Brevo slår opp DNS selv; nye poster kan bruke litt tid
+                        brevo.call("PUT", f"/senders/domains/{DOMAIN}/authenticate")
+                        brevo_ok = bool(brevo.call("GET", f"/senders/domains/{DOMAIN}").get("authenticated"))
+                        if brevo_ok:
+                            break
+                        time.sleep(60)
+            brevo_sender(brevo)
+            say(f"Brevo: domenet er {'godkjent' if brevo_ok else 'ikke godkjent ennå (sjekkes igjen ved neste kjøring)'}")
+        except (requests.RequestException, RuntimeError) as e:  # Brevo er bare reserve; feil der stopper ikke resten
+            say(f"Brevo: {str(e)[:200]}")
 
     output(klar="true", account_id=account, brevo_ok=str(brevo_ok).lower(), api_token=api_token,
            epost_ok=str(bool(smtp) or brevo_ok).lower(), smtp_host=smtp["host"] if smtp else "",

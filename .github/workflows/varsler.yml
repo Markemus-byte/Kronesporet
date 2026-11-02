@@ -86,7 +86,7 @@ jobs:
           VARSLER_API_TOKEN: ${{ secrets.VARSLER_API_TOKEN }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
-          CPANEL_USER: ${{ secrets.CPANEL_USER }}
+          CPANEL_USER: ${{ vars.CPANEL_USER }}
           CPANEL_TOKEN: ${{ secrets.CPANEL_TOKEN }}
           SMTP_HOST: ${{ secrets.SMTP_HOST }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
