@@ -27,7 +27,8 @@ Ingen e-postadresser ligger i repoet. De ligger bare i D1 (og i Stripe for dem s
 Alt annet gjør arbeidsflyten [*Worker*](https://github.com/Markemus-byte/Kronesporet/actions/workflows/worker.yml)
 selv (`scripts/varsler_oppsett.py`): Cloudflare-konto-ID og workers.dev-underdomene, databasen, Worker-en,
 postkassen utsending@kronesporet.no som e-posten sendes fra, Stripe-webhooken og til slutt skjemaet på nettsiden.
-Den kjører hver morgen til alt er på plass. Du trenger bare å lage to nøkler og lime dem inn som
+Den kjører hver morgen til alt er på plass, og prøver påmeldingen fra start til slutt hver gang
+(`scripts/varsler_e2e.py`). Du trenger bare å lage to nøkler og lime dem inn som
 GitHub-secrets under [*Settings → Secrets and variables → Actions → New repository secret*](https://github.com/Markemus-byte/Kronesporet/settings/secrets/actions/new).
 Lim aldri nøklene inn noe annet sted.
 
@@ -43,8 +44,7 @@ Lim aldri nøklene inn noe annet sted.
 **2. cPanel hos Domene.no (3 min)**, så e-posten sendes fra din egen e-postserver
 1. Logg inn i cPanel → *Security* → *Manage API Tokens* → *Create*. Navn `github`, la utløpsdato stå tom → *Create*
    → kopier tokenet (vises bare én gang). Lagre som secret `CPANEL_TOKEN`.
-2. Brukernavnet står i cPanel i høyre kolonne under *General Information → Current User*. Lagre det som
-   secret `CPANEL_USER`.
+Brukernavnet (`qkggefaf`) står som `CPANEL_USERNAME` i `scripts/varsler_oppsett.py`, så det trengs ikke i GitHub.
 
 Arbeidsflyten lager da postkassen utsending@kronesporet.no med et passord den regner ut av tokenet, og sender
 bekreftelser og varsler gjennom mail.kronesporet.no (port 465), «fra» varsler@kronesporet.no. Serveren har SPF og
