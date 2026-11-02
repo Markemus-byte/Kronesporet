@@ -124,8 +124,9 @@ har prøvd. Alt gjøres i én økt, på samme side i GitHub:
 1. **Stripe live** (5 min): i Stripe, slå av *Test mode*/sandkassen, fullfør det Stripe ber om for å aktivere
    betalinger (bankkonto og legitimasjon), og trykk *Resend* på e-postbekreftelsen (e-posten virker nå). Under
    *Developers → API keys*, kopier *Secret key* (`sk_live_...`) og lagre den som **STRIPE_LIVE_KEY**.
-2. **De fire nøklene for varslene** (10 min), som beskrevet i [worker/README.md](../worker/README.md):
-   **CLOUDFLARE_API_TOKEN**, **BREVO_API_KEY**, **CPANEL_TOKEN** og **CPANEL_USER**.
+2. **De tre nøklene for varslene** (10 min), som beskrevet i [worker/README.md](../worker/README.md):
+   **CLOUDFLARE_API_TOKEN**, **CPANEL_TOKEN** og **CPANEL_USER**. Ingen Brevo: varslene sendes fra
+   utsending@kronesporet.no på Domene.no-serveren, og den postkassen lager arbeidsflyten selv.
 3. Flett de åpne PR-ene.
 
 Resten gjøres fra GitHub Actions uten deg: *Stripe-oppsett* i modus `live` lager den ekte betalingslenken (med 14
