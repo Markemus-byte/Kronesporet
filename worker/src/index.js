@@ -7,7 +7,7 @@
 //   POST /slett?t=         slett abonnenten helt
 //   GET  /api/abonnenter   for scripts/send_alerts.py (Bearer API_TOKEN)
 //   POST /api/sendt        scripts/send_alerts.py melder inn sendte varsler (Bearer API_TOKEN)
-//   POST /stripe/webhook   betalingsstatus fra Stripe (STRIPE_WEBHOOK_SECRET)
+//   POST /stripe/webhook   betalingsstatus fra Stripe (STRIPE_WEBHOOK_SECRET_LIVE, før live: STRIPE_WEBHOOK_SECRET)
 //
 // Datamodellen er i schema.sql. Hemmeligheter (wrangler secret put): API_TOKEN, STRIPE_WEBHOOK_SECRET, og for e-post
 // enten SMTP_HOST/SMTP_USER/SMTP_PASSWORD (egen e-postserver) eller BREVO_API_KEY.
@@ -249,8 +249,9 @@ async function confirm(url, env) {
   await env.DB.batch(stmts);
 
   if (["active", "gratis"].includes(row.status)) return back(env, "bekreftet");
-  if (env.STRIPE_PAYMENT_LINK) {
-    const pay = new URL(env.STRIPE_PAYMENT_LINK);
+  const { link } = stripeMode(env);
+  if (link) {
+    const pay = new URL(link);
     pay.searchParams.set("prefilled_email", row.email);
     pay.searchParams.set("client_reference_id", row.token);
     return Response.redirect(pay.toString(), 303);
@@ -260,9 +261,19 @@ async function confirm(url, env) {
 
 // --- avmelding og sletting --------------------------------------------------------
 
+// Live så snart live-webhooken finnes (STRIPE_WEBHOOK_SECRET_LIVE), så ingen betaler uten at betalingen registreres.
+// Før det brukes lenkene og webhooken fra sandkassen.
+export function stripeMode(env) {
+  return env.STRIPE_WEBHOOK_SECRET_LIVE
+    ? { live: true, link: env.STRIPE_PAYMENT_LINK_LIVE, portal: env.STRIPE_PORTAL_URL_LIVE,
+        secret: env.STRIPE_WEBHOOK_SECRET_LIVE }
+    : { live: false, link: env.STRIPE_PAYMENT_LINK, portal: env.STRIPE_PORTAL_URL, secret: env.STRIPE_WEBHOOK_SECRET };
+}
+
 function portalLine(env) {
-  return env.STRIPE_PORTAL_URL
-    ? `<p>Betaler du for varslene, sier du opp betalingen i <a href="${escapeHtml(env.STRIPE_PORTAL_URL)}">kundeportalen</a>.</p>`
+  const { portal } = stripeMode(env);
+  return portal
+    ? `<p>Betaler du for varslene, sier du opp betalingen i <a href="${escapeHtml(portal)}">kundeportalen</a>.</p>`
     : "";
 }
 
@@ -347,10 +358,12 @@ const STRIPE_STATUS = { active: "active", trialing: "active", past_due: "past_du
 
 async function stripeWebhook(request, env) {
   const body = await request.text();
-  if (!(await verifyStripe(body, request.headers.get("stripe-signature"), env.STRIPE_WEBHOOK_SECRET))) {
+  const mode = stripeMode(env);
+  if (!(await verifyStripe(body, request.headers.get("stripe-signature"), mode.secret))) {
     return new Response("Ugyldig signatur", { status: 400 });
   }
   const event = JSON.parse(body);
+  if (mode.live && event.livemode !== true) return Response.json({ ok: true, ignorert: "testhendelse" });
   const fresh = await env.DB.prepare("INSERT OR IGNORE INTO stripe_hendelser (id, type) VALUES (?, ?)")
     .bind(event.id, event.type).run();
   if (!fresh.meta.changes) return Response.json({ ok: true, duplikat: true });
