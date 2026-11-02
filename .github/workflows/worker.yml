@@ -1,13 +1,16 @@
 # Setter opp og oppdaterer varslene (worker/) helt fra GitHub, så ingenting må installeres eller klikkes lokalt.
 # Det eneste som trengs, er nøklene i GitHub-secrets (worker/README.md). Hver kjøring gjør det som mangler:
-# - scripts/varsler_oppsett.py: Cloudflare-konto og workers.dev-underdomene, Brevo-domenet og avsenderen
-#   varsler@kronesporet.no, og DNS-postene for Brevo i cPanel (når CPANEL_USER og CPANEL_TOKEN finnes).
+# - scripts/varsler_oppsett.py: Cloudflare-konto og workers.dev-underdomene, og e-posten: postkassen
+#   utsending@kronesporet.no på Domene.no-serveren via cPanel (CPANEL_USER og CPANEL_TOKEN), eller Brevo-domenet,
+#   avsenderen og DNS-postene for Brevo når BREVO_API_KEY finnes.
 # - Lager D1-databasen kronesporet-varsler første gang og legger inn tabellene (schema.sql tåler å kjøres på nytt).
-# - Publiserer Worker-en og legger inn hemmelighetene API_TOKEN, BREVO_API_KEY og STRIPE_WEBHOOK_SECRET.
+# - Publiserer Worker-en og legger inn hemmelighetene API_TOKEN, SMTP_HOST/SMTP_USER/SMTP_PASSWORD, BREVO_API_KEY og
+#   STRIPE_WEBHOOK_SECRET (de som finnes).
 # - Stripe-webhook: lages automatisk når Worker-en ikke har STRIPE_WEBHOOK_SECRET og STRIPE_SANDBOX_KEY finnes.
 #   Signeringshemmeligheten går rett inn i Worker-en og vises ingen steder. «Stripe-webhook» ved manuell kjøring
 #   lager den på nytt med ny hemmelighet.
-# - Når Brevo har godkjent domenet og Worker-en svarer: setter ALERTS_API i src/web/build.py på main og bygger
+# - Når e-posten virker (SMTP eller godkjent Brevo-domene) og Worker-en svarer: setter ALERTS_API i
+#   src/web/build.py på main og bygger
 #   nettsiden, så skjemaet og «Få varsel»-lenkene kommer ut, og arbeidsflyten Varsler begynner å sende.
 # Kjører ved endringer i worker/ på main, hver morgen (så ventetid på DNS hos Brevo tas igjen av seg selv) og
 # manuelt. Nettsiden slås bare på fra main. Uten CLOUDFLARE_API_TOKEN gjør den ingenting.
@@ -63,6 +66,9 @@ jobs:
           BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
           CPANEL_USER: ${{ secrets.CPANEL_USER }}
           CPANEL_TOKEN: ${{ secrets.CPANEL_TOKEN }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
         run: |
           pip install -q -r requirements.txt
           python scripts/varsler_oppsett.py
@@ -106,8 +112,11 @@ jobs:
           API_TOKEN: ${{ steps.oppsett.outputs.api_token }}
           BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
           STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          SMTP_HOST: ${{ steps.oppsett.outputs.smtp_host }}
+          SMTP_USER: ${{ steps.oppsett.outputs.smtp_user }}
+          SMTP_PASSWORD: ${{ steps.oppsett.outputs.smtp_password }}
         run: |
-          for name in API_TOKEN BREVO_API_KEY STRIPE_WEBHOOK_SECRET; do
+          for name in API_TOKEN BREVO_API_KEY STRIPE_WEBHOOK_SECRET SMTP_HOST SMTP_USER SMTP_PASSWORD; do
             if [ -n "${!name}" ]; then
               printf '%s' "${!name}" | $WRANGLER secret put "$name"
               echo "- $name lagt inn i Worker-en" >> "$GITHUB_STEP_SUMMARY"
@@ -141,7 +150,7 @@ jobs:
       - name: Slå på varslene på nettsiden
         if: >-
           github.ref == 'refs/heads/main' &&
-          steps.oppsett.outputs.brevo_ok == 'true' && steps.publiser.outputs.url != ''
+          steps.oppsett.outputs.epost_ok == 'true' && steps.publiser.outputs.url != ''
         working-directory: .
         env:
           WORKER_URL: ${{ steps.publiser.outputs.url }}

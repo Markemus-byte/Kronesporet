@@ -7,7 +7,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from scripts.varsler_oppsett import _relative, derived_api_token, plan_dns, records  # noqa: E402
+import os  # noqa: E402
+from unittest import mock  # noqa: E402
+
+from scripts.varsler_oppsett import _relative, derived_api_token, derived_smtp_password, plan_dns, records  # noqa: E402
+from src.alerts.mail import BrevoSender, SmtpSender, sender_from_env  # noqa: E402
 
 ZONE = [
     {"type": "TXT", "name": "kronesporet.no", "line": 10,
@@ -55,6 +59,22 @@ class DnsPlanTest(unittest.TestCase):
         self.assertEqual(derived_api_token("x"), derived_api_token("x"))
         self.assertNotEqual(derived_api_token("x"), derived_api_token("y"))
         self.assertEqual(len(derived_api_token("x")), 64)
+
+
+class MailChoiceTest(unittest.TestCase):
+    def test_smtp_before_brevo(self) -> None:
+        env = {"SMTP_HOST": "mail.kronesporet.no", "SMTP_PASSWORD": "pw", "BREVO_API_KEY": "k"}
+        with mock.patch.dict(os.environ, env, clear=True):
+            self.assertIsInstance(sender_from_env(), SmtpSender)
+        with mock.patch.dict(os.environ, {"BREVO_API_KEY": "k"}, clear=True):
+            self.assertIsInstance(sender_from_env(), BrevoSender)
+        with mock.patch.dict(os.environ, {}, clear=True):
+            self.assertIsNone(sender_from_env())
+
+    def test_smtp_password(self) -> None:
+        pw = derived_smtp_password("tok")
+        self.assertEqual(pw, derived_smtp_password("tok"))
+        self.assertTrue(len(pw) >= 30 and any(c.isupper() for c in pw) and "-" in pw)
 
 
 if __name__ == "__main__":

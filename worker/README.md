@@ -1,7 +1,7 @@
 # Varsler (Cloudflare Worker + D1)
 
 Workeren tar imot påmeldinger fra skjemaet på [kronesporet.no/varsler.html](https://kronesporet.no/varsler.html),
-sender e-post for å bekrefte adressen, sender bekreftede abonnenter videre til betaling i Stripe, tar imot
+sender e-post for å bekrefte adressen (via egen e-postserver eller Brevo), sender bekreftede abonnenter videre til betaling i Stripe, tar imot
 betalingsstatus fra Stripe og gir abonnentlisten til utsendingen i GitHub Actions.
 
 ```
@@ -25,9 +25,9 @@ Ingen e-postadresser ligger i repoet. De ligger bare i D1 (og i Stripe for dem s
 ## Sjekkliste for oppsett (Morten)
 
 Alt annet gjør arbeidsflyten [*Worker*](https://github.com/Markemus-byte/Kronesporet/actions/workflows/worker.yml)
-selv (`scripts/varsler_oppsett.py`): Cloudflare-konto-ID og workers.dev-underdomene, databasen, Worker-en, Brevo-domenet
-og avsenderen varsler@kronesporet.no, DNS-postene for Brevo i cPanel, Stripe-webhooken og til slutt skjemaet på
-nettsiden. Den kjører hver morgen til alt er på plass. Du trenger bare å lage tre nøkler og lime dem inn som
+selv (`scripts/varsler_oppsett.py`): Cloudflare-konto-ID og workers.dev-underdomene, databasen, Worker-en,
+postkassen utsending@kronesporet.no som e-posten sendes fra, Stripe-webhooken og til slutt skjemaet på nettsiden.
+Den kjører hver morgen til alt er på plass. Du trenger bare å lage to nøkler og lime dem inn som
 GitHub-secrets under [*Settings → Secrets and variables → Actions → New repository secret*](https://github.com/Markemus-byte/Kronesporet/settings/secrets/actions/new).
 Lim aldri nøklene inn noe annet sted.
 
@@ -40,26 +40,25 @@ Lim aldri nøklene inn noe annet sted.
 5. *Account Resources*: `Include` · kontoen din. *Zone Resources*: `Include` · `All zones`.
 6. *Continue to summary* → *Create Token* → *Copy*. Lagre som secret `CLOUDFLARE_API_TOKEN`.
 
-**2. Brevo (3 min)**
-1. I [app.brevo.com](https://app.brevo.com): klikk navnet ditt øverst til høyre → *SMTP & API* → fanen *API Keys*
-   → *Generate a new API key*, navn `github` → *Generate* → kopier. Lagre som secret `BREVO_API_KEY`.
-2. Klikk navnet ditt øverst til høyre → *Security* → *Authorised IPs*. Står blokkeringen på, slår du den av
-   (*Deactivate blocking*). GitHub sender fra skiftende adresser, så ellers avviser Brevo nøkkelen.
-
-**3. cPanel hos Domene.no (3 min)**, så DNS-postene for Brevo legges inn automatisk
+**2. cPanel hos Domene.no (3 min)**, så e-posten sendes fra din egen e-postserver
 1. Logg inn i cPanel → *Security* → *Manage API Tokens* → *Create*. Navn `github`, la utløpsdato stå tom → *Create*
    → kopier tokenet (vises bare én gang). Lagre som secret `CPANEL_TOKEN`.
 2. Brukernavnet står i cPanel i høyre kolonne under *General Information → Current User*. Lagre det som
    secret `CPANEL_USER`.
 
-Uten cPanel-nøkkel virker resten likevel, men da står DNS-postene for Brevo i oppsummeringen av kjøringen og må
-legges inn for hånd i *Zone Editor*.
+Arbeidsflyten lager da postkassen utsending@kronesporet.no med et passord den regner ut av tokenet, og sender
+bekreftelser og varsler gjennom mail.kronesporet.no (port 465), «fra» varsler@kronesporet.no. Serveren har SPF og
+DKIM for domenet fra før. Ingen av de vanlige adressene får nytt passord.
 
-Når nøklene er lagt inn, kjører Worker-arbeidsflyten neste morgen, eller med en gang via *Run workflow*. Brevo kan
-bruke opptil et døgn på å godkjenne domenet. Når domenet er godkjent, setter arbeidsflyten `ALERTS_API` i
-`src/web/build.py` og bygger nettsiden på nytt.
+Når nøklene er lagt inn, kjører Worker-arbeidsflyten neste morgen, eller med en gang via *Run workflow*. Når
+e-posten virker og Worker-en svarer, setter arbeidsflyten `ALERTS_API` i `src/web/build.py` og bygger nettsiden
+på nytt.
 
-`VARSLER_API_TOKEN` og `CLOUDFLARE_ACCOUNT_ID` trengs ikke lenger: tokenet mellom GitHub og Worker-en avledes av
+**Brevo er valgfritt.** Uten cPanel-nøkkel kan e-posten gå via Brevo i stedet (`BREVO_API_KEY`; arbeidsflyten legger
+da til domenet og avsenderen og, med cPanel-nøkkel, DNS-postene). Egen SMTP-konto virker også: `SMTP_HOST`,
+`SMTP_USER` og `SMTP_PASSWORD`. Finnes både SMTP og Brevo, brukes SMTP.
+
+`VARSLER_API_TOKEN` og `CLOUDFLARE_ACCOUNT_ID` trengs ikke: tokenet mellom GitHub og Worker-en avledes av
 `CLOUDFLARE_API_TOKEN`, og konto-ID-en hentes fra Cloudflare. Finnes de, brukes de.
 
 **Senere, før ekte betalinger (fra betalingsoppsettet i #39):** live-nøkkelen fra Stripe som secret

@@ -10,7 +10,8 @@ Miljøvariabler:
   VARSLER_API         adressen til Workeren (standard: ALERTS_API i src/web/build.py)
   VARSLER_API_TOKEN   samme verdi som API_TOKEN i Workeren (uten den: avledet av CLOUDFLARE_API_TOKEN, som i
                       scripts/varsler_oppsett.py)
-  BREVO_API_KEY eller SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_PASSWORD   utsending (src/alerts/mail.py)
+  SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_PASSWORD eller BREVO_API_KEY   utsending (src/alerts/mail.py); uten SMTP-
+                      variabler brukes postkassen utsending@ via CPANEL_USER og CPANEL_TOKEN når de finnes
   STRIPE_PORTAL_URL   valgfri lenke til Stripe-kundeportalen i bunnen av e-posten
 
 Uten Worker-adresse (og uten --abonnenter) avslutter skriptet uten å gjøre noe, så arbeidsflyten
@@ -35,7 +36,7 @@ sys.path.insert(0, str(ROOT))
 from scripts.build_site import sql_to_db  # noqa: E402
 from src.alerts.engine import build_alert, children, load_contracts, load_subscribers, ref_date  # noqa: E402
 from src.alerts.mail import PreviewSender, build_message, sender_from_env  # noqa: E402
-from scripts.varsler_oppsett import derived_api_token  # noqa: E402
+from scripts.varsler_oppsett import derived_api_token, smtp_config  # noqa: E402
 from src.web.build import ALERTS_API  # noqa: E402
 
 log = logging.getLogger("varsler")
@@ -70,9 +71,14 @@ def main() -> int:
     source = a.abonnenter or f"{api.rstrip('/')}/api/abonnenter"
     subs = [s for s in load_subscribers(source, token) if s.receives]
 
+    if not a.preview and not a.dry_run and not (os.environ.get("SMTP_HOST") and os.environ.get("SMTP_PASSWORD")):
+        smtp = smtp_config()  # egen e-postserver via cPanel-nøkkelen (scripts/varsler_oppsett.py)
+        if smtp:
+            os.environ.update(SMTP_HOST=smtp["host"], SMTP_USER=smtp["user"], SMTP_PASSWORD=smtp["password"])
     sender = PreviewSender(a.preview) if a.preview else None if a.dry_run else sender_from_env()
     if sender is None and not a.dry_run:
-        raise SystemExit("Varsler: verken BREVO_API_KEY eller SMTP_HOST er satt (bruk --preview for å teste)")
+        raise SystemExit("Varsler: ingen e-postserver (CPANEL_TOKEN, SMTP_PASSWORD eller BREVO_API_KEY); bruk "
+                         "--preview for å teste")
 
     with tempfile.TemporaryDirectory() as tmp:
         conn = _open(a.data, tmp)

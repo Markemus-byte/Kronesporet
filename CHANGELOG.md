@@ -11,10 +11,11 @@
   Workeren er satt opp (`ALERTS_API` i `src/web/build.py`); oppsettet står i `worker/README.md`.
 - **Oppsett av varslene uten klikk:** arbeidsflyten `Worker` gjør nå hele oppsettet selv
   (`scripts/varsler_oppsett.py`): finner Cloudflare-kontoen og velger workers.dev-underdomene, legger til
-  Brevo-domenet og avsenderen varsler@kronesporet.no, legger DNS-postene for Brevo inn i cPanel, lager
-  Stripe-webhooken når den mangler, og slår på skjemaet på nettsiden (`ALERTS_API`) når Brevo har godkjent
-  domenet. Den kjører hver morgen til alt er på plass. Det som trengs for hånd, er fire secrets:
-  `CLOUDFLARE_API_TOKEN`, `BREVO_API_KEY`, `CPANEL_USER` og `CPANEL_TOKEN` (`worker/README.md`).
+  postkassen utsending@kronesporet.no via cPanel og sender e-posten gjennom egen e-postserver (SMTP, port 465;
+  Worker-en bruker Cloudflares TCP-sockets), lager Stripe-webhooken når den mangler, og slår på skjemaet på
+  nettsiden (`ALERTS_API`) når e-posten virker. Brevo er nå valgfritt. Den kjører hver morgen til alt er på
+  plass. Det som trengs for hånd, er tre secrets: `CLOUDFLARE_API_TOKEN`, `CPANEL_USER` og `CPANEL_TOKEN`
+  (`worker/README.md`).
 - **CPV-koder:** `doffin_contracts` har en ny kolonne `cpv` med CPV-kodene fra kunngjøringen. Nye kontrakter får
   dem med en gang, og den månedlige oppdateringen fyller inn opptil 2 000 eldre kontrakter per kjøring
   (`--cpv-backfill`). 20 502 av 30 867 kontrakter har kodene nå: alle fra 2022 og senere, og 4 384 av 14 743 fra

@@ -5,13 +5,18 @@ på plass, blir stående.
 
   - Cloudflare (CLOUDFLARE_API_TOKEN): finner konto-ID-en og velger et workers.dev-underdomene hvis kontoen
     ikke har et.
-  - Brevo (BREVO_API_KEY): legger til domenet kronesporet.no og avsenderen varsler@kronesporet.no, og ber Brevo
+  - Brevo (BREVO_API_KEY, valgfritt): legger til domenet kronesporet.no og avsenderen varsler@kronesporet.no, og ber Brevo
     sjekke domenet.
   - DNS (CPANEL_USER og CPANEL_TOKEN, valgfritt): legger postene Brevo trenger inn i sonen hos Domene.no via
     cPanel-API-et. En DMARC- eller SPF-post som allerede finnes, beholdes (SPF får Brevo lagt til). Uten
     cPanel-nøkkel står postene som mangler, i oppsummeringen av kjøringen.
 
-Skriver account_id, brevo_ok (true når Brevo har godkjent domenet) og api_token til GITHUB_OUTPUT. api_token er
+  - E-post via egen server (CPANEL_USER og CPANEL_TOKEN, eller SMTP_PASSWORD): lager postkassen
+    utsending@kronesporet.no med et passord avledet av cPanel-tokenet og sjekker at innloggingen virker. Da sendes
+    e-posten fra Domene.no-serveren, og Brevo trengs ikke. Uten den brukes Brevo.
+
+Skriver account_id, brevo_ok (true når Brevo har godkjent domenet), epost_ok (SMTP virker eller Brevo er godkjent),
+smtp_host/smtp_user/smtp_password og api_token til GITHUB_OUTPUT. api_token er
 VARSLER_API_TOKEN hvis den finnes i GitHub, ellers avledet av CLOUDFLARE_API_TOKEN (scripts/send_alerts.py
 regner ut det samme), så den ikke må lages for hånd. Ingen nøkler skrives til loggen.
 """
@@ -24,6 +29,9 @@ import os
 import sys
 import time
 
+import smtplib
+import ssl
+
 import requests
 
 DOMAIN = "kronesporet.no"
@@ -32,6 +40,10 @@ SUBDOMAINS = ["kronesporet", "kronesporet-no", "kronesporet-varsler"]  # workers
 CF = "https://api.cloudflare.com/client/v4"
 BREVO = "https://api.brevo.com/v3"
 CPANEL = f"https://cpanel.{DOMAIN}"  # cPanel-proxyen på port 443 (2083 er ofte stengt)
+# Egen postkasse for utsendingen, så ingen av de vanlige adressene får nytt passord. E-postene sendes likevel
+# «fra» varsler@kronesporet.no. Serveren til Domene.no har SPF og DKIM for domenet fra før.
+SMTP_USER = f"utsending@{DOMAIN}"
+SMTP_HOSTS = [f"mail.{DOMAIN}", "loke.domene.no"]  # det andre er servernavnet, i tilfelle sertifikatet mangler
 
 summary: list[str] = []
 
@@ -169,8 +181,8 @@ class CPanel:
         self.s = requests.Session()
         self.s.headers["Authorization"] = f"cpanel {user}:{token}"
 
-    def call(self, func: str, params: dict) -> dict:
-        r = self.s.get(f"{CPANEL}/execute/DNS/{func}", params=params, timeout=60)
+    def call(self, func: str, params: dict, module: str = "DNS") -> dict:
+        r = self.s.get(f"{CPANEL}/execute/{module}/{func}", params=params, timeout=60)
         r.raise_for_status()
         data = r.json()
         if not data.get("status"):
@@ -219,6 +231,58 @@ def fix_dns(wanted: list[dict]) -> bool:
     return True
 
 
+# ---------------------------------------------------------------- SMTP på egen e-postserver
+
+
+def derived_smtp_password(cpanel_token: str) -> str:
+    """Passordet til utsending@ avledes av cPanel-tokenet, så det ikke må lages eller lagres for hånd."""
+    return "Ks-" + hashlib.sha256(f"kronesporet-smtp|{cpanel_token}".encode()).hexdigest()[:32] + "-9q"
+
+
+def ensure_mailbox(cp: CPanel, password: str) -> None:
+    local = SMTP_USER.split("@")[0]
+    pops = cp.call("list_pops", {}, module="Email").get("data") or []
+    if any((p.get("email") or "").lower() == SMTP_USER for p in pops):
+        cp.call("passwd_pop", {"email": local, "domain": DOMAIN, "password": password}, module="Email")
+    else:
+        cp.call("add_pop", {"email": local, "domain": DOMAIN, "password": password, "quota": 250}, module="Email")
+        say(f"E-post: postkassen {SMTP_USER} er laget for utsendingen")
+
+
+def smtp_login(host: str, user: str, password: str) -> str | None:
+    """None når innloggingen virker, ellers feilen."""
+    try:
+        with smtplib.SMTP_SSL(host, 465, timeout=30, context=ssl.create_default_context()) as smtp:
+            smtp.login(user, password)
+        return None
+    except (OSError, smtplib.SMTPException) as e:
+        return f"{type(e).__name__}: {str(e)[:160]}"
+
+
+def smtp_config(ensure: bool = False) -> dict | None:
+    """{host, user, password} for SMTP, fra SMTP_PASSWORD eller cPanel-nøkkelen. None når ingen av dem virker."""
+    env = os.environ
+    user, password, host = env.get("SMTP_USER") or "", env.get("SMTP_PASSWORD") or "", env.get("SMTP_HOST") or ""
+    if not password and env.get("CPANEL_USER") and env.get("CPANEL_TOKEN"):
+        user, password = SMTP_USER, derived_smtp_password(env["CPANEL_TOKEN"])
+        if ensure:
+            ensure_mailbox(CPanel(env["CPANEL_USER"], env["CPANEL_TOKEN"]), password)
+    if not password:
+        return None
+    print(f"::add-mask::{password}")
+    user = user or SMTP_USER
+    errors = []
+    for attempt in range(2):  # en ny postkasse kan bruke noen sekunder før den tar imot innlogging
+        for h in [host] if host else SMTP_HOSTS:
+            err = smtp_login(h, user, password)
+            if err is None:
+                return {"host": h, "user": user, "password": password}
+            errors.append(f"{h}: {err}")
+        time.sleep(15 if attempt == 0 else 0)
+    say("E-post: innloggingen på e-postserveren feilet (" + "; ".join(errors[-2:]) + ")")
+    return None
+
+
 # ---------------------------------------------------------------- hovedløp
 
 
@@ -254,11 +318,16 @@ def run() -> int:
     print(f"::add-mask::{api_token}")
     account = cloudflare(cf_token)
 
+    smtp = smtp_config(ensure=True)
+    if smtp:
+        say(f"E-post: sendes fra egen e-postserver ({smtp['host']}, som {smtp['user']}), Brevo trengs ikke")
+
     brevo_ok = False
     key = os.environ.get("BREVO_API_KEY", "")
-    if not key:
-        say("BREVO_API_KEY mangler i GitHub, så Worker-en kan ikke sende e-post ennå")
-    else:
+    if not key and not smtp:
+        say("Verken cPanel-nøkkel (CPANEL_USER og CPANEL_TOKEN) eller BREVO_API_KEY i GitHub, så Worker-en kan ikke "
+            "sende e-post ennå")
+    elif key:
         brevo = Brevo(key)
         info = brevo_domain(brevo)
         brevo_ok = bool(info.get("authenticated"))
@@ -273,7 +342,9 @@ def run() -> int:
         brevo_sender(brevo)
         say(f"Brevo: domenet er {'godkjent' if brevo_ok else 'ikke godkjent ennå (sjekkes igjen ved neste kjøring)'}")
 
-    output(klar="true", account_id=account, brevo_ok=str(brevo_ok).lower(), api_token=api_token)
+    output(klar="true", account_id=account, brevo_ok=str(brevo_ok).lower(), api_token=api_token,
+           epost_ok=str(bool(smtp) or brevo_ok).lower(), smtp_host=smtp["host"] if smtp else "",
+           smtp_user=smtp["user"] if smtp else "", smtp_password=smtp["password"] if smtp else "")
     return 0
 
 

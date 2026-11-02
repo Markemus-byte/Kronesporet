@@ -18,4 +18,5 @@ binding = "DB"
 database_name = "kronesporet-varsler"
 database_id = "FYLL-INN-FRA-wrangler-d1-create"
 
-# Hemmeligheter (ikke her): npx wrangler secret put API_TOKEN | BREVO_API_KEY | STRIPE_WEBHOOK_SECRET
+# Hemmeligheter (ikke her, legges inn av .github/workflows/worker.yml): API_TOKEN, SMTP_HOST/SMTP_USER/SMTP_PASSWORD
+# eller BREVO_API_KEY, STRIPE_WEBHOOK_SECRET
