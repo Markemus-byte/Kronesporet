@@ -171,7 +171,7 @@ def render_html(alert: Alert, link: dict[str, str]) -> str:
     return f"""<!doctype html><html lang="nb"><head><meta charset="utf-8"><title>{escape(subject(alert))}</title></head>
 <body style="margin:0;background:#f7f5f0;font-family:Arial,Helvetica,sans-serif;color:#1c1c1c">
 <div style="max-width:680px;margin:0 auto;padding:24px 16px;background:#ffffff">
-<p style="font-size:20px;font-weight:bold;margin:0">Kronesporet</p>
+<p style="margin:0"><a href="{SITE_URL}/"><img src="{SITE_URL}/assets/logo-epost.png" width="243" height="48" alt="Kronesporet" style="display:block;border:0"></a></p>
 <p style="color:#6b6b6b;margin:4px 0 16px">Data til og med {_d(alert.ref)}. Du følger: {escape(_selection_text(alert))}.</p>
 {intro}{"".join(sections)}{cut}
 <p style="font-size:13px;color:#6b6b6b;margin-top:24px">Om sluttdatoene: «sluttdato i Doffin» er grunnperioden slik

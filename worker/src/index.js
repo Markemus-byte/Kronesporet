@@ -57,9 +57,9 @@ function htmlPage(env, title, body, status = 200) {
 <meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
 <title>${escapeHtml(title)} – Kronesporet</title>
 <style>body{font-family:system-ui,Arial,sans-serif;max-width:36rem;margin:3rem auto;padding:0 1rem;color:#1c1c1c;
-background:#f7f5f0;line-height:1.5}button{font:inherit;padding:.6rem 1.1rem;border:0;border-radius:6px;background:#1d4ed8;
-color:#fff;cursor:pointer}button.sekundar{background:#6b6b6b}a{color:#1d4ed8}</style></head>
-<body><p><a href="${env.SITE_URL}/">Kronesporet</a></p><h1>${escapeHtml(title)}</h1>${body}</body></html>`;
+background:#f7f5f0;line-height:1.5}button{font:inherit;padding:.6rem 1.1rem;border:0;border-radius:6px;background:#0f5c4d;
+color:#fff;cursor:pointer}button.sekundar{background:#6b6b6b}a{color:#0f5c4d}</style></head>
+<body><p><a href="${env.SITE_URL}/"><img src="${env.SITE_URL}/assets/logo.svg" width="203" height="40" alt="Kronesporet"></a></p><h1>${escapeHtml(title)}</h1>${body}</body></html>`;
   return new Response(html, { status, headers: { "content-type": "text/html; charset=utf-8" } });
 }
 
@@ -212,6 +212,7 @@ async function signup(request, env) {
     `Hei!\n\nNoen (forhåpentligvis du) har meldt denne adressen på varsler fra Kronesporet.no:\n\n${lines.join("\n")}\n` +
     `Horisont for avtaler som løper ut: ${sel.horisonter.replaceAll(",", ", ")} måneder.\n\n` +
     `Bekreft her: ${link}\n\nHar du ikke bedt om dette, kan du se bort fra e-posten. Da skjer ingenting.\n\nKronesporet.no\n`,
+    `<p><img src="${env.SITE_URL}/assets/logo-epost.png" width="243" height="48" alt="Kronesporet"></p>` +
     `<p>Hei!</p><p>Noen (forhåpentligvis du) har meldt denne adressen på varsler fra Kronesporet.no:</p><ul>` +
     lines.map((l) => `<li>${escapeHtml(l)}</li>`).join("") +
     `<li>Horisont for avtaler som løper ut: ${sel.horisonter.replaceAll(",", ", ")} måneder</li></ul>` +
