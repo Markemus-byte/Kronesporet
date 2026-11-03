@@ -222,3 +222,22 @@ test("Stripe live: live-lenken brukes først når live-webhooken finnes, og test
   await send(ev("evt_l", true), "whsec_live");
   assert.equal(env.DB.raw.prepare("SELECT status FROM abonnenter").get().status, "active");
 });
+
+test("påmelding: feiler e-posten, får personen en vennlig melding og kan prøve igjen med en gang", async () => {
+  const { env, call } = setup();
+  globalThis.fetch = async () => new Response("nede", { status: 503 });
+  const orig = console.error;
+  console.error = () => {};
+  try {
+    let r = await call("/pamelding", { method: "POST", body: form({ epost: "a@example.no", kjoper: "915429785" }) });
+    assert.equal(r.status, 303);
+    assert.match(r.headers.get("location"), /status=feil-epost/);
+    const row = env.DB.raw.prepare("SELECT bekreft_sendt FROM abonnenter WHERE email = 'a@example.no'").get();
+    assert.equal(row.bekreft_sendt, null);
+    globalThis.fetch = async () => new Response("{}", { status: 201 });
+    r = await call("/pamelding", { method: "POST", body: form({ epost: "a@example.no", kjoper: "915429785" }) });
+    assert.match(r.headers.get("location"), /status=sjekk-epost/);
+  } finally {
+    console.error = orig;
+  }
+});
