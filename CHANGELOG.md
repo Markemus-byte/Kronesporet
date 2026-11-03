@@ -2,34 +2,54 @@
 
 ## Ikke utgitt
 
-- **Varsler (v1.1, #38):** e-postvarsler om nye tildelinger og avtaler som løper ut om 3, 6 eller 12 måneder, for
+Ingen endringer ennå.
+
+## v1.1.0 – 2026-11-03: Varsler
+
+Første betalte tjeneste: e-postvarsler om nye kontrakter og avtaler som løper ut. Nettsiden er fortsatt gratis.
+Påmeldingen er åpen på [kronesporet.no/varsler.html](https://kronesporet.no/varsler.html), og varslene koster
+490 kr i måneden eks. mva etter 14 dager gratis.
+
+- **Varsler på e-post (#50):** varsel om nye tildelinger og om avtaler som løper ut om 3, 6 eller 12 måneder, for
   utvalgte kjøpere (med underenheter), leverandører, CPV-kategorier og søkeord, med CSV-uttrekk av alle treffene
   og historikk fra 2017. Sluttdatoen er merket som anslag når Doffin bare oppgir varighet. Varselmotoren er i
-  `src/alerts/` og `scripts/send_alerts.py`, og arbeidsflyten `Varsler` sender hver morgen til dem som har noe
-  nytt. Påmelding, dobbel opt-in, avmelding, sletting og betalingsstatus fra Stripe ligger i en Cloudflare Worker
-  med D1-database (`worker/`). Ingen e-postadresser ligger i repoet. Skjemaet kommer på `varsler.html` når
-  Workeren er satt opp (`ALERTS_API` i `src/web/build.py`); oppsettet står i `worker/README.md`.
-- **Oppsett av varslene uten klikk:** arbeidsflyten `Worker` gjør nå hele oppsettet selv
-  (`scripts/varsler_oppsett.py`): finner Cloudflare-kontoen og velger workers.dev-underdomene, legger til
-  postkassen utsending@kronesporet.no via cPanel og sender e-posten gjennom egen e-postserver (SMTP, port 465;
-  Worker-en bruker Cloudflares TCP-sockets), lager Stripe-webhooken når den mangler, og slår på skjemaet på
-  nettsiden (`ALERTS_API`) når e-posten virker. Brevo er nå valgfritt. Den kjører hver morgen til alt er på
-  plass, og prøver påmeldingen fra start til slutt hver gang (`scripts/varsler_e2e.py`). Det som trengs for
-  hånd, er to secrets: `CLOUDFLARE_API_TOKEN` og `CPANEL_TOKEN` (`worker/README.md`).
-- **Live-betaling for varslene:** Worker-en går over til live-betalingslenken (14 dager gratis, deretter 490 kr i
-  måneden) først når live-webhooken finnes. Den lages av arbeidsflyten `Worker` når `STRIPE_LIVE_KEY` er i GitHub
-  (`stripe_setup.py --webhook-only`, så det ikke lages en betalingslenke til). Etter det avvises testhendelser.
-- **CPV-koder:** `doffin_contracts` har en ny kolonne `cpv` med CPV-kodene fra kunngjøringen. Nye kontrakter får
-  dem med en gang, og den månedlige oppdateringen fyller inn opptil 2 000 eldre kontrakter per kjøring
-  (`--cpv-backfill`). 20 502 av 30 867 kontrakter har kodene nå: alle fra 2022 og senere, og 4 384 av 14 743 fra
-  2017–2021. Resten kommer med de neste oppdateringene.
-- **Betaling for varsler (#39), forberedt:** `plan/betaling-stripe.md` vurderer Stripe på den statiske siden
-  (Payment Link, kundeportal og webhook til Workeren fra #38), og `plan/sjekkliste-lansering.md` er sjekklisten for
-  selskapsform, mva, vilkår og juridisk gjennomgang. Vilkårene for abonnementet og personvern for abonnenter ligger
-  i `src/web/build.py` og vises på `vilkar.html` først når kundeportalen i Stripe (`STRIPE_PORTAL_URL`) er satt.
-  Selger er Brafaring Thevik (ENK), og prisen er 490 kr i måneden eks. mva. Arbeidsflyten «Stripe-oppsett»
-  (`scripts/stripe_setup.py`) lager produktet, prisen, betalingslenken og kundeportalen i Stripe via API-et.
-  Nettsiden er uendret til da.
+  `src/alerts/` og `scripts/send_alerts.py`, og arbeidsflyten `Varsler` sender hver morgen til bekreftede og
+  betalende abonnenter som har noe nytt.
+- **Påmeldingsskjema og Cloudflare Worker (#50, #54):** påmelding, dobbel opt-in, avmelding, sletting og
+  betalingsstatus ligger i en Cloudflare Worker med D1-database (`worker/`). Ingen e-postadresser ligger i repoet.
+  Skjemaet på `varsler.html` er slått på (`ALERTS_API` i `src/web/build.py`).
+- **Oppsett uten klikk (#54):** arbeidsflyten `Worker` gjør hele oppsettet selv (`scripts/varsler_oppsett.py`):
+  finner Cloudflare-kontoen og workers.dev-underdomenet, lager postkassen utsending@kronesporet.no via cPanel og
+  sender e-posten gjennom egen e-postserver (SMTP, port 465; Worker-en bruker Cloudflares TCP-sockets), lager
+  Stripe-webhooken når den mangler, og slår på skjemaet når e-posten virker. Brevo er valgfritt. Den kjører hver
+  morgen og prøver påmeldingen fra start til slutt (`scripts/varsler_e2e.py`). Oppsettet står i `worker/README.md`.
+- **Betaling med Stripe (#49, #52, #57):** betalingslenke, webhook til Worker-en og takkemelding etter betaling.
+  Worker-en bruker live-betalingslenken (14 dager gratis, deretter 490 kr i måneden) når live-webhooken finnes, og
+  avviser da testhendelser. Arbeidsflyten «Stripe-oppsett» (`scripts/stripe_setup.py`) lager produkt, pris,
+  kundeportal og webhook via API-et, uten å lage en ny betalingslenke når det finnes en (`--webhook-only`).
+  Vurderingen står i `plan/betaling-stripe.md`, og `plan/sjekkliste-lansering.md` er sjekklisten for selskapsform,
+  mva, vilkår og juridisk gjennomgang.
+- **Vilkår for abonnementet (#49):** `vilkar.html` har vilkår for abonnementet (bare for næringsdrivende) og
+  personvern for abonnenter. Selger er Brafaring Thevik (ENK, org.nr. 938 405 565).
+- **Kundeportal (#58):** abonnenter avslutter eller endrer abonnementet og henter kvitteringer i Stripes
+  kundeportal, som det lenkes til fra `vilkar.html`, `support.html` og sidene for avmelding og sletting.
+- **Kundestøtte (#56):** ny side `support.html` med support@kronesporet.no (post@ som alternativ). Den er
+  kundestøttesiden i Stripe og står i bunnteksten.
+- **Logo (#59):** ny logo med Norgeskartet, nabolandene, en kr-mynt ved Oslo og spor ut fra Norge, i toppen, som
+  favicon, på delingsbildet og i varsel-e-postene. Kildene er i `design/logo/`.
+- **Feilretting i påmeldingen (#60):** påmeldingen gir en vennlig melding i stedet for feil 500 når
+  bekreftelses-e-posten ikke kan sendes, og Worker-en prøver en reserveserver for e-post.
+- **Vennligere interessepåmelding (#53):** knappen «Meld interesse på e-post» åpner en ferdig utfylt e-post med
+  mer informasjon.
+- **CPV-koder (#50):** `doffin_contracts` har en ny kolonne `cpv` med CPV-kodene fra kunngjøringen. Nye
+  kontrakter får dem med en gang, og den månedlige oppdateringen fyller inn opptil 2 000 eldre kontrakter per
+  kjøring (`--cpv-backfill`). 20 502 av 30 867 kontrakter hadde kodene ved utgivelsen: alle fra 2022 og senere, og
+  4 384 av 14 743 fra 2017–2021.
+- **Salg (#55):** `scripts/prospects.py` lager en liste over leverandører som kan ha nytte av varslene, ut fra
+  egne avtaler som løper ut, og `plan/salg.md` har salgstekstene. Listen ligger ikke i repoet.
+
+## v1.0.0 – 2026-10-27
+
 - **E-post:** `varsler.html` har knappen «Meld interesse på e-post» til varsler@kronesporet.no (#37). Bunnteksten
   viser post@kronesporet.no. `vilkar.html` har personvern@kronesporet.no for personvern og ønsker om å skjule
   enkeltpersonforetak, post@ for feil i tallene og presse@kronesporet.no for presse.
