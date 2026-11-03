@@ -179,7 +179,8 @@
       "mangler-utvalg": "Velg minst én kjøper, leverandør, kategori eller ett søkeord.",
       "bekreftet": "Påmeldingen er bekreftet. Det første varselet kommer i løpet av et døgn.",
       "bekreftet-betaling": "E-posten er bekreftet. Vi gir beskjed når betalingen er åpen og varslene starter.",
-      "feil": "Lenken virket ikke. Meld deg på igjen."
+      "feil": "Lenken virket ikke. Meld deg på igjen.",
+      "feil-epost": "Vi fikk ikke sendt bekreftelsen akkurat nå. Prøv igjen om litt, eller skriv til oss, så ordner vi det."
     };
     var box = signup.querySelector(".signup-status");
     var status = params.get("status");
