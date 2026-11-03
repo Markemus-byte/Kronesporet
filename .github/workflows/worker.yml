@@ -181,14 +181,45 @@ jobs:
           rm -f "$secret"
           echo "- Stripe live: webhooken er laget, og Worker-en bruker nå live-betalingslenken" >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Sjekk sertifikatet på e-postserveren
+        # Worker-en godtar bare gyldige sertifikater (Python-oppsettet over sjekker ikke), så vis hva serveren har.
+        if: steps.oppsett.outputs.epost_ok == 'true'
+        continue-on-error: true
+        run: |
+          for host in mail.kronesporet.no loke.domene.no; do
+            out=$(echo QUIT | timeout 20 openssl s_client -connect "$host:465" -servername "$host" -verify_hostname "$host" \
+                  -verify_return_error 2>&1 || true)
+            subject=$(echo "$out" | grep -m1 -E '^subject=' || true)
+            verify=$(echo "$out" | grep -m1 -E 'Verify return code' || echo "ingen TLS-forbindelse")
+            echo "- TLS $host: $verify ($subject)" | tee -a "$GITHUB_STEP_SUMMARY"
+          done
+
       - name: Prøv påmeldingen fra start til slutt
         if: steps.oppsett.outputs.epost_ok == 'true' && steps.publiser.outputs.url != ''
-        working-directory: .
         env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ steps.oppsett.outputs.account_id }}
           WORKER_URL: ${{ steps.publiser.outputs.url }}
           API_TOKEN: ${{ steps.oppsett.outputs.api_token }}
           CPANEL_TOKEN: ${{ secrets.CPANEL_TOKEN }}
-        run: python scripts/varsler_e2e.py
+        run: |
+          # Fjern prøveabonnenten fra en tidligere kjøring som stoppet halvveis, så ventetiden ikke slår inn.
+          $WRANGLER d1 execute kronesporet-varsler --remote --command \
+            "DELETE FROM utvalg WHERE email = 'utsending@kronesporet.no'; DELETE FROM abonnenter WHERE email = 'utsending@kronesporet.no'" \
+            || echo "Kunne ikke rydde prøveraden"
+          # Worker-loggen under prøven, så den virkelige feilen vises hvis noe går galt.
+          $WRANGLER tail --format json > "$RUNNER_TEMP/tail.json" 2>/dev/null &
+          tail_pid=$!
+          sleep 15
+          status=0
+          (cd .. && python scripts/varsler_e2e.py) || status=$?
+          sleep 5
+          kill "$tail_pid" 2>/dev/null || true
+          if [ "$status" -ne 0 ]; then
+            echo "Worker-loggen under prøven:"
+            jq -r 'select(.logs) | .logs[] | (.message | map(tostring) | join(" "))' "$RUNNER_TEMP/tail.json" \
+              | grep -v -i "password" | tail -30 | tee -a "$GITHUB_STEP_SUMMARY" || true
+          fi
+          exit "$status"
 
       - name: Slå på varslene på nettsiden
         if: >-

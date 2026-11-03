@@ -86,8 +86,24 @@ export function parseSelection(form) {
 }
 
 // E-post: via SMTP på egen e-postserver (cPanel hos Domene.no) når SMTP_PASSWORD finnes, ellers via Brevo.
+// Prøver SMTP_HOST først og så serverens eget navn (loke.domene.no), hvert forsøk med tidsgrense.
+const SMTP_FALLBACK = "loke.domene.no";
+const SMTP_TIMEOUT_MS = 15000;
+
 async function sendMail(env, to, subject, text, html) {
-  if (env.SMTP_PASSWORD) return smtpSend(env, to, subject, text, html);
+  if (env.SMTP_PASSWORD) {
+    const hosts = [...new Set([env.SMTP_HOST || "mail.kronesporet.no", SMTP_FALLBACK])];
+    const errors = [];
+    for (const host of hosts) {
+      try {
+        return await withTimeout(smtpSend({ ...env, SMTP_HOST: host }, to, subject, text, html), SMTP_TIMEOUT_MS, host);
+      } catch (e) {
+        errors.push(`${host}: ${e?.message || e}`);
+        console.error("SMTP feilet", host, String(e?.stack || e));
+      }
+    }
+    throw new Error(`SMTP feilet på alle servere (${errors.join("; ")})`);
+  }
   if (!env.BREVO_API_KEY) throw new Error("verken SMTP_PASSWORD eller BREVO_API_KEY er satt");
   const r = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
@@ -96,6 +112,14 @@ async function sendMail(env, to, subject, text, html) {
                            subject, textContent: text, htmlContent: html }),
   });
   if (!r.ok) throw new Error(`Brevo svarte ${r.status}: ${(await r.text()).slice(0, 300)}`);
+}
+
+function withTimeout(promise, ms, label) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`tidsavbrudd etter ${ms / 1000} s mot ${label}`)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 }
 
 const utf8 = new TextEncoder();
@@ -208,7 +232,8 @@ async function signup(request, env) {
 
   const link = `${new URL(request.url).origin}/bekreft?t=${token}`;
   const lines = describe(sel);
-  await sendMail(env, email, "Bekreft varsler fra Kronesporet",
+  try {
+    await sendMail(env, email, "Bekreft varsler fra Kronesporet",
     `Hei!\n\nNoen (forhåpentligvis du) har meldt denne adressen på varsler fra Kronesporet.no:\n\n${lines.join("\n")}\n` +
     `Horisont for avtaler som løper ut: ${sel.horisonter.replaceAll(",", ", ")} måneder.\n\n` +
     `Bekreft her: ${link}\n\nHar du ikke bedt om dette, kan du se bort fra e-posten. Da skjer ingenting.\n\nKronesporet.no\n`,
@@ -217,6 +242,12 @@ async function signup(request, env) {
     `<li>Horisont for avtaler som løper ut: ${sel.horisonter.replaceAll(",", ", ")} måneder</li></ul>` +
     `<p><a href="${link}">Bekreft påmeldingen</a></p>` +
     `<p>Har du ikke bedt om dette, kan du se bort fra e-posten. Da skjer ingenting.</p><p>Kronesporet.no</p>`);
+  } catch (e) {
+    // Ikke vis en feilside: nullstill ventetiden så personen kan prøve igjen med en gang, og si fra pent.
+    console.error("Bekreftelses-e-posten ble ikke sendt", String(e?.message || e));
+    await env.DB.prepare("UPDATE abonnenter SET bekreft_sendt = NULL WHERE email = ?").bind(email).run();
+    return back(env, "feil-epost");
+  }
   return back(env, "sjekk-epost");
 }
 
