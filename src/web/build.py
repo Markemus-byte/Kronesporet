@@ -1974,41 +1974,76 @@ Vennlig hilsen
 """
 
 
-def _signup_form() -> str:
+# Bransjene i påmeldingen: CPV-hovedgrupper (de to første sifrene) med vanlige navn, så ingen må kunne CPV-koder.
+ALERT_INDUSTRIES = (
+    ("72", "IT-tjenester"), ("48", "Programvare"), ("30", "Datautstyr og kontormaskiner"),
+    ("32", "Tele- og radioutstyr"), ("45", "Bygg og anlegg"), ("44", "Byggevarer og konstruksjoner"),
+    ("71", "Arkitekt- og ingeniørtjenester"),
+    ("79", "Konsulent- og forretningstjenester (juss, rekruttering, markedsføring, vakthold)"),
+    ("73", "Forskning og utredning"), ("80", "Opplæring og kurs"), ("85", "Helse og sosiale tjenester"),
+    ("33", "Medisinsk utstyr og legemidler"), ("90", "Avfall, renhold og miljø"), ("50", "Reparasjon og vedlikehold"),
+    ("51", "Installasjon"), ("31", "Elektrisk utstyr"), ("42", "Maskiner"), ("43", "Anleggsmaskiner"),
+    ("34", "Kjøretøy og transportmidler"), ("60", "Transport"), ("63", "Logistikk og reisetjenester"),
+    ("39", "Møbler og inventar"), ("15", "Mat og drikke"), ("55", "Hotell, kantine og catering"),
+    ("09", "Drivstoff og strøm"), ("65", "Vann, strøm og varme (forsyning)"), ("64", "Post og telekom"),
+    ("66", "Bank, finans og forsikring"), ("70", "Eiendom"), ("77", "Grøntanlegg, landbruk og skog"),
+    ("92", "Kultur, sport og fritid"), ("35", "Sikkerhets- og beredskapsutstyr"), ("38", "Laboratorie- og måleutstyr"),
+    ("18", "Klær og sko"), ("22", "Trykksaker"), ("98", "Andre tjenester"),
+)
+
+
+def _signup_form(buyers: list[tuple[str, str]] | None = None) -> str:
     """Påmeldingsskjemaet. Sendes som vanlig skjema til Workeren (worker/src/index.js), som sender en e-post for å
-    bekrefte og så videre til betaling. app.js fyller inn ?kjoper= og ?leverandor= og viser ?status= etterpå."""
+    bekrefte og så videre til betaling. Bransje velges med avkrysning, kjøpere med navn (lista under gir orgnr);
+    app.js samler valgene i feltene Workeren leser (cpv, kjoper), fyller inn ?kjoper=, ?leverandor= og ?cpv= fra
+    lenken og viser ?status= etterpå."""
     horizons = "".join(f'<label class="check"><input type="checkbox" name="horisont" value="{h}" checked> {h} måneder'
                        "</label>" for h in (3, 6, 12))
+    industries = "".join(f'<label class="check"><input type="checkbox" data-cpv="{c}" value="{c}"> {escape(n)}</label>'
+                         for c, n in ALERT_INDUSTRIES)
+    options = "".join(f'<option value="{escape(n)}" data-orgnr="{o}"></option>' for n, o in (buyers or []))
     return f"""<h2 id="meld-interesse">Meld deg på</h2>
 <form class="signup" id="varsel-skjema" method="post" action="{escape(ALERTS_API.rstrip("/"))}/pamelding">
   <p class="signup-status" role="status" hidden></p>
-  <label for="v-epost">E-post</label>
+  <p class="signup-prefill" hidden></p>
+  <label for="v-epost">Din e-postadresse</label>
   <input id="v-epost" name="epost" type="email" autocomplete="email" required>
-  <label for="v-kjoper">Kjøpere <span class="muted">(organisasjonsnummer, ett per linje)</span></label>
-  <textarea id="v-kjoper" name="kjoper" rows="2" placeholder="915429785"></textarea>
-  <label for="v-leverandor">Leverandører <span class="muted">(organisasjonsnummer eller navn)</span></label>
+  <fieldset class="industries"><legend>Hvilken bransje er dere i?</legend>
+  <p class="muted small">Kryss av for det dere leverer. Du får varsel om offentlige avtaler i bransjen.</p>
+  {industries}</fieldset>
+  <input type="hidden" name="cpv" id="v-cpv">
+  <details class="more"><summary>Flere valg (kan stå tomme)</summary>
+  <label for="v-kjoper-navn">Offentlige kjøpere du vil følge <span class="muted">(skriv navnet, f.eks. Statens
+  vegvesen eller Bergen kommune, og velg fra lista)</span></label>
+  <div class="row"><input id="v-kjoper-navn" list="kjopere" autocomplete="off">
+  <button type="button" class="button secondary" id="v-kjoper-legg">Legg til</button></div>
+  <datalist id="kjopere">{options}</datalist>
+  <ul class="chips" id="v-kjoper-valgt"></ul>
+  <input type="hidden" name="kjoper" id="v-kjoper">
+  <label for="v-leverandor">Konkurrenter eller samarbeidspartnere <span class="muted">(firmanavn, ett per linje. Du
+  får beskjed når de vinner en offentlig kontrakt)</span></label>
   <textarea id="v-leverandor" name="leverandor" rows="2"></textarea>
-  <label for="v-cpv">Kategorier <span class="muted">(CPV-kode eller begynnelsen av den, f.eks. 72 for IT-tjenester
-  eller 45 for bygg og anlegg)</span></label>
-  <input id="v-cpv" name="cpv" inputmode="numeric">
-  <label for="v-sokeord">Søkeord i tittelen <span class="muted">(skill med komma)</span></label>
+  <label for="v-sokeord">Ord i tittelen på avtalen <span class="muted">(f.eks. renhold, vikar, skolebuss. Skill med
+  komma)</span></label>
   <input id="v-sokeord" name="sokeord">
-  <fieldset><legend>Varsle om avtaler som løper ut innen</legend>{horizons}</fieldset>
-  <label class="check"><input type="checkbox" name="csv" value="1" checked> Legg ved alle treffene med historikk fra
-  2017 som CSV</label>
+  <label for="v-cpv-egne">Egne CPV-koder <span class="muted">(for den som kjenner dem, skill med komma)</span></label>
+  <input id="v-cpv-egne" inputmode="numeric">
+  <fieldset><legend>Varsle om avtaler som går ut om</legend>{horizons}</fieldset>
+  <label class="check"><input type="checkbox" name="csv" value="1" checked> Legg ved treffene som regneark</label>
+  </details>
   <div class="hp" aria-hidden="true"><label>Nettside <input name="nettside" tabindex="-1" autocomplete="off"></label></div>
-  <p><button class="button" type="submit">Meld meg på</button></p>
-  <p class="muted small">Velger du både kjøpere eller leverandører og kategorier eller søkeord, får du avtalene som
-  treffer begge. Kjøpere tar med underenhetene sine. Du får en e-post for å bekrefte adressen, og hver e-post har en
-  lenke for å avslutte. Se <a href="vilkar.html#personvern">personvern</a>.</p>
+  <p><button class="button" type="submit">Prøv gratis i {TRIAL_DAYS} dager</button></p>
+  <p class="muted small">Du får en e-post for å bekrefte adressen, og så kommer du til betalingen. De første
+  {TRIAL_DAYS} dagene er gratis, deretter {PAID_ALERTS_PRICE}. Du kan si opp når som helst, og hver e-post har en lenke for
+  å avslutte. Se <a href="vilkar.html#abonnement">vilkårene</a> og <a href="vilkar.html#personvern">personvern</a>.</p>
 </form>"""
 
 
-def alerts_page(ref_date: str, expiring: list[Expiring]) -> str:
+def alerts_page(ref_date: str, expiring: list[Expiring], buyers: list[tuple[str, str]] | None = None) -> str:
     """Varsler (første betalte tilbud): påmeldingsskjemaet når Workeren er satt opp (ALERTS_API), ellers
     interessepåmelding på e-post, og avtalene som løper ut."""
     if ALERTS_API:
-        signup = _signup_form()
+        signup = _signup_form(buyers)
     elif ALERTS_EMAIL:
         mail = f"mailto:{ALERTS_EMAIL}?subject=" + quote(ALERTS_MAIL_SUBJECT) + "&body=" + quote(ALERTS_MAIL_BODY)
         signup = ('<h2 id="meld-interesse">Meld interesse</h2>\n<p>Påmeldingen åpner snart. Fortell oss hvem du vil '
@@ -2384,6 +2419,23 @@ def _write_csv(path: Path, rows: list[dict[str, object]]) -> None:
     path.write_text("\ufeff" + buf.getvalue(), encoding="utf-8")
 
 
+def _alert_buyers(datasets: list[Dataset]) -> list[tuple[str, str]]:
+    """Offentlige kjøpere til påmeldingen (navn, orgnr): statlige virksomheter, helseforetak, statlige og kommunale
+    selskaper, kommuner og fylkeskommuner. Siste navn per orgnr vinner (navn kan endres)."""
+    names: dict[str, str] = {}
+    for d in datasets:
+        for group in (d.agencies, d.unmatched, d.health, d.companies, d.municipal_companies, d.municipal):
+            for a in group:
+                if a.orgnr and re.fullmatch(r"\d{9}", a.orgnr) and a.name:
+                    names[a.orgnr] = a.name
+    seen: dict[str, int] = {}
+    for n in names.values():
+        seen[n.lower()] = seen.get(n.lower(), 0) + 1
+    # Samme navn på flere orgnr (f.eks. gamle og nye kommuner): skill dem med orgnr i navnet.
+    out = [(n if seen[n.lower()] == 1 else f"{n} ({o})", o) for o, n in names.items()]
+    return sorted(out, key=lambda x: x[0].lower())
+
+
 def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "",
                breadth: Breadth | None = None, expiring: tuple[str, list[Expiring]] | None = None,
                municipal_history: dict[str, list[tuple[int, Agency]]] | None = None) -> int:
@@ -2426,7 +2478,8 @@ def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "",
     (out / "404.html").write_text(not_found_page(), encoding="utf-8")
     (out / "vilkar.html").write_text(terms_page(), encoding="utf-8")
     (out / "support.html").write_text(support_page(), encoding="utf-8")
-    (out / "varsler.html").write_text(alerts_page(*(expiring or ("", []))), encoding="utf-8")
+    (out / "varsler.html").write_text(alerts_page(*(expiring or ("", [])), buyers=_alert_buyers(datasets)),
+                                      encoding="utf-8")
     pages += 3
     if len(datasets) > 1:
         (out / "ar").mkdir()
