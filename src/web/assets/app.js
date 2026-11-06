@@ -169,14 +169,84 @@
   var signup = document.getElementById("varsel-skjema");
   if (signup) {
     var params = new URLSearchParams(window.location.search);
-    ["kjoper", "leverandor", "cpv", "sokeord"].forEach(function (k) {
-      if (params.get(k) && signup.elements[k]) signup.elements[k].value = params.get(k);
+    var split = function (v) { return (v || "").split(/[\n\r,;]+/).map(function (x) { return x.trim(); }).filter(Boolean); };
+    if (params.get("leverandor")) signup.elements.leverandor.value = params.get("leverandor");
+    if (params.get("sokeord")) signup.elements.sokeord.value = params.get("sokeord");
+
+    // Bransje: avkrysning per CPV-hovedgruppe. Koder fra lenken (f.eks. 790,796 fra e-posten) krysser av
+    // hovedgruppen, men beholder de nøyaktige kodene, så varslene ikke blir bredere enn lenken sa.
+    var boxes = Array.prototype.slice.call(signup.querySelectorAll("input[data-cpv]"));
+    var extra = [];
+    split(params.get("cpv")).forEach(function (code) {
+      code = code.replace(/[^\d]/g, "");
+      var box = boxes.filter(function (b) { return code.indexOf(b.getAttribute("data-cpv")) === 0; })[0];
+      if (!box || code.length < 2) { if (code) extra.push(code); return; }
+      var codes = box.checked && box.value !== box.getAttribute("data-cpv") ? box.value.split(",") : [];
+      if (code.length > 2) codes.push(code);
+      box.value = codes.length ? codes.join(",") : box.getAttribute("data-cpv");
+      box.checked = true;
+    });
+    if (extra.length) signup.querySelector("#v-cpv-egne").value = extra.join(", ");
+    var picked = boxes.filter(function (b) { return b.checked; });
+    var prefill = signup.querySelector(".signup-prefill");
+    if (picked.length && prefill) {
+      prefill.textContent = "Bransjen er fylt ut fra lenken: " + picked.map(function (b) {
+        return b.parentNode.textContent.trim();
+      }).join(", ") + ". Du trenger bare å skrive inn e-postadressen.";
+      prefill.hidden = false;
+    }
+
+    // Kjøpere: velg med navn fra lista, Workeren får organisasjonsnumrene.
+    var byName = {}, byOrg = {};
+    Array.prototype.forEach.call(signup.querySelectorAll("#kjopere option"), function (o) {
+      byName[o.value.toLowerCase()] = o.getAttribute("data-orgnr");
+      byOrg[o.getAttribute("data-orgnr")] = o.value;
+    });
+    var chosen = [];
+    var list = signup.querySelector("#v-kjoper-valgt");
+    var nameInput = signup.querySelector("#v-kjoper-navn");
+    var drawBuyers = function () {
+      list.innerHTML = "";
+      chosen.forEach(function (orgnr, i) {
+        var li = document.createElement("li");
+        li.textContent = byOrg[orgnr] || orgnr;
+        var x = document.createElement("button");
+        x.type = "button"; x.textContent = "×"; x.setAttribute("aria-label", "Fjern " + li.textContent);
+        x.addEventListener("click", function () { chosen.splice(i, 1); drawBuyers(); });
+        li.appendChild(x);
+        list.appendChild(li);
+      });
+    };
+    var addBuyer = function () {
+      var v = nameInput.value.trim();
+      var orgnr = /^\d{9}$/.test(v.replace(/\s/g, "")) ? v.replace(/\s/g, "") : byName[v.toLowerCase()];
+      if (!v) return;
+      if (!orgnr) { nameInput.setCustomValidity("Velg en kjøper fra lista."); nameInput.reportValidity(); return; }
+      nameInput.setCustomValidity("");
+      if (chosen.indexOf(orgnr) < 0) chosen.push(orgnr);
+      nameInput.value = "";
+      drawBuyers();
+    };
+    nameInput.addEventListener("change", addBuyer);
+    nameInput.addEventListener("input", function () { nameInput.setCustomValidity(""); });
+    nameInput.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); addBuyer(); } });
+    signup.querySelector("#v-kjoper-legg").addEventListener("click", addBuyer);
+    split(params.get("kjoper")).forEach(function (o) { o = o.replace(/\s/g, ""); if (/^\d{9}$/.test(o)) chosen.push(o); });
+    drawBuyers();
+    if (chosen.length || params.get("leverandor") || params.get("sokeord")) signup.querySelector("details.more").open = true;
+
+    signup.addEventListener("submit", function () {
+      if (nameInput.value.trim()) addBuyer();
+      signup.elements.kjoper.value = chosen.join("\n");
+      var codes = [];
+      boxes.forEach(function (b) { if (b.checked) codes = codes.concat(b.value.split(",")); });
+      signup.elements.cpv.value = codes.concat(split(signup.querySelector("#v-cpv-egne").value)).join(",");
     });
     var messages = {
       "sjekk-epost": "Takk! Sjekk e-posten din og trykk på lenken for å bekrefte påmeldingen.",
       "vent": "Vi har nettopp sendt deg en e-post. Vent noen minutter før du prøver igjen.",
       "ugyldig-epost": "E-postadressen ser ikke riktig ut.",
-      "mangler-utvalg": "Velg minst én kjøper, leverandør, kategori eller ett søkeord.",
+      "mangler-utvalg": "Kryss av for minst én bransje, eller velg noe under «Flere valg».",
       "bekreftet": "Påmeldingen er bekreftet. Det første varselet kommer i løpet av et døgn.",
       "bekreftet-betaling": "E-posten er bekreftet. Vi gir beskjed når betalingen er åpen og varslene starter.",
       "feil": "Lenken virket ikke. Meld deg på igjen.",
