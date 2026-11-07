@@ -2,7 +2,15 @@
 
 ## Ikke utgitt
 
-Ingen endringer ennå.
+- **Søkemotorer:** hver side har en `<title>` og beskrivelse med søkeordene folk bruker (offentlige kontrakter,
+  anbud, innkjøp, leverandører, avtaler som løper ut) og med tall fra siden: antall kontrakter, største
+  leverandører og kjøpere. Strukturerte data (schema.org): nettstedet og Kronesporet som organisasjon på
+  forsiden, brødsmuler og virksomheten eller leverandøren siden handler om på undersidene, og tjenesten med pris
+  på `varsler.html`. Sidekartet har `<lastmod>`. Plass til bekreftelseskodene fra Google Search Console og Bing
+  Webmaster Tools (`GOOGLE_SITE_VERIFICATION` og `BING_SITE_VERIFICATION` i `src/web/build.py`).
+- **IndexNow:** etter hver publisering melder `scripts/indexnow.py` de endrede sidene til Bing (og dermed
+  DuckDuckGo, Yahoo og Ecosia), Yandex, Seznam og Naver, uten konto. Arbeidsflyten `Nettside` kan kjøres for hånd
+  med «alle sider» for å melde inn hele sidekartet.
 
 ## v1.1.0 – 2026-11-03: Varsler
 

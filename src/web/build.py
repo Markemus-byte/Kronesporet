@@ -58,6 +58,17 @@ PAID_ALERTS_PRICE = "490 kr i måneden eks. mva"  # valgt 29.10.2026
 TRIAL_DAYS = 14  # gratis prøveperiode; samme tall som TRIAL_DAYS i scripts/stripe_setup.py
 STRIPE_PORTAL_URL = "https://billing.stripe.com/p/login/3cI28j3Ue5oB64l9Ze5sA00"  # Stripes kundeportal (live), satt av Stripe-oppsett
 
+# --- søkemotorer --------------------------------------------------------------
+# Bekreftelse av eierskap i Google Search Console (eiendom «Prefiks for nettadresse» https://kronesporet.no/) og
+# Bing Webmaster Tools med «HTML-tag»-metoden: lim inn bare koden i content="..." (ikke hele taggen). Taggen havner
+# på forsiden ved neste bygging. Tom = ingen tag. Fjern ikke koden etterpå; da mister eiendommen bekreftelsen.
+GOOGLE_SITE_VERIFICATION = ""  # <meta name="google-site-verification" content="HER">
+BING_SITE_VERIFICATION = ""    # <meta name="msvalidate.01" content="HER">
+# IndexNow (Bing, Yandex, Seznam, Naver; Bing deler med DuckDuckGo, Yahoo og Ecosia): nøkkelfilen <nøkkel>.txt
+# legges i roten, og scripts/indexnow.py melder fra om endrede sider etter hver publisering. Nøkkelen er offentlig.
+INDEXNOW_KEY = "7c3e9a51d84f4b2fa6e0b19c5d27f8a4"
+SEO_TAGLINE = "offentlige kontrakter, anbud og innkjøp fra Doffin"
+
 
 def paid_alerts_live() -> bool:
     """Om abonnementet er i salg: selger, pris og kundeportal er satt."""
@@ -145,7 +156,10 @@ def _num(x: float | None) -> str:
 # --- sidemal ----------------------------------------------------------------
 
 def page(title: str, body: str, root: str = "", active: str = "", description: str = "", path: str = "",
-         head: str = "") -> str:
+         head: str = "", seo_title: str = "", jsonld: list[dict] | None = None,
+         crumbs: list[tuple[str, str]] | None = None) -> str:
+    """Sidemalen. `seo_title` er <title> for søkemotorene (standard: `title`), `crumbs` er brødsmulene
+    [(navn, sti)] over siden for schema.org/BreadcrumbList, og `jsonld` er flere strukturerte data."""
     nav = [("index.html", "Virksomheter", "index")]
     if _SITE["health"]:
         nav.append(("helseforetak.html", "Helseforetak", "helseforetak"))
@@ -159,10 +173,12 @@ def page(title: str, body: str, root: str = "", active: str = "", description: s
         f'<a href="{root}{href}"{CURRENT if key == active else ""}>{label}</a>'
         for href, label, key in nav
     )
-    full_title = f"{title} – {SITE_NAME}" if title != SITE_NAME else f"{SITE_NAME} – hvor går statens penger?"
+    full_title = (f"{seo_title or title} – {SITE_NAME}" if title != SITE_NAME
+                  else f"{SITE_NAME} – {seo_title or SEO_TAGLINE}")
     description = description or DEFAULT_DESCRIPTION
     base = _SITE["base_url"]
     url_meta = ""
+    head = _seo_head(path, title, crumbs, jsonld) + head
     if base and path:
         url = base + ("" if path == "index.html" else path)
         url_meta = (f'<link rel="canonical" href="{escape(url)}">\n'
@@ -555,8 +571,18 @@ def index_page(ds: Dataset, root: str = "", years: list[int] | None = None,
 """
     title = SITE_NAME if ds.year == front else f"Statlige virksomheter {year_text(ds.year, short=True)}"
     path = "index.html" if ds.year == front else f"ar/{ds.year}.html"
-    return page(title, body, root=root, active="index", path=path,
-                description=f"Doffin-kontrakter mot kjøp for {n} statlige virksomheter i {ds.year}.")
+    if ds.year == front:
+        b = breadth or Breadth()
+        span = f"{min(b.contracts_by_year)}–{max(b.contracts_by_year)}" if b.contracts_by_year else str(ds.year)
+        description = (f"Søk i {_group(b.contracts)} offentlige kontrakter fra Doffin {span}: hvem som kjøper hva, "
+                       "hvem som vinner, og hvilke avtaler som løper ut. Stat, kommuner, helseforetak og selskaper, "
+                       "med leverandørene som vinner." if b.contracts else
+                       f"Doffin-kontrakter mot kjøp for {n} statlige virksomheter i {ds.year}.")
+        return page(title, body, root=root, active="index", path=path, description=description)
+    return page(title, body, root=root, active="index", path=path, crumbs=[],
+                seo_title=f"Statlige virksomheter {year_text(ds.year, short=True)}: Doffin-kontrakter og kjøp",
+                description=f"Doffin-kontrakter mot kjøp i statsregnskapet for {n} statlige virksomheter i "
+                            f"{year_text(ds.year)}, med avvik, dekning og leverandører.")
 
 
 def _unmatched_section(ds: Dataset, root: str) -> str:
@@ -915,8 +941,10 @@ def agency_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]] | None
 {contracts_html}
 {joint_html}
 """
-    return page(a.name, body, root="../", description=f"Doffin-kontrakter og kjøp for {a.name} i {ds.year}.",
-                path=f"virksomhet/{a.slug}.html")
+    return page(a.name, body, root="../", description=_buyer_description(a, ds, "kjøpene i statsregnskapet"),
+                path=f"virksomhet/{a.slug}.html", seo_title=f"{a.name}: innkjøp, kontrakter og leverandører",
+                crumbs=[],
+                jsonld=_webpage(a.name, f"virksomhet/{a.slug}.html", _about(a.name, a.orgnr, "GovernmentOrganization")))
 
 
 # --- helseforetak -------------------------------------------------------------
@@ -1015,8 +1043,10 @@ def health_index_page(datasets: list[Dataset], front: Dataset) -> str:
   <tbody>{"".join(rows)}</tbody></table></div>
 </section>
 """
-    return page("Helseforetakene", body, active="helseforetak", path="helseforetak.html",
-                description=f"Doffin-kontraktene og driftskostnadene til de {len(front.health)} helseforetakene.")
+    return page("Helseforetakene", body, active="helseforetak", path="helseforetak.html", crumbs=[],
+                seo_title="Helseforetakene: innkjøp og Doffin-kontrakter",
+                description=f"Doffin-kontraktene, leverandørene og driftskostnadene til de {len(front.health)} "
+                            "helseforetakene og sykehusene, med avtaler som løper ut.")
 
 
 def health_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]], linked: set[str] = frozenset()) -> str:
@@ -1058,7 +1088,10 @@ def health_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]], linke
 {joint_html}
 """
     return page(a.name, body, root="../", active="helseforetak", path=a.path,
-                description=f"Doffin-kontrakter og driftskostnader for {a.name} i {ds.year}.")
+                seo_title=f"{a.name}: innkjøp, kontrakter og leverandører",
+                crumbs=[("Helseforetakene", "helseforetak.html")],
+                jsonld=_webpage(a.name, a.path, _about(a.name, a.orgnr)),
+                description=_buyer_description(a, ds, "driftskostnadene"))
 
 
 # --- statlige selskaper ------------------------------------------------------
@@ -1166,8 +1199,10 @@ def company_index_page(datasets: list[Dataset], front: Dataset, level: str = "st
   <tbody>{"".join(rows)}</tbody></table></div>
 </section>
 """
-    return page(title, body, active="selskaper", path=path,
-                description=f"Doffin-kontraktene og driftskostnadene til {len(current)} {title.lower()}.")
+    return page(title, body, active="selskaper", path=path, crumbs=[],
+                seo_title=f"{title}: innkjøp og Doffin-kontrakter",
+                description=f"Doffin-kontraktene, leverandørene og driftskostnadene til {len(current)} "
+                            f"{title.lower()}, med avtaler som løper ut.")
 
 
 def company_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]], linked: set[str] = frozenset()) -> str:
@@ -1208,7 +1243,11 @@ def company_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]], link
 {joint_html}
 """
     return page(a.name, body, root="../", active="selskaper", path=a.path,
-                description=f"Doffin-kontrakter og driftskostnader for {a.name} i {ds.year}.")
+                seo_title=f"{a.name}: innkjøp, kontrakter og leverandører",
+                crumbs=[("Kommunale selskaper", "kommunale-selskaper.html") if a.owner_level == "kommune"
+                        else ("Selskaper", "selskaper.html")],
+                jsonld=_webpage(a.name, a.path, _about(a.name, a.orgnr)),
+                description=_buyer_description(a, ds, "driftskostnadene"))
 
 
 # --- kommuner -----------------------------------------------------------------
@@ -1382,8 +1421,10 @@ def municipal_index_page(datasets: list[Dataset], front: Dataset,
 </section>
 {split_html}
 """
-    return page("Kommuner og fylker", body, active="kommuner", path="kommuner.html",
-                description=f"Doffin-kontraktene og kjøpene til {n_k} kommuner og fylkeskommunene i {year}.")
+    return page("Kommuner og fylker", body, active="kommuner", path="kommuner.html", crumbs=[],
+                seo_title="Kommuner og fylker: innkjøp og Doffin-kontrakter",
+                description=f"Doffin-kontraktene, leverandørene og kjøpene til {n_k} kommuner og fylkeskommunene "
+                            f"i {year}, med avtaler som løper ut.")
 
 
 def municipal_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]], linked: set[str] = frozenset()) -> str:
@@ -1454,7 +1495,10 @@ def municipal_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]], li
 {joint_html}
 """
     return page(a.name, body, root="../", active="kommuner", path=a.path,
-                description=f"Doffin-kontrakter og kjøp for {a.name} i {ds.year}.")
+                seo_title=f"{a.name}: innkjøp, kontrakter og leverandører",
+                crumbs=[("Kommuner og fylker", "kommuner.html")],
+                jsonld=_webpage(a.name, a.path, _about(a.name, a.orgnr, "GovernmentOrganization")),
+                description=_buyer_description(a, ds, "kjøpene i KOSTRA"))
 
 
 # --- leverandører -------------------------------------------------------------
@@ -1576,8 +1620,10 @@ utenlandske) er ikke med her.</p>
   if len(suppliers) > SUPPLIERS_INLINE else ""}
 </section>
 """
-    return page("Leverandører", body, active="leverandorer", path="leverandorer.html",
-                description=f"Leverandørene som vinner {_public()} kontrakter i Doffin, {span}.")
+    return page("Leverandører", body, active="leverandorer", path="leverandorer.html", crumbs=[],
+                seo_title=f"Leverandører: hvem vinner {_public()} kontrakter",
+                description=f"{_group(len(suppliers))} leverandører som har vunnet {_public()} kontrakter i Doffin "
+                            f"{span}, med kjøpere, verdier og avtaler som løper ut.")
 
 
 def supplier_page(datasets: list[Dataset], s: SupplierSummary, front: Dataset) -> str:
@@ -1665,8 +1711,20 @@ def supplier_page(datasets: list[Dataset], s: SupplierSummary, front: Dataset) -
   <tbody>{"".join(rows)}</tbody></table></div>
 </section>
 """
+    all_years = sorted(s.years)
+    span = str(all_years[0]) if len(all_years) == 1 else f"{all_years[0]}–{all_years[-1]}"
+    top_buyers = [a.name for a, ids, _ in sorted(per_buyer.values(), key=lambda r: -len(r[1]))[:3]]
+    n_c, n_b = len(contracts), len(per_buyer)
+    kind = _public() if n_c > 1 else _public()[:-1]  # «1 offentlig kontrakt», «2 offentlige kontrakter»
+    description = (_sentence(f"{s.name} har {n_c} {kind} {'kontrakt' if n_c == 1 else 'kontrakter'} i Doffin "
+                             f"({span}) hos {n_b} {'kjøper' if n_b == 1 else 'kjøpere'}"
+                             + (f", blant annet {_names(top_buyers)}" if top_buyers and n_b > 1
+                                else f": {top_buyers[0]}" if top_buyers else ""))
+                   + (" Se verdiene og når avtalene løper ut." if n_c > 1 else " Se verdien og når avtalen løper ut."))
     return page(s.name, body, root="../", active="leverandorer", path=f"leverandor/{s.orgnr}.html",
-                description=f"{_public().capitalize()} kontrakter i Doffin vunnet av {s.name}.")
+                seo_title=f"{s.name}: offentlige kontrakter og kunder", description=description,
+                crumbs=[("Leverandører", "leverandorer.html")],
+                jsonld=_webpage(s.name, f"leverandor/{s.orgnr}.html", _about(s.name, s.orgnr)))
 
 
 # --- om dataene ---------------------------------------------------------------
@@ -1939,7 +1997,8 @@ med leverandører som <a href="data/kontrakter.csv">kontrakter.csv</a>{', helsef
 underlagt NLOD 2.0; oppgi kildene ved gjenbruk.</p>
 </div>
 """
-    return page("Om dataene", body, active="om", path="om.html",
+    return page("Om dataene", body, active="om", path="om.html", crumbs=[],
+                seo_title="Om dataene: Doffin, statsregnskapet og metoden",
                 description="Hvorfor Kronesporet, kildene, metoden og forbeholdene: Doffin, statsregnskapet, "
                             "Enhetsregisteret og Kudos.",
                 head=_dataset_jsonld())
@@ -2101,8 +2160,23 @@ konkurranse.</li>
 </div>
 {table}
 """
-    return page("Varsler", body, active="varsler", path="varsler.html",
-                description="Planlagte e-postvarsler om nye tildelinger og avtaler som løper ut hos statlige kjøpere.")
+    base = _SITE["base_url"]
+    service = {"@type": "Service", "name": "Kronesporet varsler", "serviceType": "Varsler om offentlige kontrakter",
+               "url": base + "varsler.html", "areaServed": {"@type": "Country", "name": "Norge"},
+               "provider": {"@id": base + "#organisasjon"},
+               "description": "E-postvarsler om nye tildelinger og offentlige kontrakter som løper ut, fra Doffin."}
+    price = re.match(r"(\d[\d ]*) kr", PAID_ALERTS_PRICE)
+    if ALERTS_API and price:
+        service["offers"] = {"@type": "Offer", "price": price.group(1).replace(" ", ""), "priceCurrency": "NOK",
+                             "url": base + "varsler.html", "priceSpecification": {
+                                 "@type": "UnitPriceSpecification", "price": price.group(1).replace(" ", ""),
+                                 "priceCurrency": "NOK", "unitText": "måned", "valueAddedTaxIncluded": False}}
+    description = ("Få e-post når offentlige kontrakter i din bransje tildeles eller løper ut, 12, 6 og 3 måneder "
+                   "før, så du rekker neste anbudskonkurranse. Stat, kommuner og helseforetak fra Doffin."
+                   + (f" {TRIAL_DAYS} dager gratis, deretter {PAID_ALERTS_PRICE}." if ALERTS_API else ""))
+    return page("Varsler", body, active="varsler", path="varsler.html", crumbs=[],
+                seo_title="Varsler om offentlige kontrakter som løper ut og nye tildelinger",
+                description=description, jsonld=[service] if base else None)
 
 
 def paid_terms_section() -> str:
@@ -2232,7 +2306,7 @@ står fortsatt i Doffin. {contact}</li>
 </ul>
 </div>
 """
-    return page("Vilkår og personvern", body, path="vilkar.html",
+    return page("Vilkår og personvern", body, path="vilkar.html", crumbs=[],
                 description="Vilkår for bruk av Kronesporet, forbehold, retting av feil og personvern.")
 
 
@@ -2279,7 +2353,7 @@ betale med faktura, skriver du til {link}.</p>
 <a href="vilkar.html">vilkårsiden</a> og under <a href="vilkar.html#personvern">personvern</a>.</p>
 </div>
 """
-    return page("Kundestøtte", body, path="support.html",
+    return page("Kundestøtte", body, path="support.html", crumbs=[],
                 description="Kontakt, prøveperiode, oppsigelse og faktura for varsler fra Kronesporet.")
 
 
@@ -2297,6 +2371,84 @@ def not_found_page() -> str:
   <li><a href="{root}om.html">Les om dataene og metoden</a></li>
 </ul>"""
     return page("Fant ikke siden", body, root=root, head='<meta name="robots" content="noindex">\n')
+
+
+def _ld(data: dict | list) -> str:
+    text = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+    return f'<script type="application/ld+json">{text}</script>\n'
+
+
+def _organization() -> dict:
+    base = _SITE["base_url"]
+    return {"@type": "Organization", "@id": base + "#organisasjon", "name": SITE_NAME, "url": base,
+            "logo": base + "assets/ikon-512.png", "email": CONTACT_EMAIL, "sameAs": [REPO_URL]}
+
+
+def _seo_head(path: str, title: str, crumbs: list[tuple[str, str]] | None, jsonld: list[dict] | None) -> str:
+    """Bekreftelsestagger (forsiden), og schema.org-data: nettstedet på forsiden, brødsmuler på undersidene."""
+    base = _SITE["base_url"]
+    out = ""
+    if path == "index.html":
+        if GOOGLE_SITE_VERIFICATION:
+            out += f'<meta name="google-site-verification" content="{escape(GOOGLE_SITE_VERIFICATION)}">\n'
+        if BING_SITE_VERIFICATION:
+            out += f'<meta name="msvalidate.01" content="{escape(BING_SITE_VERIFICATION)}">\n'
+    if not (base and path):
+        return out
+    items: list[dict] = []
+    if path == "index.html":
+        items += [{"@type": "WebSite", "@id": base + "#nettsted", "name": SITE_NAME, "alternateName": "Kronesporet.no",
+                   "url": base, "inLanguage": "nb", "description": DEFAULT_DESCRIPTION,
+                   "publisher": {"@id": base + "#organisasjon"}}, _organization()]
+    elif crumbs is not None:
+        trail = [(SITE_NAME, "index.html")] + crumbs + [(title, path)]
+        items.append({"@type": "BreadcrumbList", "itemListElement": [
+            {"@type": "ListItem", "position": i, "name": name, "item": base + ("" if p == "index.html" else p)}
+            for i, (name, p) in enumerate(trail, 1)]})
+    items += jsonld or []
+    if not items:
+        return out
+    return out + _ld({"@context": "https://schema.org", "@graph": items})
+
+
+def _about(a_name: str, orgnr: str | None, kind: str = "Organization") -> dict:
+    """schema.org-beskrivelse av virksomheten eller leverandøren siden handler om."""
+    org: dict = {"@type": kind, "name": a_name}
+    if orgnr and orgnr.isdigit():
+        org["identifier"] = {"@type": "PropertyValue", "propertyID": "Organisasjonsnummer", "value": orgnr}
+        org["sameAs"] = f"https://data.brreg.no/enhetsregisteret/oppslag/enheter/{orgnr}"
+    return org
+
+
+def _webpage(title: str, path: str, about: dict) -> list[dict]:
+    base = _SITE["base_url"]
+    return [{"@type": "WebPage", "name": title, "url": base + path, "inLanguage": "nb",
+             "isPartOf": {"@id": base + "#nettsted"}, "about": about}]
+
+
+def _sentence(text: str) -> str:
+    """Punktum til slutt, men ikke to (navn som «Arlen S.A.»)."""
+    text = text.strip()
+    return text if text.endswith((".", "!", "?")) else text + "."
+
+
+def _names(names: list[str]) -> str:
+    return names[0] if len(names) == 1 else ", ".join(names[:-1]) + " og " + names[-1]
+
+
+def _top_suppliers(contracts: list[Contract], n: int = 3) -> list[str]:
+    count = Counter(s.name for c in contracts for s in c.suppliers if s.name)
+    return [name for name, _ in count.most_common(n)]
+
+
+def _buyer_description(a: Agency, ds: Dataset, spend: str) -> str:
+    """Beskrivelsen søkemotorene viser for en kjøperside: antall kontrakter, største leverandører, hva siden har."""
+    n = len(a.contracts) or a.contract_count
+    text = f"{a.name}: {n} {'kontrakt' if n == 1 else 'kontrakter'} i Doffin som løper i {year_text(ds.year, short=True)}"
+    top = _top_suppliers(a.contracts)
+    if top:
+        text += f". {'Største leverandører' if len(top) > 1 else 'Leverandør'}: {_names(top)}"
+    return _sentence(text) + f" Se hva som er kjøpt, hvem som vant, avtaler som løper ut, og {spend}."
 
 
 def _dataset_jsonld() -> str:
@@ -2572,15 +2724,27 @@ def build_site(datasets: Dataset | list[Dataset], out: Path, base_url: str = "",
 
 
 def write_sitemap(out: Path) -> None:
-    """sitemap.xml og robots.txt for søkemotorene (bare når offentlig adresse er kjent)."""
+    """sitemap.xml, robots.txt og IndexNow-nøkkelen for søkemotorene (bare når offentlig adresse er kjent).
+
+    Sidene med tall får <lastmod> lik datoen dataene sist ble hentet; de faste sidene (vilkår, kundestøtte) får ingen.
+    """
     base = _SITE["base_url"]
-    for name in ("sitemap.xml", "robots.txt"):
-        (out / name).unlink(missing_ok=True)
+    old_keys = [f for f in out.glob("*.txt") if re.fullmatch(r"[0-9a-f]{32}\.txt", f.name)]  # IndexNow-nøkler
+    for f in [out / "sitemap.xml", out / "robots.txt", *old_keys]:
+        f.unlink(missing_ok=True)
     if not base:
         return
+    lastmod = ""
+    if _SITE["data_date"]:
+        d, m, y = _SITE["data_date"].split(".")
+        lastmod = f"<lastmod>{y}-{m}-{d}</lastmod>"
+    static = {"vilkar.html", "support.html"}
     paths = sorted(p.relative_to(out).as_posix() for p in out.rglob("*.html") if p.name != "404.html")
-    urls = "".join(f"<url><loc>{escape(base + ('' if p == 'index.html' else p))}</loc></url>\n" for p in paths)
+    urls = "".join(f"<url><loc>{escape(base + ('' if p == 'index.html' else p))}</loc>"
+                   f"{'' if p in static else lastmod}</url>\n" for p in paths)
     (out / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}</urlset>\n', encoding="utf-8")
     (out / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {base}sitemap.xml\n", encoding="utf-8")
+    if INDEXNOW_KEY:
+        (out / f"{INDEXNOW_KEY}.txt").write_text(INDEXNOW_KEY, encoding="utf-8")
