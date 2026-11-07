@@ -117,8 +117,9 @@ Forbehold som står i e-postene: barnevernstjenester har egne regler og enkeltkj
 vinnerne kan være kjent andre steder enn Doffin (Torghatten Nord vant Festvåg–Misten ifølge fagpressen); UDI viser
 selv hvem som driver mottakene. Sakene påstår ikke lovbrudd, de spør.
 
-Lagt bort: Hovedredningssentralen (det eneste flagget for 2025) fordi redningshelikopteravtalene ble kunngjort av
-Justisdepartementet (Doffin 2020-383463, 2023-603960), så flagget bør ikke brukes i presse. Kommuner med null kontrakter
+Lagt bort: Hovedredningssentralen, fordi redningshelikopteravtalene ble kunngjort av Justisdepartementet (Doffin
+2020-383463, 2023-603960). Flagget er rettet i PR #67 («Overtatt budsjettkapittel»), og etter det har 2025 ingen
+dekningsflagg. Pressesakene viser ikke til flagg. Kommuner med null kontrakter
 (Eidsvoll, Nannestad) kjøper gjennom Øvre Romerike Innkjøpssamarbeid. Forsvaret og UD har unntak og kjøp i utlandet.
 
 Etterprøving:
@@ -138,8 +139,8 @@ Brukes hvis en redaksjon vil ha selve verktøyet heller enn en enkeltsak.
 > Kronesporet.no kobler for første gang alle kontraktene i Doffin fra 2017 til i dag (30 867 kontrakter og 7 378
 > leverandører) mot statsregnskapet for 128 statlige virksomheter. For en typisk statlig virksomhet tilsvarer
 > kontraktene som er kunngjort i Doffin bare rundt 13 prosent av det den kjøper varer og tjenester for (median 2025).
-> Noe av forskjellen har gode grunner, som kjøp under terskelverdien og felles rammeavtaler, men noen skiller seg
-> ut år etter år, og de er flagget på nettsiden. Neste 12 måneder løper 616 offentlige avtaler til rundt 30
+> Noe av forskjellen har gode grunner, som kjøp under terskelverdien og felles rammeavtaler, og nettsiden viser hvem
+> som ligger langt under lignende virksomheter. Neste 12 måneder løper 616 offentlige avtaler til rundt 30
 > milliarder kroner ut. Alt er åpent og gratis å søke i på kronesporet.no, og dataene bygger på åpne kilder (Doffin,
 > DFØ og Brønnøysundregistrene). Jeg stiller gjerne opp, viser tallene og lager uttrekk for deres saker.
 >
