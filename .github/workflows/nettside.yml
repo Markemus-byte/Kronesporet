@@ -2,6 +2,8 @@
 # - Pull requests: bygger og sjekker lenkene, så feil oppdages før fletting.
 # - main: bygger og committer docs/ hvis noe er endret. GitHub Pages publiserer
 #   deretter docs/ som før (Settings -> Pages -> main, /docs).
+# - Etter publiseringen får Bing og de andre IndexNow-søkemotorene beskjed om sidene som er endret
+#   (scripts/indexnow.py). Kjør for hånd med «alle sider» for å melde inn hele sidekartet.
 name: Nettside
 
 on:
@@ -20,6 +22,11 @@ on:
       - "scripts/**"
       - ".github/workflows/nettside.yml"
   workflow_dispatch:
+    inputs:
+      indexnow_alle:
+        description: "Meld alle sidene i sitemap.xml til IndexNow (Bing m.fl.), ikke bare de endrede"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -45,14 +52,32 @@ jobs:
         run: python scripts/check_site.py docs
 
       - name: Commit oppdatert docs/
+        id: commit
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         run: |
           if [ -z "$(git status --porcelain docs)" ]; then
             echo "docs/ er uendret"
             exit 0
           fi
+          echo "endret=true" >> "$GITHUB_OUTPUT"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs
           git commit -m "Bygg nettsiden på nytt"
           git push
+
+      - name: Meld endrede sider til søkemotorene (IndexNow)
+        if: >-
+          github.event_name != 'pull_request' && github.ref == 'refs/heads/main' &&
+          (steps.commit.outputs.endret == 'true' || inputs.indexnow_alle)
+        continue-on-error: true
+        env:
+          ALLE: ${{ inputs.indexnow_alle && 'true' || 'false' }}
+          ENDRET: ${{ steps.commit.outputs.endret == 'true' && 'true' || 'false' }}
+        run: |
+          pip install --quiet requests
+          if [ "$ALLE" = "true" ]; then
+            python scripts/indexnow.py --docs docs --all
+          elif [ "$ENDRET" = "true" ]; then
+            python scripts/indexnow.py --docs docs --changed-since HEAD~1
+          fi
