@@ -96,9 +96,42 @@ lista) og skriv: «Her er lista. Vil du ha slike varsler automatisk hver måned,
 >
 > Vil du ha lista over avtalene i din bransje som løper ut? Kommenter eller send meg en melding.
 
-## Pressepitch (E24, DN, Kommunal Rapport)
+## Pressesaker (november 2026)
 
-Send til tipsadressen redaksjonene oppgir på nettsiden. Pressen kan få varslene gratis (står i vilkårene).
+Pressen betaler ikke, men én sak i DN, E24 eller Kommunal Rapport sender leverandører til kronesporet.no. Redaksjoner
+og forskere får varslene gratis (står i vilkårene). Tre saker er gravd fram fra dataene og etterprøvd mot Doffin og
+statsregnskapet 7.11.2026. Ferdige e-poster med kopier-knapper ligger i artefakten «Kronesporets pressesaker»
+(https://claude.ai/artifact/GqUusEN9hghUXjgdJ24Bbk). Hver sak går til én redaksjon først, med tilbud om å få den
+alene til torsdag kl. 12. Svarer de ikke, går den til neste.
+
+Datafilene journalistene får lenke til ligger i `docs/data/presse/` (kronesporet.no/data/presse/), og alle tallene
+regnes ut på nytt med `scripts/presse_tall.py`. Tipsadressene er hentet fra redaksjonenes egne sider samme dag.
+
+| Sak | Første redaksjon | Neste | Hovedtall | Kilde |
+|---|---|---|---|---|
+| 1. Private barnevernstjenester | tips@dn.no | tips@aftenposten.no, 03030@nrk.no | 12,49 mrd. kr 2023–2025 (+40 %); 541 Doffin-kunngjøringer fra Bufdir/Bufetat siden 2017, ingen konkurranse om institusjons- eller fosterhjemsplasser; fire tildelinger av private omsorgstjenester, 335 mill. kr | Statsregnskapet kap. 0855 post 22; Doffin; kronesporet.no/virksomhet/986128433.html |
+| 2. Nordland fylkeskommune | redaksjon@kommunal-rapport.no | 03030@nrk.no | 311 konkurranser 2023–2025 (150 over EØS-terskelen), 9 tildelinger; 3 tildelinger per 100 konkurranser mot 32 i hele Doffin; kontrakter på 285–700 mill. kr uten kunngjort vinner | Doffin; kronesporet.no/kommune/964982953.html |
+| 3. UDI og asylmottak | tips@e24.no | tips@dn.no | 8,73 mrd. kr 2023–2025; vinneren kunngjort i 2 av 18 mottakskonkurranser 2023–2024; 31 229 konkurranser og 10 064 tildelinger i hele Doffin 2023–2025 | Statsregnskapet kap. 0490 post 21; Doffin; kronesporet.no/virksomhet/974760746.html |
+
+Forbehold som står i e-postene: barnevernstjenester har egne regler og enkeltkjøp kan være lovlig uten kunngjøring;
+vinnerne kan være kjent andre steder enn Doffin (Torghatten Nord vant Festvåg–Misten ifølge fagpressen); UDI viser
+selv hvem som driver mottakene. Sakene påstår ikke lovbrudd, de spør.
+
+Lagt bort: Hovedredningssentralen (det eneste flagget for 2025) fordi redningshelikopteravtalene ble kunngjort av
+Justisdepartementet (Doffin 2020-383463, 2023-603960), så flagget bør ikke brukes i presse. Kommuner med null kontrakter
+(Eidsvoll, Nannestad) kjøper gjennom Øvre Romerike Innkjøpssamarbeid. Forsvaret og UD har unntak og kjøp i utlandet.
+
+Etterprøving:
+
+```
+python scripts/presse_tall.py barnevern --raadata /mnt/project-files/kronesporet/data/statsregnskap_raadata
+python scripts/presse_tall.py kjoper --navn "Nordland fylkeskommune" --orgnr 964982953
+python scripts/presse_tall.py landet --ar 2023,2024,2025 --ut landet.csv   # rundt en time
+```
+
+### Generell pitch (reserve)
+
+Brukes hvis en redaksjon vil ha selve verktøyet heller enn en enkeltsak.
 
 > **Emne: Nytt verktøy: hvor mye av statens innkjøp som faktisk kunngjøres**
 >
