@@ -65,7 +65,9 @@ class Coverage:
     flagged: bool                # vedvarende avvik (flere av de siste årene)
     outlier: bool = False        # avvik dette året
     years_outlier: int = 0       # år med avvik blant de siste tre
-    category: str = ""           # 'flagg' | 'observasjon' | 'tilskudd' | 'avtaler_for_andre' | ''
+    category: str = ""           # 'flagg' | 'observasjon' | 'tilskudd' | 'avtaler_for_andre' | 'overtatt_kapittel' | ''
+    takeover_share: float = 0.0  # andel av kjøpene på kapitler overtatt fra en annen virksomhet
+    takeover_note: str = ""      # hvilke kapitler, og hvem som hadde dem før
 
 
 @dataclass
@@ -366,7 +368,7 @@ def load_dataset(db_path: str | Path, year: int | None = None, threshold: float 
 
         has_coverage = _has_table(conn, "doffin_coverage")
         cov_cols = {r[1] for r in conn.execute("PRAGMA table_info(doffin_coverage)")} if has_coverage else set()
-        extra = ", ".join(c if c in cov_cols else f"NULL AS {c}" for c in ("outlier", "years_outlier", "category"))
+        extra = ", ".join(c if c in cov_cols else f"NULL AS {c}" for c in ("outlier", "years_outlier", "category", "takeover_share", "takeover_note"))
         has_parents = _has_table(conn, "orgnr_parent")
         has_buyers = _has_table(conn, "doffin_buyers")
         for a in agencies:
@@ -379,7 +381,9 @@ def load_dataset(db_path: str | Path, year: int | None = None, threshold: float 
                                           peer_count=c["peer_count"] or 0, peer_median=c["peer_median"] or 0.0,
                                           z=c["z"] or 0.0, flagged=bool(c["flagged"]),
                                           outlier=bool(c["outlier"] if c["outlier"] is not None else c["flagged"]),
-                                          years_outlier=c["years_outlier"] or 0, category=c["category"] or "")
+                                          years_outlier=c["years_outlier"] or 0, category=c["category"] or "",
+                                          takeover_share=c["takeover_share"] or 0.0,
+                                          takeover_note=c["takeover_note"] or "")
             for s in conn.execute(
                 "SELECT artskonto, SUM(amount) AS amount, MAX(source_file) AS source_file "
                 "FROM statsregnskap WHERE orgnr = ? AND year = ? GROUP BY artskonto", (a.orgnr, year)):

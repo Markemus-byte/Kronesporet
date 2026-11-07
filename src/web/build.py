@@ -257,6 +257,9 @@ COVERAGE_NOTES = {
                                          "staten (f.eks. kjøp av fly- og togruter)"),
     "avtaler_for_andre": ("Over 100 %: avtaler for andre", "Doffin-andelen er større enn kjøpene, typisk fordi "
                                                            "virksomheten inngår avtaler som andre bruker"),
+    "overtatt_kapittel": ("Overtatt budsjettkapittel", "De fleste kjøpene er på et budsjettkapittel "
+                                                               "virksomheten har overtatt, og avtalene er som regel "
+                                                               "kunngjort av den som hadde kapitlet før"),
 }
 
 
@@ -913,6 +916,13 @@ def agency_page(ds: Dataset, a: Agency, history: list[tuple[int, Agency]] | None
         notes.append(
             f"<li><strong>Dekning over 100 %.</strong> Doffin-andelen ({pct(c.ratio)} av kjøpene) er større enn "
             f"virksomhetens egne kjøp. {why} Det gir ikke flagg.</li>")
+    elif a.coverage and a.coverage.category == "overtatt_kapittel":
+        c = a.coverage
+        notes.append(
+            f"<li><strong>Overtatt budsjettkapittel.</strong> {pct(c.takeover_share, decimals=0)} av "
+            f"kjøpene er på {escape(c.takeover_note)}. Avtaler på et kapittel som er flyttet, er som regel inngått "
+            f"og kunngjort i Doffin av den som hadde kapitlet før, så den lave dekningen ({pct(c.ratio)}) sier lite "
+            f"om {escape(a.name)} selv. Det gir ikke flagg.</li>")
     if a.flagged:
         word = "høyere" if a.deviation > 0 else "lavere"
         notes.append(
@@ -1734,13 +1744,18 @@ def supplier_page(datasets: list[Dataset], s: SupplierSummary, front: Dataset) -
 def about_page(ds: Dataset) -> str:
     coverage = ""
     if ds.has_coverage:
+        takeover = next((f" Er minst halvparten av kjøpene på et budsjettkapittel virksomheten har overtatt fra en "
+                         f"annen virksomhet, merkes den «overtatt budsjettkapittel» i stedet for å flagges. "
+                         f"For eksempel er {pct(a.coverage.takeover_share, decimals=0)} av kjøpene til "
+                         f"{escape(a.name)} på {escape(a.coverage.takeover_note)}." for a in ds.agencies
+                         if a.coverage and a.coverage.category == "overtatt_kapittel"), "")
         persist = ("<p>Avviker den samme vei i minst to av de tre siste årene, får den flagget «uvanlig høy» eller "
                    "«uvanlig lav dekning». Ett år alene kan skyldes én stor rammeavtale og vises bare som "
                    "«avvik i dekning i år». Dekning over 100 % betyr at Doffin-andelen er større enn egne kjøp. Det "
                    "har som regel en kjent forklaring og blir merket, ikke flagget: «tilskudd» når tilskuddene ut "
                    "av staten er minst like store (Samferdselsdepartementet kunngjør fly- og togruter, men betaler "
                    "dem som tilskudd), ellers «avtaler for andre» (som DFØ og DSS, som inngår avtaler andre "
-                   "bruker).</p>"
+                   "bruker)." + takeover + "</p>"
                    if any(a.coverage and a.coverage.category for a in ds.agencies) else
                    "<p>Da får den flagget «uvanlig høy» eller «uvanlig lav dekning».</p>")
         coverage = f"""

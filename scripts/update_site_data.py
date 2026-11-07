@@ -282,7 +282,10 @@ def apply_corrections(conn: sqlite3.Connection, path: Path = CORRECTIONS) -> int
 def keep_only(conn: sqlite3.Connection, orgnrs: set[str]) -> int:
     """Fjern regnskapstall for virksomheter som ikke er på nettsiden. Returnerer antall virksomheter fjernet."""
     extra = agencies(conn) - orgnrs
-    for table in ("statsregnskap", "statsregnskap_tilskudd"):
+    tables = ["statsregnskap", "statsregnskap_tilskudd"]
+    if conn.execute("SELECT 1 FROM sqlite_master WHERE name = 'statsregnskap_kapittel'").fetchone():
+        tables.append("statsregnskap_kapittel")
+    for table in tables:
         conn.executemany(f"DELETE FROM {table} WHERE orgnr = ?", [(o,) for o in extra])
     conn.commit()
     return len(extra)
