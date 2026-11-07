@@ -154,7 +154,7 @@ Havindustritilsynet;986174613;2024;12;6;27811688;111131484;-75.0;1;25.03;melloms
 Helse- og omsorgsdepartementet;983887406;2024;12;4;4463836;62317081;-92.8;1;7.16;små;10.3;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Helsedirektoratet;983544622;2024;12;3;2013578;1049663712;-99.8;1;0.19;store;16.6;1;flagg;2;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Helseøkonomiforvaltningen (HELFO);986965610;2024;12;2;126835592;71480470;77.4;1;177.44;små;10.3;0;tilskudd;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
-Hovedredningssentralen;971390425;2024;12;2;3905508;1318686067;-99.7;1;0.3;store;16.6;0;observasjon;1;;raadata_desember_2024_bevilgningsregnskap.xlsx
+Hovedredningssentralen;971390425;2024;12;2;3905508;1318686067;-99.7;1;0.3;store;16.6;0;overtatt_kapittel;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Husbanken;942114184;2024;12;10;97485781;164809931;-40.8;1;59.15;mellomstore;25.0;0;;0;;raadata_desember_2024_bevilgningsregnskap.xlsx
 Høgskolen i Innlandet;918108467;2024;12;30;13326810;598476000;-97.8;1;2.23;store;16.6;0;;0;https://kudos.dfo.no/dokument/352ee9ab-f13d-4783-b049-c386e0aef6bb/filer/0dd953ff-7d16-4f36-aeee-825c25396f43.pdf;
 Høgskulen på Vestlandet;917641404;2024;12;28;40962292;865653000;-95.3;1;4.73;store;16.6;0;;0;https://kudos.dfo.no/dokument/fc0de7d2-2de5-4996-a238-605a2b176a9d/filer/1a646b19-84c8-4ac0-8f80-5924e0fbc858.pdf;
@@ -278,7 +278,7 @@ Havindustritilsynet;986174613;2025;12;4;20332280;110127986;-81.5;1;18.46;melloms
 Helse- og omsorgsdepartementet;983887406;2025;12;5;5534384;71125710;-92.2;1;7.78;små;9.6;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Helsedirektoratet;983544622;2025;12;8;3889046;964897360;-99.6;1;0.4;store;10.7;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Helseøkonomiforvaltningen (HELFO);986965610;2025;12;3;125690930;80603835;55.9;1;155.94;små;9.6;0;tilskudd;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
-Hovedredningssentralen;971390425;2025;12;1;2453799;1474643946;-99.8;1;0.17;store;10.7;1;flagg;2;;raadata_desember_2025_bevilgningsregnskap.xlsx
+Hovedredningssentralen;971390425;2025;12;1;2453799;1474643946;-99.8;1;0.17;store;10.7;0;overtatt_kapittel;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Husbanken;942114184;2025;12;8;119438359;169241634;-29.4;1;70.57;mellomstore;18.5;0;;0;;raadata_desember_2025_bevilgningsregnskap.xlsx
 Høgskolen i Molde;971555483;2025;12;7;1599795;118639000;-98.7;1;1.35;mellomstore;18.5;0;;0;https://kudos.dfo.no/dokument/a14aee79-772b-4120-911a-83b3ac7a294b/filer/a14aee7e-0677-4b8e-9050-5f5f3da817da.pdf;
 Høgskulen på Vestlandet;917641404;2025;12;22;27378364;892099000;-96.9;1;3.07;store;10.7;0;;0;https://kudos.dfo.no/dokument/a14aee78-9c81-48db-823b-3f5b82e723df/filer/a14aee7d-9734-41b3-bfcf-667c4652c37c.pdf;
@@ -401,7 +401,7 @@ Havindustritilsynet;986174613;2026;8;5;11414787;71140686;-84.0;1;16.05;mellomsto
 Helse- og omsorgsdepartementet;983887406;2026;8;1;1093151;49425262;-97.8;1;2.21;små;18.0;0;observasjon;1;;raadata_august_2026_bevilgningsregnskap.xlsx
 Helsedirektoratet;983544622;2026;8;10;56869738;437372346;-87.0;1;13.0;store;21.0;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Helseøkonomiforvaltningen (HELFO);986965610;2026;8;3;38220098;56665085;-32.6;1;67.45;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
-Hovedredningssentralen;971390425;2026;8;1;466283;553984024;-99.9;1;0.08;store;21.0;1;flagg;3;;raadata_august_2026_bevilgningsregnskap.xlsx
+Hovedredningssentralen;971390425;2026;8;1;466283;553984024;-99.9;1;0.08;store;21.0;0;overtatt_kapittel;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Husbanken;942114184;2026;8;7;79708311;112605209;-29.2;1;70.79;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Integrerings- og mangfoldsdirektoratet;987879696;2026;8;15;21430393;87531107;-75.5;1;24.48;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
 Jernbanedirektoratet;916810962;2026;8;26;104920903;111405434;-5.8;1;94.18;mellomstore;28.9;0;;0;;raadata_august_2026_bevilgningsregnskap.xlsx
