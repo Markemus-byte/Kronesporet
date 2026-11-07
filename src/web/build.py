@@ -64,6 +64,8 @@ STRIPE_PORTAL_URL = "https://billing.stripe.com/p/login/3cI28j3Ue5oB64l9Ze5sA00"
 # på forsiden ved neste bygging. Tom = ingen tag. Fjern ikke koden etterpå; da mister eiendommen bekreftelsen.
 GOOGLE_SITE_VERIFICATION = ""  # <meta name="google-site-verification" content="HER">
 BING_SITE_VERIFICATION = ""    # <meta name="msvalidate.01" content="HER">
+# Eller «HTML-fil»-metoden: filnavnet Google gir (googleXXXX.html). Filen skrives i roten med innholdet Google krever.
+GOOGLE_VERIFICATION_FILES = ["google3f78e4393a5680b5.html"]  # Search Console, Morten, 07.11.2026
 # IndexNow (Bing, Yandex, Seznam, Naver; Bing deler med DuckDuckGo, Yahoo og Ecosia): nøkkelfilen <nøkkel>.txt
 # legges i roten, og scripts/indexnow.py melder fra om endrede sider etter hver publisering. Nøkkelen er offentlig.
 INDEXNOW_KEY = "7c3e9a51d84f4b2fa6e0b19c5d27f8a4"
@@ -2739,7 +2741,10 @@ def write_sitemap(out: Path) -> None:
         d, m, y = _SITE["data_date"].split(".")
         lastmod = f"<lastmod>{y}-{m}-{d}</lastmod>"
     static = {"vilkar.html", "support.html"}
-    paths = sorted(p.relative_to(out).as_posix() for p in out.rglob("*.html") if p.name != "404.html")
+    for name in GOOGLE_VERIFICATION_FILES:
+        (out / name).write_text(f"google-site-verification: {name}", encoding="utf-8")
+    paths = sorted(p.relative_to(out).as_posix() for p in out.rglob("*.html")
+                   if p.name != "404.html" and not re.fullmatch(r"google[0-9a-f]+\.html", p.name))
     urls = "".join(f"<url><loc>{escape(base + ('' if p == 'index.html' else p))}</loc>"
                    f"{'' if p in static else lastmod}</url>\n" for p in paths)
     (out / "sitemap.xml").write_text(
