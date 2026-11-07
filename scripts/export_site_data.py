@@ -36,6 +36,7 @@ TABLES: list[tuple[str, str]] = [
     ("orgnr_checked", ""),  # kjøpere i Doffin som er slått opp uten treff, så de ikke slås opp hver måned
     ("statsregnskap", "orgnr IN ({buyers})"),
     ("statsregnskap_tilskudd", "orgnr IN ({buyers})"),  # skiller «tilskudd» fra «avtaler for andre» i dekningen
+    ("statsregnskap_kapittel", "orgnr IN ({buyers})"),  # kapitler som er overtatt fra en annen virksomhet
     ("doffin_coverage", ""),
     ("orgnr_parent", "parent IN ({buyers})"),
     ("doffin_contracts", "{contracts}"),

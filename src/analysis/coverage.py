@@ -25,6 +25,15 @@ hver virksomhet i stedet med lignende virksomheter:
     'avtaler_for_andre' avtaler virksomheten inngår for andre, eller kjøp som føres
                         utenfor kjøp av varer og tjenester (fellesavtaler, folketrygden)
   Høy dekning under 100 % og lav dekning flagges som før.
+- Kjøp på et budsjettkapittel virksomheten har overtatt fra en annen virksomhet (som regel
+  departementet) får også egen kategori, 'overtatt_kapittel', når de er minst TAKEOVER_SHARE av
+  kjøpene og dekningen ellers ville avveket. Avtalene på kapitlet er da kunngjort i Doffin av den
+  som hadde kapitlet før, så lav dekning sier lite om virksomheten selv. Eksempel: kap. 0454
+  Redningshelikoptertjenesten ble ført på Justis- og beredskapsdepartementet i 2023 og på
+  Hovedredningssentralen fra 2024; helikopteravtalene er kunngjort av departementet.
+  Slike år telles ikke som avvik i flerårsvinduet. Som 'tilskudd' og 'avtaler_for_andre' er de
+  fortsatt med i gruppemedianen, som er robust mot enkeltverdier.
+  Overtakelsene leses fra tabellen statsregnskap_kapittel (rådata per kapittel).
 
 Bygger på `contract_spend_comparison` fra join_and_flag.flag_deviations, så
 5 %-flaggene ('doffin_avvik') beholdes uendret ved siden av.
@@ -39,6 +48,9 @@ from src.analysis.join_and_flag import SCHEMA as COMPARISON_SCHEMA
 
 FLAG_TYPE = "doffin_dekning"
 OBSERVATION_TYPE = "doffin_dekning_observasjon"
+TAKEOVER_CATEGORY = "overtatt_kapittel"
+TAKEOVER_SHARE = 0.5     # andel av kjøpene på overtatte kapitler som gir egen kategori
+TAKEOVER_MIN = 1_000_000  # kr; mindre kapitler flyttes ofte litt fram og tilbake og regnes ikke
 Z_THRESHOLD = 2.0
 PERSIST_WINDOW = 3
 PERSIST_MIN = 2
@@ -59,11 +71,14 @@ CREATE TABLE IF NOT EXISTS doffin_coverage (
     flagged      INTEGER,  -- 1 når category = 'flagg'
     outlier      INTEGER,  -- |z| > terskel dette året
     years_outlier INTEGER, -- år med avvik samme vei i vinduet (siste PERSIST_WINDOW år)
-    category     TEXT,     -- 'flagg' | 'observasjon' | 'tilskudd' | 'avtaler_for_andre' | NULL
+    category     TEXT,     -- 'flagg' | 'observasjon' | 'tilskudd' | 'avtaler_for_andre' | 'overtatt_kapittel' | NULL
+    takeover_share REAL,   -- andel av kjøpene på kapitler overtatt fra en annen virksomhet
+    takeover_note  TEXT,   -- f.eks. 'kap. 0454 Redningshelikoptertjenesten (Justis- og beredskapsdepartementet til og med 2023)'
     PRIMARY KEY (orgnr, year)
 );
 """
-NEW_COLUMNS = {"outlier": "INTEGER", "years_outlier": "INTEGER", "category": "TEXT"}
+NEW_COLUMNS = {"outlier": "INTEGER", "years_outlier": "INTEGER", "category": "TEXT",
+               "takeover_share": "REAL", "takeover_note": "TEXT"}
 
 
 def _robust_z(values: list[float]) -> tuple[float, float]:
@@ -82,11 +97,62 @@ def _band_name(i: int, n: int) -> str:
     return names[i] if names else f"gruppe {i + 1} av {n}"
 
 
-def _category(cov: float, contract_sum: float, tilskudd: float, outlier: bool, persistent: bool) -> str | None:
+def chapter_takeovers(conn: sqlite3.Connection) -> dict[tuple[str, int], tuple[float, str]]:
+    """Kjøp på budsjettkapitler som virksomheten har overtatt, per (orgnr, år): (beløp, forklaring).
+
+    Et kapittel regnes som overtatt i år Y når virksomheten hadde lite eller ingenting på det i et
+    tidligere år Y0 (høyst 10 % av beløpet nå), mens en annen virksomhet hadde det meste av kapitlet i
+    Y0 (minst halvparten av kjøpene på kapitlet og minst halvparten av beløpet virksomheten har nå) og
+    nesten ingenting i Y (høyst 10 % av beløpet i Y0). Kapitler som deles av mange, som fellesløsningene
+    på kap. 1540, regnes dermed ikke. Bare kjøp av varer og tjenester telles, og bare kapitler med minst
+    TAKEOVER_MIN kr i kjøp hos virksomheten.
+    """
+    try:
+        rows = conn.execute(
+            "SELECT year, orgnr, kapittel, MAX(kaptekst), MAX(virksomhet), SUM(amount) FROM statsregnskap_kapittel "
+            "WHERE orgnr IS NOT NULL AND amount > 0 GROUP BY year, orgnr, kapittel").fetchall()
+    except sqlite3.OperationalError:
+        return {}
+    by_kap: dict[str, dict[int, dict[str, float]]] = {}
+    texts: dict[str, str] = {}
+    names: dict[str, str] = {}
+    for year, org, kap, text, name, amount in rows:
+        by_kap.setdefault(kap, {}).setdefault(year, {})[org] = amount
+        texts[kap] = text or texts.get(kap, "")
+        names[org] = name or names.get(org, org)
+
+    found: dict[tuple[str, int], list] = {}
+    for kap, by_year in by_kap.items():
+        for year, orgs in by_year.items():
+            for org, amount in orgs.items():
+                if amount < TAKEOVER_MIN:
+                    continue
+                givers: dict[str, int] = {}
+                for y0, before in by_year.items():
+                    if y0 >= year or before.get(org, 0.0) > 0.1 * amount:
+                        continue
+                    total = sum(before.values())
+                    for other, had in before.items():
+                        if (other != org and had >= 0.5 * total and had >= 0.5 * amount
+                                and orgs.get(other, 0.0) <= 0.1 * had):
+                            givers[other] = max(givers.get(other, 0), y0)
+                if givers:
+                    who = " og ".join(f"{names[o]} til og med {y}" for o, y in sorted(givers.items(), key=lambda g: g[1]))
+                    hit = found.setdefault((org, year), [0.0, []])
+                    hit[0] += amount
+                    hit[1].append((amount, f"kap. {kap} {texts[kap]} ({who})"))
+    return {key: (total, "; ".join(t for _, t in sorted(parts, reverse=True)))
+            for key, (total, parts) in found.items()}
+
+
+def _category(cov: float, contract_sum: float, tilskudd: float, outlier: bool, persistent: bool,
+              takeover: bool = False) -> str | None:
     if cov > 1:
         return "tilskudd" if tilskudd >= contract_sum else "avtaler_for_andre"
     if not outlier:
         return None
+    if takeover:
+        return TAKEOVER_CATEGORY
     return "flagg" if persistent else "observasjon"
 
 
@@ -118,6 +184,10 @@ def flag_coverage_outliers(
             "SELECT orgnr, year, SUM(amount) FROM statsregnskap_tilskudd GROUP BY orgnr, year")}
     except sqlite3.OperationalError:
         tilskudd = {}
+    takeovers = chapter_takeovers(conn)
+    takeover_share = {(o, y): min(takeovers[(o, y)][0] / spend, 1.0)
+                      for o, _, y, _, spend in rows if (o, y) in takeovers}
+    taken_over = {key for key, share in takeover_share.items() if share >= TAKEOVER_SHARE}
 
     # 1. Robust z per år innen størrelsesgruppen
     scored: dict[tuple[str, int], tuple] = {}
@@ -141,15 +211,20 @@ def flag_coverage_outliers(
         outlier = abs(z) > z_threshold
         sign = 1 if z > 0 else -1
         window = [scored.get((org, y)) for y in range(yr - persist_window + 1, yr + 1)]
-        years_outlier = sum(1 for w in window if w and abs(w[6]) > z_threshold and (w[6] > 0) == (sign > 0))
+        years_outlier = sum(1 for y, w in zip(range(yr - persist_window + 1, yr + 1), window)
+                            if w and (org, y) not in taken_over
+                            and abs(w[6]) > z_threshold and (w[6] > 0) == (sign > 0))
+        takeover = (org, yr) in taken_over
         category = _category(cov, contract_sum, tilskudd.get((org, yr), 0.0), outlier,
-                             outlier and years_outlier >= persist_min)
+                             outlier and years_outlier >= persist_min, takeover)
         conn.execute(
             "INSERT OR REPLACE INTO doffin_coverage "
             "(orgnr, year, virksomhet, coverage, peer_group, peer_count, peer_median, z, flagged, "
-            "outlier, years_outlier, category) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "outlier, years_outlier, category, takeover_share, takeover_note) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (org, yr, name, cov, group, n_peers, peer_med, z, int(category == "flagg"),
-             int(outlier), years_outlier if outlier else 0, category),
+             int(outlier and not takeover), years_outlier if outlier and not takeover else 0, category,
+             takeover_share.get((org, yr)), takeovers[(org, yr)][1] if (org, yr) in takeovers else None),
         )
         if category not in ("flagg", "observasjon"):
             continue

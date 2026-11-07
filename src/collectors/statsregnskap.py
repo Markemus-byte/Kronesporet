@@ -263,6 +263,22 @@ RAADATA_REQUIRED = {"Orgnr", "Artskonto", "Regnskap HIÅ"}
 # Samferdselsdepartementet), havner her og ikke i kjøp av varer og tjenester.
 TILSKUDD_ARTSKONTO = {"870", "871", "872", "873", "874", "875", "876", "878"}
 
+# Kjøp per kapittel: viser når et budsjettkapittel flyttes mellom virksomheter (f.eks. kap. 0454
+# Redningshelikoptertjenesten fra Justis- og beredskapsdepartementet til Hovedredningssentralen i 2024).
+# Avtalene på et slikt kapittel er som regel kunngjort i Doffin av den som hadde kapitlet før
+# (se src/analysis/coverage.py).
+RAADATA_KAPITTEL_SCHEMA = """
+CREATE TABLE IF NOT EXISTS statsregnskap_kapittel (
+    year         INTEGER,
+    orgnr        TEXT,
+    kapittel     TEXT,     -- fire sifre, f.eks. '0454'
+    kaptekst     TEXT,
+    virksomhet   TEXT,
+    amount       REAL,     -- kjøp av varer og tjenester på kapitlet (kr)
+    source_file  TEXT
+);
+"""
+
 TILSKUDD_SCHEMA = """
 CREATE TABLE IF NOT EXISTS statsregnskap_tilskudd (
     year         INTEGER,
@@ -335,6 +351,7 @@ def load_raadata_xlsx(conn: sqlite3.Connection, path: str | Path,
     org_names: dict[str, str] = {}
     unit_orgs: dict[str, set[str]] = {}
     tilskudd: dict[str, float] = {}
+    chapters: dict[tuple[str, str], list] = {}  # (orgnr, kap) -> [kaptekst, beløp]
     for r in rows[head_i + 1:]:
         art = r.get(col["Artskonto"], "")
         orgnr = re.sub(r"\D", "", r.get(col["Orgnr"], ""))
@@ -349,6 +366,10 @@ def load_raadata_xlsx(conn: sqlite3.Connection, path: str | Path,
             tilskudd[orgnr] = tilskudd.get(orgnr, 0.0) + amount
             continue
         sums[(orgnr, art)] = sums.get((orgnr, art), 0.0) + amount
+        kap = r.get(col.get("Kap", ""), "")
+        if kap:
+            chapter = chapters.setdefault((orgnr, kap), [r.get(col.get("Kaptekst", ""), ""), 0.0])
+            chapter[1] += amount
         org_names.setdefault(orgnr, r.get(col.get("Orgnavn", ""), ""))
         unit = r.get(col.get("Virksomhet", ""), "")
         if unit:
@@ -360,13 +381,16 @@ def load_raadata_xlsx(conn: sqlite3.Connection, path: str | Path,
         if len(unit_orgs.get(names.get(orgnr, ""), ())) != 1:
             names[orgnr] = org_names[orgnr] or names.get(orgnr, "")
 
-    conn.executescript(ANALYSIS_SCHEMA + TILSKUDD_SCHEMA)
+    conn.executescript(ANALYSIS_SCHEMA + TILSKUDD_SCHEMA + RAADATA_KAPITTEL_SCHEMA)
     # Rådata er akkumulert hittil i år: en nyere måned for samme år erstatter den forrige filen.
-    for table in ("statsregnskap", "statsregnskap_tilskudd"):
+    for table in ("statsregnskap", "statsregnskap_tilskudd", "statsregnskap_kapittel"):
         conn.execute(f"DELETE FROM {table} WHERE source_file = ? OR (year = ? AND (lower(source_file) LIKE "
                      "'raadata%' OR lower(source_file) LIKE 'rådata%'))", (path.name, year))
     conn.executemany("INSERT INTO statsregnskap_tilskudd VALUES (?, ?, ?, ?)",
                      [(year, org, amount, path.name) for org, amount in tilskudd.items()])
+    conn.executemany("INSERT INTO statsregnskap_kapittel VALUES (?, ?, ?, ?, ?, ?, ?)",
+                     [(year, org, kap, text, names.get(org, org_names.get(org, "")), amount, path.name)
+                      for (org, kap), (text, amount) in sorted(chapters.items())])
     # Rådata er regnskapet selv: erstatter tall lest fra årsrapporter (Kudos) for de samme virksomhetene.
     # Nettobudsjetterte virksomheter (universiteter m.fl.) finnes ikke i rådata og beholder Kudos-tallene.
     conn.executemany("DELETE FROM statsregnskap WHERE year = ? AND orgnr = ? AND source_file LIKE 'kudos:%'",

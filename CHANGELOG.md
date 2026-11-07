@@ -2,6 +2,12 @@
 
 ## Ikke utgitt
 
+- **Rettet feil flagg for Hovedredningssentralen:** fra 2024 betaler Hovedredningssentralen for
+  redningshelikoptertjenesten (kap. 0454, 1,3 mrd. i 2025), men avtalene er kunngjort i Doffin av Justis- og
+  beredskapsdepartementet, som hadde kapitlet til og med 2023. Kjøpene per budsjettkapittel lagres nå
+  (`statsregnskap_kapittel`), og er minst halvparten av kjøpene på et kapittel virksomheten har overtatt fra en
+  annen virksomhet, merkes dekningen «overtatt budsjettkapittel» i stedet for å flagges. Flagget for 2025 og
+  2026 og observasjonen for 2024 forsvinner; ingen andre virksomheter endres.
 - **Søkemotorer:** hver side har en `<title>` og beskrivelse med søkeordene folk bruker (offentlige kontrakter,
   anbud, innkjøp, leverandører, avtaler som løper ut) og med tall fra siden: antall kontrakter, største
   leverandører og kjøpere. Strukturerte data (schema.org): nettstedet og Kronesporet som organisasjon på
