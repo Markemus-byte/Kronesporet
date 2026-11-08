@@ -81,23 +81,22 @@ selger er fylt inn, så nettsiden er uendret til da. Hovedpunktene:
 
 ## 4. Juridisk gjennomgang
 
-Be en advokat med e-handel og personvern om en fastpris-gjennomgang av:
+Morten valgte 08.11.2026 å bruke standard GDPR-oppsett i stedet for advokat. Gjort i samme omgang:
 
-- [ ] brukervilkårene for abonnementet (punkt 3)
-- [ ] personvernerklæringen på `vilkar.html`, særlig behandling av abonnenter og enkeltpersonforetak blant
-  leverandørene
-- [ ] at opplysningene ehandelsloven § 8 krever (navn, geografisk adresse, orgnr, e-post og eventuelt mva-nummer)
-  står på nettsiden
-- [ ] at Kronesporet kan ta betalt for varsler bygget på NLOD-data (NLOD tillater kommersiell bruk med
-  kildehenvisning, men be advokaten bekrefte at vilkårene ikke begrenser selve kildedataene)
-- [ ] databehandleravtalene med Stripe, Cloudflare og e-posttjenesten (de er som regel en del av standardvilkårene
-  deres, men det bør stå i personvernerklæringen hvem som behandler hva)
+- [x] personvernerklæringen på `vilkar.html#personvern` følger artikkel 13 og 14: behandlingsansvarlig, formål,
+  rettslig grunnlag og lagringstid per gruppe, databehandlerne med navn, overføring til USA, rettigheter og klage
+- [x] databehandlerne er navngitt (GitHub, Cloudflare, Domene AS, Stripe); oversikt og behandlingsprotokoll i
+  [personvern.md](personvern.md)
+- [x] lagringstidene håndheves automatisk av Worker-en (daglig sletting, `cleanup` i `worker/src/index.js`)
+- [x] opplysningene ehandelsloven § 8 krever (navn, adresse, orgnr, e-post) står under «Hvem står bak» på
+  `vilkar.html`; ikke mva-registrert, så mva-nummer trengs ikke ennå
+- [ ] valgfritt senere: advokat ser over vilkårene når det er inntekter å ta av
 
 ## Rekkefølge
 
 1. ENK-et klart: næringskode, bankkonto og selgeropplysninger (punkt 1)
 2. Stripe-konto i testmodus og pris (betaling-stripe.md)
-3. Advokat ser på vilkårene mens varslene fra #38 testes
+3. Vilkår og personvern klare (08.11.2026, uten advokat)
 4. Slå på Stripe live og fyll inn `STRIPE_PORTAL_URL` i `src/web/build.py` (selger og pris står der alt). Da
    vises vilkårene, og varslene kan selges
 5. Mva-registrering når salget nærmer seg 50 000 kr

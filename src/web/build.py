@@ -2249,30 +2249,155 @@ verneting.</p>
 """
 
 
-def paid_privacy_item() -> str:
-    """Personvern for abonnenter. Tom til abonnementet er i salg."""
-    if not paid_alerts_live():
-        return ""
-    return ("<li><strong>Abonnenter på varsler.</strong> Vi lagrer e-post, navn og organisasjonsnummer på virksomheten, "
-            "hva du følger, hvilke varsler som er sendt, og om abonnementet er betalt. Grunnlaget er avtalen med deg "
-            "(artikkel 6 nr. 1 bokstav b) og bokføringsplikten (bokstav c). Betalingen behandles av Stripe, som også er "
-            "selvstendig behandlingsansvarlig for å forhindre svindel. Abonnementet og følge-listene lagres hos "
-            "Cloudflare, og varslene sendes via en e-posttjeneste som behandler adressen din på våre vegne. Noen av "
-            "disse lagrer data i USA, med EUs standardkontrakter eller EU–US Data Privacy Framework som grunnlag. Vi "
-            "sletter opplysningene om deg når abonnementet er avsluttet, bortsett fra kvitteringer og annet "
-            "regnskapsmateriale, som bokføringsloven krever at vi tar vare på i fem år.</li>\n")
+# Personvern (GDPR). Databehandlerne er de tjenestene koden faktisk bruker: GitHub (Pages og Actions), Cloudflare
+# (Worker og D1), Domene AS (e-postserveren i cPanel) og Stripe. Brevo er støttet i koden, men ikke i bruk, og står
+# derfor ikke her. Endres en leverandør, skal tabellen og plan/personvern.md endres samtidig. Lagringstidene for
+# abonnentene håndheves av rydde-jobben i worker/src/index.js (scheduled).
+PRIVACY_UPDATED = "8. november 2026"
+CONTROLLER = "Brafaring Thevik (enkeltpersonforetak), org.nr. 938 405 565, Multeveien 1, 1712 Grålum"
+
+# (leverandør, hva den gjør for oss, hvor dataene behandles, grunnlag for overføring ut av EØS)
+PROCESSORS = (
+    ("GitHub, Inc. (USA)",
+     "Drifter nettsiden (GitHub Pages) og kjører den daglige utsendingen av varsler (GitHub Actions). Ser IP-adressen "
+     "til besøkende, og e-postadressen og utvalget til abonnenter mens varslene lages.",
+     "USA", "EU–US Data Privacy Framework og EUs standardkontrakter"),
+    ("Cloudflare, Inc. (USA)",
+     "Tar imot påmeldinger og lagrer abonnenter, hva de følger og loggen over sendte varsler (Cloudflare Workers og "
+     "D1). Ser IP-adressen til den som sender påmeldingsskjemaet.",
+     "USA og Cloudflares servere i andre land", "EU–US Data Privacy Framework og EUs standardkontrakter"),
+    ("Domene AS (Norge, org.nr. 880 478 982)",
+     "Webhotell og e-postserver for kronesporet.no. Alle e-poster vi sender og mottar, også bekreftelser og varsler, "
+     "går gjennom og lagres her.",
+     "Norge", "ingen, alt er i Norge"),
+    ("Stripe (Stripe Payments Europe, Limited, Irland)",
+     "Tar imot betalingen, lagrer kort og kundeopplysninger, lager kvitteringer og driver kundeportalen. Stripe er "
+     "også selvstendig behandlingsansvarlig for å forhindre svindel og hvitvasking.",
+     "EØS og USA", "EU–US Data Privacy Framework og EUs standardkontrakter"),
+)
+
+
+def privacy_section() -> str:
+    """Personvernerklæringen (personvernforordningen artikkel 13 og 14)."""
+    mail = f'<a href="mailto:{escape(PRIVACY_EMAIL)}">{escape(PRIVACY_EMAIL)}</a>'
+    paid = paid_alerts_live()
+    rows = [
+        ("Besøk på nettsiden",
+         "IP-adresse, nettleser og hvilken side som ble hentet, i serverloggen hos GitHub.",
+         "Drive siden og verne den mot angrep.",
+         "Berettiget interesse (artikkel 6 nr. 1 bokstav f).",
+         "Etter GitHubs regler, i en begrenset periode. Vi lagrer ingenting selv."),
+        ("Leverandører som er enkeltpersonforetak",
+         "Navnet på foretaket (ofte innehaverens navn) og organisasjonsnummer, sammen med kontraktene med det "
+         "offentlige. Hentet fra Doffin og Enhetsregisteret.",
+         "Vise hvem som får offentlige kontrakter.",
+         "Berettiget interesse (bokstav f): allmennheten har interesse av å se hvem som får offentlige penger.",
+         "Så lenge kontrakten er med i dataene på siden. Du kan be om å bli skjult, se under."),
+        ("Påmelding til varsler",
+         "E-postadresse, hva du vil følge, og når du meldte deg på og bekreftet.",
+         "Bekrefte adressen og sende deg videre til betaling.",
+         "Tiltak før avtale etter ønske fra deg (bokstav b).",
+         "Slettes automatisk etter 30 dager hvis påmeldingen ikke blir bekreftet og betalt."),
+    ]
+    if paid:
+        rows.append((
+            "Abonnenter på varsler",
+            "E-postadresse, hva du følger, hvilke varsler som er sendt, og om abonnementet er betalt. Hos Stripe i "
+            "tillegg navn, fakturaadresse, firmanavn og organisasjonsnummer som du oppgir, og kortet (som bare Stripe "
+            "ser).",
+            "Sende varslene og ta betalt for dem.",
+            "Avtalen med deg (bokstav b).",
+            "Så lenge abonnementet løper. Slettes automatisk 90 dager etter at du har sagt opp eller avsluttet "
+            "varslene. Loggen over sendte varsler slettes etter 13 måneder."))
+        rows.append((
+            "Regnskap",
+            "Kvitteringer og fakturaer med navn, firma, adresse og beløp.",
+            "Oppfylle bokføringsplikten.",
+            "Rettslig plikt (bokstav c), bokføringsloven § 13.",
+            "Fem år etter utgangen av regnskapsåret."))
+    rows += [
+        ("Henvendelser på e-post",
+         "Det du skriver til oss, med navn og e-postadresse.",
+         "Svare deg og følge opp saken.",
+         "Berettiget interesse (bokstav f), eller avtalen hvis du er kunde (bokstav b).",
+         "Slettes senest 12 måneder etter at saken er avsluttet, med mindre den er regnskapsmateriale."),
+        ("Kontakt med bedrifter om varslene",
+         "Firmanavn, organisasjonsnummer, offentlige kontrakter og firmaets e-postadresse eller telefon fra "
+         "Enhetsregisteret, Doffin eller firmaets nettside. Vi bruker bare personlige navn og adresser når de er "
+         "oppgitt offentlig som firmaets kontakt.",
+         "Tilby varslene til bedrifter som vinner eller kan vinne offentlige kontrakter.",
+         "Berettiget interesse (bokstav f). E-post sendes bare til næringsdrivende, med mulighet til å reservere seg "
+         "(markedsføringsloven § 15).",
+         "Slettes senest 12 måneder etter siste kontakt. Sier du nei takk, noterer vi bare firmaet og adressen så du "
+         "ikke blir kontaktet igjen."),
+    ]
+    labels = ("Opplysninger", "Formål", "Rettslig grunnlag", "Lagringstid")
+    body = "".join(f"<h4>{escape(r[0])}</h4>\n<ul class=\"notes\">"
+                   + "".join(f"<li><strong>{lab}:</strong> {escape(c)}</li>" for lab, c in zip(labels, r[1:]))
+                   + "</ul>\n" for r in rows)
+    procs = PROCESSORS if paid else PROCESSORS[:3]
+    proc_rows = "".join(f"<li><strong>{escape(n)}.</strong> {escape(w)} Hvor: {escape(where)}. "
+                        f"Overføring ut av EØS: {escape(basis)}.</li>\n"
+                        for n, w, where, basis in procs)
+    return f"""<h2 id="personvern">Personvern</h2>
+<p class="muted small">Sist oppdatert {PRIVACY_UPDATED}.</p>
+<p>Her står hvilke opplysninger om personer Kronesporet behandler, hvorfor, hvor lenge, og hvem som hjelper oss med
+det. Erklæringen følger personvernforordningen (GDPR) og personopplysningsloven.</p>
+
+<h3 id="personvern-ansvarlig">Behandlingsansvarlig</h3>
+<p>{escape(CONTROLLER)}, som driver Kronesporet. Spørsmål om personvern sender du til {mail}. Vi har ikke
+personvernombud, for det kreves ikke for en virksomhet av vår størrelse.</p>
+
+<h3 id="personvern-opplysninger">Hva vi behandler</h3>
+{body}<p>Vi selger ikke opplysninger om deg og bruker dem ikke til noe annet enn det som står her. Vi tar ingen
+automatiserte avgjørelser om deg. Du må oppgi e-postadressen for å få varsler, men ellers er ingenting påkrevd.</p>
+
+<h3 id="personvern-informasjonskapsler">Informasjonskapsler og sporing</h3>
+<p>Nettsiden har ingen innlogging, ingen informasjonskapsler (cookies) og ingen analyse- eller sporingsverktøy, og
+den henter ikke noe fra andre nettsteder. Varslene og e-postene våre har ingen sporingspiksler, og vi måler ikke om
+du åpner dem eller klikker på lenkene.</p>
+
+<h3 id="personvern-databehandlere">Hvem som behandler opplysninger for oss</h3>
+<p>Disse leverandørene behandler opplysninger på våre vegne (databehandlere) etter sine standard
+databehandleravtaler. De får bare bruke opplysningene til å levere tjenesten til oss.</p>
+<ul class="notes">
+{proc_rows}</ul>
+<p>Vi gir ikke opplysninger til andre, med mindre loven krever det, for eksempel til skattemyndighetene.</p>
+
+<h3 id="personvern-overforing">Overføring ut av EØS</h3>
+<p>GitHub, Cloudflare og Stripe er amerikanske selskaper, og opplysningene kan bli behandlet i USA. De er sertifisert
+under EU–US Data Privacy Framework, som EU-kommisjonen har godkjent, og bruker i tillegg EUs standardkontrakter.
+Ønsker du en kopi av grunnlaget, skriver du til {mail}.</p>
+
+<h3 id="personvern-rettigheter">Dine rettigheter</h3>
+<ul>
+<li><strong>Innsyn:</strong> du kan få vite hva vi har om deg, og få en kopi.</li>
+<li><strong>Retting og sletting:</strong> du kan be oss rette feil og slette opplysninger vi ikke trenger. Abonnenter
+kan slette seg selv: trykk «Avslutt varslene» nederst i et varsel og så «Slett meg».</li>
+<li><strong>Begrensning og dataportabilitet:</strong> du kan be oss stanse bruken mens noe blir avklart, og få
+opplysningene du har gitt oss i et maskinlesbart format.</li>
+<li><strong>Protest:</strong> du kan protestere mot behandling som bygger på berettiget interesse. Mot
+markedsføring kan du alltid reservere deg, og da stanser vi den.</li>
+<li><strong>Enkeltpersonforetak kan bli skjult.</strong> Har du et enkeltpersonforetak og vil ikke vises med navn,
+viser vi foretaket som «Enkeltpersonforetak (skjult)» uten organisasjonsnummer, og leverandørsiden fjernes.
+Kontraktene står fortsatt i Doffin.</li>
+</ul>
+<p>Send en e-post til {mail}. Vi svarer innen én måned, og det koster ingenting. Vi kan be deg bekrefte hvem du er
+før vi gir ut eller sletter noe.</p>
+
+<h3 id="personvern-klage">Klage</h3>
+<p>Mener du at vi behandler opplysninger om deg i strid med reglene, kan du klage til
+<a href="https://www.datatilsynet.no">Datatilsynet</a>. Ta gjerne kontakt med oss først, så prøver vi å rette det.</p>
+
+<h3 id="personvern-endringer">Endringer</h3>
+<p>Endrer vi denne erklæringen, oppdaterer vi datoen øverst. Store endringer som gjelder abonnenter, varsler vi på
+e-post.</p>
+"""
 
 
 def terms_page() -> str:
     """Vilkår for bruk, forbehold, retting og personvern."""
     issue = f"{REPO_URL}/issues/new"
-    contact = (f'Send en e-post til <a href="mailto:{escape(PRIVACY_EMAIL)}">{escape(PRIVACY_EMAIL)}</a>.'
-               if PRIVACY_EMAIL else
-               f'Opprett en <a href="{issue}">sak på GitHub</a> og be om kontakt. Ikke skriv personopplysninger i '
-               "saken, for den er offentlig.")
-    signup = ("<li><strong>Påmelding til varsler.</strong> Melder du interesse for varsler på e-post, bruker vi "
-              "adressen bare til å si fra når varslene er klare. Vi deler den ikke og sletter den når du ber om det.</li>"
-              if ALERTS_EMAIL else "")
     body = f"""<section class="hero">
   <h1>Vilkår og personvern</h1>
   <p class="lede">Kronesporet er gratis å bruke. Tallene kommer fra åpne offentlige kilder og er satt sammen av
@@ -2281,9 +2406,9 @@ def terms_page() -> str:
 </section>
 <div class="prose">
 <h2 id="hvem">Hvem står bak</h2>
-<p>Kronesporet drives av Markemus-byte og er ikke tilknyttet DFØ, Digdir eller Brønnøysundregistrene.
-Kildekoden og endringsloggen ligger på <a href="{REPO_URL}">GitHub</a>.{
-f" Selger av abonnementet på varsler er {escape(SELLER)}." if paid_alerts_live() else ""}{
+<p>Kronesporet drives av {escape(CONTROLLER)}, og er ikke tilknyttet DFØ, Digdir eller
+Brønnøysundregistrene. Kildekoden og endringsloggen ligger på <a href="{REPO_URL}">GitHub</a>.{
+" Det samme foretaket selger abonnementet på varsler." if paid_alerts_live() else ""}{
 f' Kontakt oss på <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>' if CONTACT_EMAIL else ""}{
 f', og presse kan skrive til <a href="mailto:{PRESS_EMAIL}">{PRESS_EMAIL}</a>.' if CONTACT_EMAIL and PRESS_EMAIL else
 "." if CONTACT_EMAIL else ""}</p>
@@ -2305,23 +2430,7 @@ av tallene. Sjekk mot kilden før du bruker et tall; hver kontrakt lenker til ku
 GitHub</a>{f' eller sende en e-post til <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>' if CONTACT_EMAIL else ""}. Skriv hvilken side det gjelder og hva som er feil. Rettelser står i
 <a href="{REPO_URL}/blob/main/CHANGELOG.md">endringsloggen</a>.</p>
 
-{paid_terms_section()}<h2 id="personvern">Personvern</h2>
-<ul>
-<li><strong>Besøk på nettsiden.</strong> Siden har ingen innlogging, ingen informasjonskapsler og ingen analyse-
-eller sporingsverktøy, og den henter ikke noe fra andre nettsteder. Siden ligger på GitHub Pages, og GitHub
-<a href="https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages#data-collection">lagrer
-IP-adressen til besøkende av sikkerhetshensyn</a>.</li>
-<li><strong>Leverandører som er enkeltpersonforetak.</strong> Noen leverandører er enkeltpersonforetak, og
-navnet på foretaket kan være innehaverens navn. Vi viser navn og organisasjonsnummer slik de står i Doffin og
-Enhetsregisteret, og bare sammen med kontrakter med staten. Grunnlaget er berettiget interesse
-(personvernforordningen artikkel 6 nr. 1 bokstav f): allmennheten har interesse av å se hvem som får offentlige
-kontrakter.</li>
-<li><strong>Du kan be om å bli skjult.</strong> Har du et enkeltpersonforetak og vil ikke vises med navn, viser
-vi foretaket som «Enkeltpersonforetak (skjult)» uten organisasjonsnummer, og leverandørsiden fjernes. Kontraktene
-står fortsatt i Doffin. {contact}</li>
-{signup}{paid_privacy_item()}<li><strong>Klage.</strong> Du kan klage til <a href="https://www.datatilsynet.no">Datatilsynet</a>.</li>
-</ul>
-</div>
+{paid_terms_section()}{privacy_section()}</div>
 """
     return page("Vilkår og personvern", body, path="vilkar.html", crumbs=[],
                 description="Vilkår for bruk av Kronesporet, forbehold, retting av feil og personvern.")

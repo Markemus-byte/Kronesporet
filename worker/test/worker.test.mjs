@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { DatabaseSync } from "node:sqlite";
 import { test } from "node:test";
 
-import worker, { mimeMessage, parseSelection, smtpSend, stripeMode, verifyStripe } from "../src/index.js";
+import worker, { cleanup, mimeMessage, parseSelection, smtpSend, stripeMode, verifyStripe } from "../src/index.js";
 
 const SCHEMA = readFileSync(new URL("../schema.sql", import.meta.url), "utf8");
 
@@ -240,4 +240,28 @@ test("påmelding: feiler e-posten, får personen en vennlig melding og kan prøv
   } finally {
     console.error = orig;
   }
+});
+
+test("lagringstid: gamle påmeldinger, avsluttede abonnenter og gamle logger slettes, betalende beholdes", async () => {
+  const { env } = setup();
+  const db = env.DB.raw;
+  const add = (email, status, oppdatert, avmeldt = null) => db.prepare(
+    "INSERT INTO abonnenter (email, token, status, oppdatert, avmeldt) VALUES (?, ?, ?, ?, ?)",
+  ).run(email, email.padEnd(48, "0"), status, oppdatert, avmeldt);
+  add("ny-gammel@x.no", "ny", "2026-09-01 00:00:00");
+  add("ny-fersk@x.no", "ny", "2026-10-30 00:00:00");
+  add("oppsagt-gammel@x.no", "canceled", "2026-07-01 00:00:00");
+  add("oppsagt-fersk@x.no", "canceled", "2026-10-01 00:00:00");
+  add("avmeldt-gratis@x.no", "gratis", "2026-07-01 00:00:00", "2026-07-01 00:00:00");
+  add("betaler-avmeldt@x.no", "active", "2026-07-01 00:00:00", "2026-07-01 00:00:00");
+  add("betaler@x.no", "active", "2026-01-01 00:00:00");
+  db.prepare("INSERT INTO utvalg (email, type, verdi) VALUES ('ny-gammel@x.no', 'cpv', '72')").run();
+  db.prepare("INSERT INTO sendte_varsler (email, kjoring, sendt) VALUES ('betaler@x.no', '2025-01-01', '2025-01-02 00:00:00')").run();
+  db.prepare("INSERT INTO sendte_varsler (email, kjoring, sendt) VALUES ('betaler@x.no', '2026-11-01', '2026-11-02 00:00:00')").run();
+  const r = await cleanup(env, Date.parse("2026-11-08T00:00:00Z"));
+  assert.equal(r.slettet, 3);
+  assert.deepEqual(db.prepare("SELECT email FROM abonnenter ORDER BY email").all().map((x) => x.email),
+    ["betaler-avmeldt@x.no", "betaler@x.no", "ny-fersk@x.no", "oppsagt-fersk@x.no"]);
+  assert.equal(db.prepare("SELECT COUNT(*) AS n FROM utvalg").get().n, 0);
+  assert.equal(db.prepare("SELECT COUNT(*) AS n FROM sendte_varsler").get().n, 1);
 });

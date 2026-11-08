@@ -8,6 +8,7 @@
 //   GET  /api/abonnenter   for scripts/send_alerts.py (Bearer API_TOKEN)
 //   POST /api/sendt        scripts/send_alerts.py melder inn sendte varsler (Bearer API_TOKEN)
 //   POST /stripe/webhook   betalingsstatus fra Stripe (STRIPE_WEBHOOK_SECRET_LIVE, før live: STRIPE_WEBHOOK_SECRET)
+//   cron (wrangler.toml)   sletter gamle opplysninger etter lagringstidene i personvernerklæringen (cleanup)
 //
 // Datamodellen er i schema.sql. Hemmeligheter (wrangler secret put): API_TOKEN, STRIPE_WEBHOOK_SECRET, og for e-post
 // enten SMTP_HOST/SMTP_USER/SMTP_PASSWORD (egen e-postserver) eller BREVO_API_KEY.
@@ -38,7 +39,36 @@ export default {
       return new Response("Noe gikk galt. Prøv igjen senere.", { status: 500 });
     }
   },
+  async scheduled(_event, env, ctx) {
+    ctx.waitUntil(cleanup(env));
+  },
 };
+
+// --- lagringstid (personvern) ------------------------------------------------------
+
+// Samme tall som i personvernerklæringen (privacy_section i src/web/build.py). Endres de, endres begge.
+export const RETENTION_DAYS = { ubetalt: 30, avsluttet: 90, logg: 395, hendelser: 90 };
+
+// Sletter påmeldinger som aldri ble betalt, abonnenter som har sluttet, og gamle logger. Betalende ('active',
+// 'past_due') og gratisabonnenter som ikke har avsluttet, røres ikke. Kvitteringene ligger i Stripe.
+export async function cleanup(env, nowMs = Date.now()) {
+  const before = (days) => new Date(nowMs - days * 864e5).toISOString().slice(0, 19).replace("T", " ");
+  const gone = `(status = 'ny' AND oppdatert < ?1)
+    OR (status = 'canceled' AND oppdatert < ?2)
+    OR (avmeldt IS NOT NULL AND avmeldt < ?2 AND status NOT IN ('active', 'past_due'))`;
+  const binds = [before(RETENTION_DAYS.ubetalt), before(RETENTION_DAYS.avsluttet)];
+  const { results } = await env.DB.prepare(`SELECT email FROM abonnenter WHERE ${gone}`).bind(...binds).all();
+  const stmts = [];
+  for (const { email } of results) {
+    stmts.push(env.DB.prepare("DELETE FROM utvalg WHERE email = ?").bind(email));
+    stmts.push(env.DB.prepare("DELETE FROM sendte_varsler WHERE email = ?").bind(email));
+    stmts.push(env.DB.prepare("DELETE FROM abonnenter WHERE email = ?").bind(email));
+  }
+  stmts.push(env.DB.prepare("DELETE FROM sendte_varsler WHERE sendt < ?").bind(before(RETENTION_DAYS.logg)));
+  stmts.push(env.DB.prepare("DELETE FROM stripe_hendelser WHERE mottatt < ?").bind(before(RETENTION_DAYS.hendelser)));
+  await env.DB.batch(stmts);
+  return { slettet: results.length };
+}
 
 // --- hjelpere -------------------------------------------------------------------
 
