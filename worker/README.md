@@ -68,12 +68,18 @@ og testhendelser fra sandkassen avvises. Før det går alt i sandkassen, så ing
 registreres.
 
 **Senere, før ekte betalinger (fra betalingsoppsettet i #39):** live-nøkkelen fra Stripe som secret
-`STRIPE_LIVE_KEY` når testen i sandkassen virker, og en advokat som ser over vilkårene og personvernerklæringen.
+`STRIPE_LIVE_KEY` når testen i sandkassen virker (gjort). Personvernerklæringen og databehandlerne står i
+[plan/personvern.md](../plan/personvern.md).
 
 Uten Stripe virker alt unntatt betalingen: bekreftede abonnenter får beskjed om at betalingen åpner snart, og
 gratisabonnenter kan settes opp for hånd.
 
 ## Drift
+
+**Lagringstid.** Worker-en sletter hver natt (cron i `wrangler.toml`) påmeldinger som ikke er betalt etter 30 dager,
+abonnenter 90 dager etter at de har sagt opp eller avsluttet varslene, og logg over sendte varsler etter 13 måneder.
+Betalende og gratisabonnenter som ikke har avsluttet, røres ikke. Tallene står i `RETENTION_DAYS` i `src/index.js`
+og i personvernerklæringen (`privacy_section` i `src/web/build.py`); endres de, endres begge.
 
 Kommandoene under kjøres i D1-konsollen i Cloudflare (*Storage & Databases → D1 → kronesporet-varsler → Console*)
 uten `npx wrangler ...`-delen, eller med wrangler på en maskin med Node.js.

@@ -16,6 +16,10 @@ STRIPE_PORTAL_URL = "https://billing.stripe.com/p/login/test_bJe3cnalvcydaqMcB37
 STRIPE_PAYMENT_LINK_LIVE = "https://buy.stripe.com/8x200bgH06sFeARgnC5sA01"
 STRIPE_PORTAL_URL_LIVE = "https://billing.stripe.com/p/login/3cI28j3Ue5oB64l9Ze5sA00"
 
+# Daglig sletting av gamle opplysninger etter lagringstidene i personvernerklæringen (cleanup i src/index.js).
+[triggers]
+crons = ["15 3 * * *"]
+
 [[d1_databases]]
 binding = "DB"
 database_name = "kronesporet-varsler"

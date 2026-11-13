@@ -95,7 +95,7 @@ def main() -> int:
             skipped += 1  # ingenting nytt; vinduene for utløp regnes fra forrige varsel neste gang
             continue
         if a.dry_run:
-            log.info("%s: %d tildelinger, %d utløp", sub.email, len(alert.awards), alert.n_expiring)
+            log.info("%s: %d tildelinger, %d utløp", sub.token[:6] or "abonnent", len(alert.awards), alert.n_expiring)
             sent += 1
             continue
         try:
